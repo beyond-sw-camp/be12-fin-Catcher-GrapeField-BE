@@ -17,8 +17,8 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("Acrosse The Pacific API")
-                .description("Acrosse The Pacific API")
+                .title("Grapefield API")
+                .description("Grapefield API")
                 .version("0.0.1");
 
     }
