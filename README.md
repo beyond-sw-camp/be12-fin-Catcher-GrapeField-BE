@@ -13,11 +13,11 @@
 │   │   └── 📁 response  
 │   │       ├── UserDetailResp.java  
 │   │       ├── UserListItemResp.java  
-│   │       ├── UserProfileResp.java  
+│   │       └── UserProfileResp.java  
 │   ├── 📁 userblock   
-│   │   ├── 📁 model    
-│   │   ├   ├──  📁 entity  
-│   │   │   │     ├── UserBlock.java  
+│   │   └── 📁 model    
+│   │       └──  📁 entity  
+│   │            └── UserBlock.java  
 │   ├── UserController.java  
 │   ├── UserService.java  
 │   └── UserRepository.java  
