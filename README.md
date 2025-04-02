@@ -1,5 +1,10 @@
 GradpeFiled_Back
-아래는 예시용으로만 참고해주기를
+아래는 예시용으로만 참고해주기를    
+예를 들어 UserBlock의 경우 아래처럼이 아닌    
+src/user/userblock/model...    
+과 같이 user하위의 userblock이라는 별개의 패키지를 만들어 관리하는 것도 가능하므로    
+패키지를 어디까지 쪼갤지는 기능을 구현하면서 차차 생각해도 됨     
+
 <pre>
 📁 src  
 ├── 📁 user  
