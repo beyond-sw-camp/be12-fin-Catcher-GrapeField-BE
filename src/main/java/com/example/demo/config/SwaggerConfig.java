@@ -20,6 +20,5 @@ public class SwaggerConfig {
                 .title("Grapefield API")
                 .description("Grapefield API")
                 .version("0.0.1");
-
     }
 }
