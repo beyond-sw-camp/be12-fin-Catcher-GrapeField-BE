@@ -2,10 +2,10 @@ package com.example.demo.user.model.entity;
 
 import com.example.demo.events.chat.model.entity.ChatMessageCurrent;
 import com.example.demo.events.chat.model.entity.ChatroomMember;
+import com.example.demo.events.model.entity.Review;
 import com.example.demo.events.post.model.entity.Post;
 import com.example.demo.events.post.model.entity.PostComment;
 import com.example.demo.events.post.model.entity.PostRecommend;
-import com.example.demo.events.post.model.entity.Review;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

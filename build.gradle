@@ -21,7 +21,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    implementation 'org.projectlombok:lombok'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
     // DataBase 연결관련 Spring jpa, mariadb
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

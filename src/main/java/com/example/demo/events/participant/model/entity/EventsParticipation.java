@@ -6,9 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.type.AssociationType;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Builder

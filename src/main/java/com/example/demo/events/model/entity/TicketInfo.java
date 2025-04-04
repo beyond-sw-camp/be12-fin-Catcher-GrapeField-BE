@@ -16,17 +16,17 @@ public class TicketInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
-
-    @ManyToOne
-    @JoinColumn(name = "idx")
-    private Events events;
-
-    @Enumerated(EnumType.STRING)
-    private TicketVendor ticketVendor;
-
     private String ticketLink;
     private Boolean isPresale;
     private LocalDateTime saleStart;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "events_idx")
+    private Events events;
+
+    @Enumerated(EnumType.STRING)
+    private TicketVendor ticketVendor;
+
 }
