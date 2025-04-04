@@ -17,11 +17,11 @@ import java.util.List;
 public class Board {
     @Id
     private Long idx;
-
     @MapsId
     @OneToOne
     @JoinColumn(name="idx")
     private Events events;
+    private String title; //evnets.title가 동일, serivce에서 events의 title을 받아와서 저장
 
     @OneToMany(mappedBy = "board")
     private List<Post> postList;

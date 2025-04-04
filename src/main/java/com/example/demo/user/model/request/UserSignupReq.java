@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class UserSignupReq {
   @NotBlank
   @Schema(description="실명(문자열): 필수", example = "gildong")
-  @Pattern(regexp = "[0-9A-Za-z가-힣]+", message="signup wrong name")
+  @Pattern(regexp = "[0-9A-Za-z가-힣]+", message="이름을 입력해주세요.")
   private String username;
   @NotBlank
   @Schema(description="이메일(문자열): 필수", example = "example@example.com")
