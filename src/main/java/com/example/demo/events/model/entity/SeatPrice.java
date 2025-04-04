@@ -15,12 +15,12 @@ public class SeatPrice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
+    private String seatType;
+    private BigDecimal price;
+    private String description;
 
     @ManyToOne
     @JoinColumn(name = "events_idx")
     private Events events;
 
-    private String seatType;
-    private BigDecimal price;
-    private String description;
 }

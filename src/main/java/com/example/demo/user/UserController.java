@@ -10,8 +10,10 @@ import com.example.demo.user.model.response.UserInfoListResp;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,11 +26,17 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/user")
-@Tag(name="회원 기능", description = "회원 가입, 유저 정보 조회(자기자신 혹은 관리자가 다른 유저들을 관리할 때)")
+@Tag(name="회원 기능", description = "회원 가입, 유저 정보 조회(자기자신 혹은 관리자가 다른 유저들을 관리)")
 public class UserController {
   @Operation(summary="회원가입", description = "회원 가입을 합니다")
-  @ApiResponse(responseCode = "200", description = "회원가입 성공")
-  @ApiResponse(responseCode = "409", description = "이메일 중복")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "회원가입 성공",
+          content = @Content(mediaType = "text/plain",
+              examples = @ExampleObject(value = "가입 성공"))),
+      @ApiResponse(responseCode = "409", description = "이메일 중복",
+          content = @Content(mediaType = "text/plain",
+              examples = @ExampleObject(value = "이미 존재하는 이메일입니다.")))
+  })
   @ApiErrorResponses
   @PostMapping("/signup")
   public ResponseEntity<String> signup(
