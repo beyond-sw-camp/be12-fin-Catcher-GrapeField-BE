@@ -60,10 +60,8 @@ public class UserController {
   @ApiErrorResponses
   @PutMapping("/update")
   public ResponseEntity<String> update(
-      @Parameter(description="UserUpdateReq 데이터 전송 객체를 사용합니다")
       @RequestBody UserInfoDetailReq request,
       @AuthenticationPrincipal User user) {
-    UserInfoDetailReq dummy = new UserInfoDetailReq();
     return ResponseEntity.ok("회원 정보 수정 성공");
   }
 

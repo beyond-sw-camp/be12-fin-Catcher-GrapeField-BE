@@ -37,6 +37,4 @@ public class PostDetailResp {
   private int recommendCnt;
   @Schema(description="현재 로그인한 유저가 작성자이거나 ADMIN일 경우 게시글을 수정/삭제 가능하도록 프론트에 반환하기 위한 값", example = "false")
   private boolean editable;
-  @Schema(description="게시글에 등록된 댓글")
-  List<CommentListResp> comments;
 }

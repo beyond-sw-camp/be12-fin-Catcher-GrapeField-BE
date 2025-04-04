@@ -3,6 +3,7 @@ package com.example.demo.events.post;
 import com.example.demo.base.ApiErrorResponses;
 import com.example.demo.base.ApiSuccessResponses;
 import com.example.demo.events.post.model.entity.PostType;
+import com.example.demo.events.post.model.request.CommentRegisterReq;
 import com.example.demo.events.post.model.request.PostRegisterReq;
 import com.example.demo.events.post.model.response.PostDetailResp;
 import com.example.demo.events.post.model.response.PostListResp;
@@ -60,5 +61,35 @@ public class PostController {
   ) {
     PostDetailResp dummy = new PostDetailResp();
     return ResponseEntity.ok().body(dummy);
+  }
+
+  @Operation(summary = "게시글 내용 수정", description = "기존에 게시한 글을 수정(작성자만 가능)")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "게시글 수정 성공",
+          content = @Content(mediaType = "text/plain",
+              examples = @ExampleObject(value = "게시글 수정 성공"))),
+      @ApiResponse(responseCode = "403", description = "작성자가 아닌 경우 수정 불가",
+          content = @Content(mediaType = "text/plain",
+              examples = @ExampleObject(value = "게시글 수정 권한이 없습니다.")))
+  })
+  @ApiErrorResponses
+  @PutMapping("/update/{postIdx}")
+  public ResponseEntity<String> updateComment(@PathVariable Long postIdx, @RequestBody PostRegisterReq request, @AuthenticationPrincipal User user) {
+    return ResponseEntity.ok("게시글 수정 성공");
+  }
+
+  @Operation(summary = "게시글 삭제", description = "기존에 게시한 글을 삭제(작성자 혹은 관리자만 가능, 실제로 DB상에서는 삭제하지 않고 is_visible을 false로 바꿈)")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "게시글 삭제 성공",
+          content = @Content(mediaType = "text/plain",
+              examples = @ExampleObject(value = "게시글 삭제 성공"))),
+      @ApiResponse(responseCode = "403", description = "작성자가 아닌 경우 삭제 불가",
+          content = @Content(mediaType = "text/plain",
+              examples = @ExampleObject(value = "게시글 삭제 권한이 없습니다.")))
+  })
+  @ApiErrorResponses
+  @PutMapping("/delete/{postIdx}")
+  public ResponseEntity<String> updateComment(@PathVariable Long postIdx, @AuthenticationPrincipal User user) {
+    return ResponseEntity.ok("게시글 삭제 성공");
   }
 }
