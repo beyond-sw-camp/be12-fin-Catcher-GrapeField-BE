@@ -35,9 +35,10 @@ public class EventsController {
           examples = @ExampleObject(value = "공연/전시 정보를 성공적으로 등록"))))
   @ApiErrorResponses
   @PostMapping("/register")
-  public ResponseEntity<String> register(
+  public ResponseEntity<Long> register(
       @RequestBody EventsRegisterReq request) {
-    return ResponseEntity.ok("등록 성공");
+    //TODO: 공연/전시 idx를 반환하여 등록된 공연/전시 상세 페이지로 이동되도록 추후 수정
+    return ResponseEntity.ok(1L);
   }
 
   @Operation(summary = "공연/전시 목록 조회", description = "사이트에 등록된 공연과 전시를 목록으로 조회")
