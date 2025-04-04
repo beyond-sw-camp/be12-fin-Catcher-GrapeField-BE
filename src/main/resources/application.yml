@@ -12,6 +12,6 @@ spring:
         format_sql: false
     database-platform: org.hibernate.dialect.MariaDBDialect
 
-jwtData:
+jwt-data:
   secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION}
+  expiration: 3600000
