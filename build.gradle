@@ -39,6 +39,15 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    //회원가입 시 이메일 인증 전송
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    //소셜 로그인 관련
+    implementation 'org.springframework.security:spring-security-oauth2-client'
+
+    //Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
 }
 
 tasks.named('test') {
