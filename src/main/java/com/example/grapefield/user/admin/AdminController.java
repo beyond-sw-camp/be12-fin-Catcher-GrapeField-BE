@@ -35,7 +35,18 @@ public class AdminController {
         );
         return ResponseEntity.ok(dummyList);
     }
-    
-    //TODO : 신고 목록 확인
+
+    @Operation(summary = "신고 목록 조회", description = "관리자가 신고들어온 전체 목록을 조회합니다")
+    @ApiSuccessResponses
+    @ApiErrorResponses
+    @GetMapping("/admin/report")
+    public ResponseEntity<List<UserInfoListResp>> getReportList(
+        @AuthenticationPrincipal User user) {
+      List<UserInfoListResp> dummyList = List.of(
+          new UserInfoListResp("gildong", "gildong@example.com", LocalDateTime.now(), "user"),
+          new UserInfoListResp("admin", "admin@example.com", LocalDateTime.now(), "admin")
+      );
+      return ResponseEntity.ok(dummyList);
+    }
     //TODO : 신고 처리
 }

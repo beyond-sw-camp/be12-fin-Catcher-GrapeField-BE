@@ -111,7 +111,21 @@ public class EventsController {
     return ResponseEntity.ok("게시글 삭제 성공");
   }
 
-  //TODO: Review(한줄평, 별점)
+  //TODO: Review(한줄평, 별점) 등록
+  @Operation(summary="게시글 등록", description = "공연 및 전시 게시판에서 게시글을 등록")
+  @ApiResponses(
+      @ApiResponse(responseCode = "200", description = "게시글 등록 성공",
+          content = @Content(mediaType = "text/plain",
+              examples = @ExampleObject(value = "게시글을 성공적으로 등록"))))
+  @ApiErrorResponses
+  @PostMapping("/review/register")
+  public ResponseEntity<Long> postRegister(
+      @RequestBody PostRegisterReq request, @AuthenticationPrincipal User user) {
+    //TODO: 게시글 idx를 반환하여 등록된 게시글로 페이지 이동되도록 추후 수정
+    return ResponseEntity.ok(1L);
+  }
+
+  //TODO: Review(한줄평, 별점) 목록 조회
 
   //TODO: 공지사항, Qna, FaQ,
 }
