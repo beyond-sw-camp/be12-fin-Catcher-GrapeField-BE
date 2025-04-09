@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: grapefield
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
@@ -15,3 +17,7 @@ spring:
 jwtData:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
+
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha   # 태그를 알파벳 기준으로 정렬 (숫자 포함 가능)

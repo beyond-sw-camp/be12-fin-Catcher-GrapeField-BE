@@ -1,0 +1,24 @@
+package com.example.grapefield.events.chat.model.response;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.time.LocalDateTime;
+
+@Schema(description = "채팅 메시지 응답")
+public class ChatMessageResp {
+    @Schema(description = "메시지 고유 Idx", example = "101")
+    private Long messageIdx;
+    @Schema(description = "채팅방 Idx", example = "1")
+    private Long roomIdx;
+    @Schema(description = "보낸 사용자 Idx", example = "3")
+    private Long sendUserIdx;
+    @Schema(description = "보낸 사용자 닉네임", example = "포도햄")
+    private String nickname;
+    @Schema(description = "보낸 사용자 프로필 이미지", example = "https://cdn.example.com/user1.png")
+    private String profileImageUrl;
+    @Schema(description = "채팅 메시지 내용", example = "안녕하세요!")
+    private String content;
+    @Schema(description = "메시지 전송 시간", example = "2024-04-10T10:45:00")
+    private LocalDateTime createdAt;
+
+}
