@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,9 +35,18 @@ public class User implements UserDetails {
     private String password;
     private String phoneNumber;
     private String profileImg;
-    private String role;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+  @Enumerated(EnumType.STRING)
+  @Builder.Default
+  private UserRole role = UserRole.ROLE_USER;
+  @Builder.Default
+    private int reportCnt = 0;
+  @Enumerated(EnumType.STRING)
+  @Builder.Default
+  private AccountStatus status = AccountStatus.UNAUTHENTIC;
+  @Builder.Default
+  private LocalDateTime createdAt = LocalDateTime.now();
+  @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "user")
     private List<Review> reviewList;
@@ -62,10 +72,13 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<EventsInterest> interestList;
 
+  @OneToMany(mappedBy = "user")
+  private List<EmailVerify> verifyList;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(role));
+        authorities.add(new SimpleGrantedAuthority(role.getRole()));
         return authorities;
     }
     @Override
