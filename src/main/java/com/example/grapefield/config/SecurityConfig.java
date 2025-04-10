@@ -50,14 +50,11 @@ public class SecurityConfig {
             }).deleteCookies("ATOKEN"));
         http.authorizeHttpRequests(authorizeRequests -> {
             authorizeRequests
-                    .requestMatchers("/user/logout", "/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**").permitAll()
-                    .requestMatchers("/admin/**", "/events/register", "/user/**", "/post/register","/post/update/**", "/post/delete/**","/comment/register","/comment/update/**","/comment/delete/**").hasRole("ADMIN")
+                    .requestMatchers("/admin/**", "/events/register", "/events/update","/user/**", "/post/register","/post/update/**", "/post/delete/**","/comment/register","/comment/update/**","/comment/delete/**").hasRole("ADMIN")
                     .requestMatchers("/post/register","/post/update/**", "/post/delete/**","/comment/register","/comment/update/**","/comment/delete/**", "/user/**").hasRole("USER")
-//                    .requestMatchers("/user/**").hasRole("USER")
-//                    .anyRequest().permitAll()
+                    .requestMatchers("/user/logout", "/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**").permitAll()
                     .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**","/v3/api-docs", "/swagger-resources/**", "/webjars/**").permitAll()
                     .anyRequest().authenticated();
-
         });
 //        http.oauth2Login(config-> {
 //            config.successHandler(new OAuth2SuccessHandler());

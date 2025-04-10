@@ -17,9 +17,9 @@ public class TicketInfoDetailResp {
   private String ticketLink;
   @Schema(description = "선예매 여부", example = "true")
   private Boolean isPresale;
-  @Schema(description="티켓 판매 시작일",  example = "2024-12-30T00:00:00")
+  @Schema(description="예매 시작일",  example = "2024-12-30T00:00:00")
   private LocalDateTime saleStart;
-  @Schema(description="티켓 판매 종료일",  example = "2025-03-09T00:00:00")
+  @Schema(description="예매 종료일",  example = "2025-03-09T00:00:00")
   private LocalDateTime saleEnd;
   @Schema(description="예메처 정보", example="인터파크")
   private TicketVendor ticketVendor;
