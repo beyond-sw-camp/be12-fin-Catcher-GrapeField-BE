@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -36,10 +38,16 @@ public class SecurityConfig {
         http.httpBasic(AbstractHttpConfigurer::disable);
         http.formLogin(AbstractHttpConfigurer::disable);
         http.logout(logout -> logout.logoutUrl("/logout")
-                .logoutSuccessHandler((request, response, authentication) -> {
-                    response.setStatus(HttpServletResponse.SC_OK);
-                })
-                .deleteCookies("ATOKEN"));
+            .logoutSuccessHandler((request, response, authentication) -> {
+              ResponseCookie deleteCookie = ResponseCookie.from("ATOKEN", "")
+                  .path("/") // 로그인 시와 동일하게
+                  .httpOnly(true)
+                  .secure(true)
+                  .maxAge(0) // 즉시 만료
+                  .build();
+              response.setHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
+              response.setStatus(HttpServletResponse.SC_OK);
+            }).deleteCookies("ATOKEN"));
         http.authorizeHttpRequests(authorizeRequests -> {
             authorizeRequests
                     .requestMatchers("/user/logout", "/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**").permitAll()
@@ -57,6 +65,8 @@ public class SecurityConfig {
 //                    endpoint.userService(customOAuth2UserService));
 //        });
 
+      // 세션은 그냥 쓰지 않음
+      http.sessionManagement(AbstractHttpConfigurer::disable);
         http.addFilterAt(new LoginFilter(authConfiguration.getAuthenticationManager()), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
