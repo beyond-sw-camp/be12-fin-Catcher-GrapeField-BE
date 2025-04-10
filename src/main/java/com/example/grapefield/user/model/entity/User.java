@@ -1,7 +1,7 @@
 package com.example.grapefield.user.model.entity;
 
-import com.example.grapefield.events.chat.model.entity.ChatMessageCurrent;
-import com.example.grapefield.events.chat.model.entity.ChatroomMember;
+import com.example.grapefield.chat.model.entity.ChatMessageCurrent;
+import com.example.grapefield.chat.model.entity.ChatroomMember;
 import com.example.grapefield.events.model.entity.Review;
 import com.example.grapefield.events.post.model.entity.Post;
 import com.example.grapefield.events.post.model.entity.PostComment;

@@ -1,7 +1,7 @@
-package com.example.grapefield.events.chat;
+package com.example.grapefield.chat;
 
-import com.example.grapefield.events.chat.model.request.ChatMessageKafkaReq;
-import com.example.grapefield.events.chat.model.request.ChatMessageReq;
+import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
+import com.example.grapefield.chat.model.request.ChatMessageReq;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
