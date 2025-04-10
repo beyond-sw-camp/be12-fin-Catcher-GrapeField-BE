@@ -33,5 +33,8 @@ public class ChatMessageCurrent {
 
     private String content;
     private LocalDateTime createdAt;
-    private Boolean isHighlighted;
+
+    @Builder.Default
+    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean isHighlighted = false;
 }

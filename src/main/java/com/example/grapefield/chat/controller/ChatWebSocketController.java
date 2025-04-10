@@ -1,4 +1,4 @@
-package com.example.grapefield.chat;
+package com.example.grapefield.chat.controller;
 
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.model.request.ChatMessageReq;
@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RestController
 @Tag(name = "6. 웹소켓 채팅", description = "채팅 전송을 담당하는 웹소켓 채팅 컨트롤러")
 @Controller
 public class ChatWebSocketController {

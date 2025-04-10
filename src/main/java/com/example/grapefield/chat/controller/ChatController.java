@@ -1,4 +1,4 @@
-package com.example.grapefield.chat;
+package com.example.grapefield.chat.controller;
 
 import com.example.grapefield.chat.model.response.ChatDetailResp;
 import com.example.grapefield.chat.model.response.ChatListResp;
