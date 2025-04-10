@@ -1,6 +1,7 @@
 package com.example.grapefield.utils;
 
 import com.example.grapefield.user.model.entity.User;
+import com.example.grapefield.user.model.entity.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -40,7 +41,7 @@ public class JwtUtil {
               .idx(claims.get("userIdx", Long.class))
               .username(claims.get("userUserName", String.class))
               .email(claims.get("userEmail", String.class))
-              .role(claims.get("userRole", String.class))
+              .role(claims.get("userRole", UserRole.class))
               .build();
     } catch (ExpiredJwtException e) {
       System.out.println("토큰이 만료되었습니다!");
@@ -48,7 +49,7 @@ public class JwtUtil {
     }
   }
   
-  public static String generateToken(Long idx, String username, String email, String role) {
+  public static String generateToken(Long idx, String username, String email, UserRole role) {
     Claims claims = Jwts.claims();
     claims.put("userIdx", idx);
     claims.put("userUserName", username);

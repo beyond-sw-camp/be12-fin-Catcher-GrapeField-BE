@@ -7,10 +7,7 @@ import com.example.grapefield.events.post.model.entity.Post;
 import com.example.grapefield.events.post.model.entity.PostComment;
 import com.example.grapefield.events.post.model.entity.PostRecommend;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,6 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +31,7 @@ public class User implements UserDetails {
     private String username;
     private String email;
     private String password;
-    private String phoneNumber;
+    private String phone;
     private String profileImg;
   @Enumerated(EnumType.STRING)
   @Builder.Default
@@ -89,5 +87,10 @@ public class User implements UserDetails {
     @Override
     public String getPassword() {
         return password;
+    }
+
+    @Override
+  public boolean isEnabled(){
+      return status.equals(AccountStatus.ACTIVE);
     }
 }
