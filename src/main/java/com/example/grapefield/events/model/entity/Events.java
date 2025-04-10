@@ -59,6 +59,7 @@ public class Events {
     private Board board;
 
     @OneToOne(mappedBy = "events")
+    @PrimaryKeyJoinColumn
     private ChatRoom chatRoom;
 }
 
