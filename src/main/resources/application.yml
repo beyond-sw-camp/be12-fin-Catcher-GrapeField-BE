@@ -14,6 +14,29 @@ spring:
         format_sql: false
     database-platform: org.hibernate.dialect.MariaDBDialect
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_ADDR}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+            required: true
+          auth: true
+          timeout: 5000
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      s3:
+        bucket: a0109407-s3
+      region:
+        static: ${SEOUL}
+
 jwtData:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
@@ -21,3 +44,7 @@ jwtData:
 springdoc:
   swagger-ui:
     tags-sorter: alpha   # 태그를 알파벳 기준으로 정렬 (숫자 포함 가능)
+
+file:
+  upload:
+    path: ${FILEPATH}
