@@ -1,4 +1,4 @@
-package com.example.grapefield.user;
+package com.example.grapefield.user.repository;
 
 import com.example.grapefield.user.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -28,23 +28,17 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 @Tag(name="1. 회원 기능", description = "회원 가입 및 자신의 정보를 조회할 수 있는 회원 전용 기능")
 public class UserController {
-  @Operation(summary="회원가입", description = "회원 가입을 합니다")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "회원가입 성공",
-          content = @Content(mediaType = "text/plain",
-              examples = @ExampleObject(value = "가입 성공"))),
-      @ApiResponse(responseCode = "409", description = "이메일 중복",
-          content = @Content(mediaType = "text/plain",
-              examples = @ExampleObject(value = "이미 존재하는 이메일입니다.")))
-  })
-  @ApiErrorResponses
-  @PostMapping("/signup")
-  public ResponseEntity<String> signup(
-      @Parameter(description="SignupReq 데이터 전송 객체를 사용합니다")
-      @RequestBody UserSignupReq request) {
-    return ResponseEntity.ok("가입 성공");
-  }
+  private final UserService userService;
 
+  @Operation(summary="회원가입", description = "회원 가입을 합니다")
+  @PostMapping("/signup")
+  public ResponseEntity<Boolean> registerUser(
+      @Parameter(description="SignupReq 데이터 전송 객체를 사용합니다")
+      @ModelAttribute UserSignupReq request) {
+    Boolean response = userService.registerUser(request);
+    //이미 가입한 메일일 경우 false를 반환
+    return ResponseEntity.ok(response);
+  }
 
   @Operation(summary = "소셜 회원가입", description = "소셜 로그인을 이용한 회원가입")
   @ApiResponses({
@@ -74,6 +68,13 @@ public class UserController {
 //      return ResponseEntity.badRequest().body(respDto);
 //    }
     return ResponseEntity.ok("소셜 회원가입 성공");
+  }
+
+  @Operation(summary = "이메일 인증", description = "전송된 이메일을 통해 이메일 인증")
+  @GetMapping("/email_verify/{uuid}")
+  public boolean verify(@PathVariable String uuid) {
+    System.out.println(uuid);
+    return userService.verify(uuid);
   }
 
   @SecurityRequirement(name = "BearerAuth")
