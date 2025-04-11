@@ -7,10 +7,8 @@ import com.example.grapefield.events.post.model.entity.Post;
 import com.example.grapefield.events.post.model.entity.PostComment;
 import com.example.grapefield.events.post.model.entity.PostRecommend;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,18 +23,28 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class User implements UserDetails {
+@Setter
+public class User{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
     private String username;
     private String email;
     private String password;
-    private String phoneNumber;
+    private String phone;
     private String profileImg;
-    private String role;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+  @Enumerated(EnumType.STRING)
+  @Builder.Default
+  private UserRole role = UserRole.ROLE_USER;
+  @Builder.Default
+    private int reportCnt = 0;
+  @Enumerated(EnumType.STRING)
+  @Builder.Default
+  private AccountStatus status = AccountStatus.UNAUTHENTIC;
+  @Builder.Default
+  private LocalDateTime createdAt = LocalDateTime.now();
+  @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "user")
     private List<Review> reviewList;
@@ -62,19 +70,7 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     private List<EventsInterest> interestList;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(role));
-        return authorities;
-    }
-    @Override
-    public String getUsername() {
-        return email;
-    }
+  @OneToMany(mappedBy = "user")
+  private List<EmailVerify> verifyList;
 
-    @Override
-    public String getPassword() {
-        return password;
-    }
 }

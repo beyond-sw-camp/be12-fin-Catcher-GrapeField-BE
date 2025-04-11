@@ -1,6 +1,7 @@
 package com.example.grapefield.utils;
 
 import com.example.grapefield.user.model.entity.User;
+import com.example.grapefield.user.model.entity.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -32,28 +33,29 @@ public class JwtUtil {
   public static User getUser(String token) {
     try {
       Claims claims = Jwts.parserBuilder()
-              .setSigningKey(key)
-              .build()
-              .parseClaimsJws(token)
-              .getBody();
+          .setSigningKey(key)
+          .build()
+          .parseClaimsJws(token)
+          .getBody();
       return User.builder()
-              .idx(claims.get("userIdx", Long.class))
-              .username(claims.get("userUserName", String.class))
-              .email(claims.get("userEmail", String.class))
-              .role(claims.get("userRole", String.class))
-              .build();
+          .idx(claims.get("userIdx", Long.class))
+          .username(claims.get("userUserName", String.class))
+          .email(claims.get("userEmail", String.class))
+          .role(UserRole.valueOf(claims.get("userRole", String.class)))
+          .build();
     } catch (ExpiredJwtException e) {
       System.out.println("토큰이 만료되었습니다!");
       return null;
     }
   }
-  
-  public static String generateToken(Long idx, String username, String email, String role) {
+
+
+  public static String generateToken(Long idx, String username, String email, UserRole role) {
     Claims claims = Jwts.claims();
     claims.put("userIdx", idx);
     claims.put("userUserName", username);
     claims.put("userEmail", email);
-    claims.put("userRole", role);
+    claims.put("userRole", role.name());
 
     return Jwts.builder()
         .setClaims(claims)

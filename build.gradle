@@ -36,6 +36,7 @@ dependencies {
 
     // 인증, 인가관련 Spring Security, jjwt, validation
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.security:spring-security-oauth2-client'
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
@@ -49,6 +50,9 @@ dependencies {
 
     //Kafka
     implementation 'org.springframework.kafka:spring-kafka'
+
+    //이미지를 aws s3에 저장
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.3.0'
 }
 
 tasks.named('test') {
