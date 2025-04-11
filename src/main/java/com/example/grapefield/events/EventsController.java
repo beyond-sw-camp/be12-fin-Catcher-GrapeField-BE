@@ -2,8 +2,10 @@ package com.example.grapefield.events;
 
 import com.example.grapefield.base.ApiErrorResponses;
 import com.example.grapefield.base.ApiSuccessResponses;
+import com.example.grapefield.common.PageResponse;
 import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.events.model.request.EventsRegisterReq;
+import com.example.grapefield.events.model.response.EventsCalendarListResp;
 import com.example.grapefield.events.model.response.EventsDetailResp;
 import com.example.grapefield.events.model.response.EventsListResp;
 import com.example.grapefield.events.post.model.request.PostRegisterReq;
@@ -15,6 +17,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,12 +27,14 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/events")
 @Tag(name="3. 공연/전시 기능", description = "공연/전시를 등록하고 목록 및 상세 정보를 확인")
 public class EventsController {
+  private final EventsService eventsService;
   @Operation(summary="공연/전시 등록", description = "공연 및 전시를 등록 합니다(관리자)")
   @ApiResponses(
       @ApiResponse(responseCode = "200", description = "공연/전시 등록 성공",
@@ -46,29 +52,35 @@ public class EventsController {
   @ApiSuccessResponses
   @ApiErrorResponses
   @GetMapping("/list")
-  public ResponseEntity<List<EventsListResp>> getEventsList(
-      @AuthenticationPrincipal User user) {
-    List<EventsListResp> dummyList = List.of(
-        new EventsListResp(1L,"웃는 남자", EventCategory.MUSICAL, LocalDateTime.now(), LocalDateTime.now(), "/sample/images/poster/poster1.jpg", "예술의전당 오페라극장"),
-        new EventsListResp(2L,"우는 남자", EventCategory.MUSICAL, LocalDateTime.now(), LocalDateTime.now(), "/sample/images/poster/poster1.jpg", "예술의전당 오페라극장")
-    );
-    return ResponseEntity.ok(dummyList);
+  public ResponseEntity<PageResponse<EventsListResp>> getEventList(@PageableDefault(page = 0, size = 30) Pageable pageable) {
+    PageResponse<EventsListResp> eventListPage = eventsService.getEventListWithPagination(pageable);
+    return ResponseEntity.ok(eventListPage);
   }
 
-  //(캘린더용)날짜 선택하면 해당 날짜의 공연/전시 불러오기
-  @Operation(summary = "특정 날짜의 공연/전시 조회", description = "입력한 날짜에 진행 중인 공연/전시를 목록으로 반환합니다. (캘린더 전용)")
+  @Operation(summary = "캘린더 이벤트 조회", description = "해당 월의 예매 시작/종료 이벤트를 구분하여 조회합니다")
   @ApiSuccessResponses
   @ApiErrorResponses
   @GetMapping("/calendar")
-  public ResponseEntity<List<EventsListResp>> getEventsByDate(
-          @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date
+  public ResponseEntity<Map<String, List<EventsCalendarListResp>>> getCalendarEvents(
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date
   ) {
-    List<EventsListResp> dummyList = List.of(
-            new EventsListResp(1L,"웃는 남자", EventCategory.MUSICAL, LocalDateTime.now(), LocalDateTime.now(), "/sample/images/poster/poster1.jpg", "예술의전당 오페라극장"),
-            new EventsListResp(2L,"우는 남자", EventCategory.MUSICAL, LocalDateTime.now(), LocalDateTime.now(), "/sample/images/poster/poster1.jpg", "예술의전당 오페라극장")
-    );
-    return ResponseEntity.ok(dummyList);
+    Map<String, List<EventsCalendarListResp>> eventMap = eventsService.getCalendarEvents(date);
+    return ResponseEntity.ok(eventMap);
   }
+
+  //TODO : 캘린더 개별날짜 공연/전시 불러오기
+//  @Operation(summary = "특정 날짜 이벤트 조회", description = "특정 날짜의 예매 시작/종료 이벤트를 구분하여 조회합니다")
+//  @ApiSuccessResponses
+//  @ApiErrorResponses
+//  @GetMapping("/calendar/day")
+//  public ResponseEntity<Map<String, List<EventsCalendarListResp>>> getDailyEvents(
+//      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date
+//  ) {
+//    Map<String, List<EventsCalendarListResp>> eventMap = eventsService.getEventsForDay(date);
+//    return ResponseEntity.ok(eventMap);
+//  }
+
+
 
 
   @Operation(summary = "공연/전시 상세 조회", description = "사이트에 등록된 공연 및 전시의 상세한 정보를 조회")
