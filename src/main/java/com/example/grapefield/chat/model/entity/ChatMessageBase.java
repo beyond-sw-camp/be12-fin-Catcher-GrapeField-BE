@@ -1,4 +1,4 @@
-package com.example.grapefield.events.chat.model.entity;
+package com.example.grapefield.chat.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
+//@Table(name="CHAT_MESSAGE_BASE")
 @Entity
 @Builder
 @AllArgsConstructor
@@ -18,4 +19,12 @@ public class ChatMessageBase {
     private Long messageIdx;
 
     private LocalDateTime createdAt;
+
+    @OneToOne(mappedBy = "base", cascade = CascadeType.ALL, orphanRemoval = true)
+    @PrimaryKeyJoinColumn
+    private ChatMessageCurrent current;
+
+    @OneToOne(mappedBy = "base", cascade = CascadeType.ALL, orphanRemoval = true)
+    @PrimaryKeyJoinColumn
+    private ChatMessageArchive archive;
 }

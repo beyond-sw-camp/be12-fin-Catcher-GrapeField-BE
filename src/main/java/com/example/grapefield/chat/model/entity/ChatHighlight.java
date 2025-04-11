@@ -1,4 +1,4 @@
-package com.example.grapefield.events.chat.model.entity;
+package com.example.grapefield.chat.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

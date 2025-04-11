@@ -1,10 +1,9 @@
-package com.example.grapefield.events.chat;
+package com.example.grapefield.chat.controller;
 
-import com.example.grapefield.events.chat.model.response.ChatDetailResp;
-import com.example.grapefield.events.chat.model.response.ChatListResp;
-import com.example.grapefield.events.chat.model.response.ChatMessageItemResp;
+import com.example.grapefield.chat.model.response.ChatDetailResp;
+import com.example.grapefield.chat.model.response.ChatListResp;
+import com.example.grapefield.chat.model.response.ChatMessageItemResp;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

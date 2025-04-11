@@ -1,4 +1,4 @@
-package com.example.grapefield.events.chat.model.response;
+package com.example.grapefield.chat.model.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
