@@ -11,7 +11,9 @@ import com.example.grapefield.events.post.BoardRepository;
 import com.example.grapefield.events.post.model.entity.Board;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -70,6 +72,16 @@ public class EventsService {
 
     return result;
   }
+  public Slice<EventsListResp> getEventListByContents(String category, int page, int size) {
+    Pageable pageable = PageRequest.of(page, size);
+    if (category == null || category.trim().isEmpty() || category.equals("전체")) {
+      return eventsRepository.findAllOrdered(pageable);
+    } else {
+      EventCategory eventCategory = EventCategory.valueOf(category.toUpperCase());
+      return eventsRepository.findAllFilteredByCategory(eventCategory, pageable);
+    }
+  }
+
 
 //  public Map<String, List<EventsCalendarListResp>> getFilteredCalendarEvents(
 //      LocalDateTime date, EventCategory category, Boolean isPresale, TicketVendor ticketVendor) {

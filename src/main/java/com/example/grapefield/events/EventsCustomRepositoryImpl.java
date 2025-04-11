@@ -2,10 +2,19 @@ package com.example.grapefield.events;
 
 import com.example.grapefield.events.model.entity.*;
 import com.example.grapefield.events.model.response.EventsCalendarListResp;
+import com.example.grapefield.events.model.response.EventsListResp;
+import com.example.grapefield.notification.model.entity.QEventsInterest;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -67,5 +76,64 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
         .where(whereBuilder)
         .orderBy(ticketInfo.saleStart.asc())
         .fetch();
+  }
+
+  @Override
+  public Slice<EventsListResp> findAllOrdered(Pageable pageable) {
+    return findEventsByCategory(null, pageable);
+  }
+
+  @Override
+  public Slice<EventsListResp> findAllFilteredByCategory(EventCategory category, Pageable pageable) {
+    return findEventsByCategory(category, pageable);
+  }
+
+  private Slice<EventsListResp> findEventsByCategory(EventCategory category, Pageable pageable) {
+    QEvents e = QEvents.events;
+    QEventsInterest ei = QEventsInterest.eventsInterest;
+    LocalDateTime now = LocalDateTime.now();
+
+    List<Tuple> results = queryFactory
+        .select(e, ei.count())
+        .from(e)
+        .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
+        .where(
+            category != null ? e.category.eq(category) : null
+        )
+        .groupBy(e)
+        .orderBy(
+            new CaseBuilder()
+                .when(e.startDate.loe(now).and(e.endDate.goe(now))).then(0)
+                .when(e.startDate.gt(now)).then(1)
+                .otherwise(2).asc(),
+            e.startDate.asc()
+        )
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize() + 1)
+        .fetch();
+
+    List<EventsListResp> content = results.stream()
+        .map(tuple -> {
+          Events event = tuple.get(e);
+          Long count = tuple.get(ei.count());
+          return EventsListResp.builder()
+              .idx(event.getIdx())
+              .title(event.getTitle())
+              .category(event.getCategory())
+              .startDate(event.getStartDate())
+              .endDate(event.getEndDate())
+              .posterImgUrl(event.getPosterImgUrl())
+              .venue(event.getVenue())
+              .interestCtn(count != null ? count.intValue() : 0)
+              .build();
+        })
+        .toList();
+
+    boolean hasNext = content.size() > pageable.getPageSize();
+    return new SliceImpl<>(
+        hasNext ? content.subList(0, pageable.getPageSize()) : content,
+        pageable,
+        hasNext
+    );
   }
 }

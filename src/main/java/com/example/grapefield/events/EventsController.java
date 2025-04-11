@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -55,6 +56,15 @@ public class EventsController {
   public ResponseEntity<PageResponse<EventsListResp>> getEventList(@PageableDefault(page = 0, size = 30) Pageable pageable) {
     PageResponse<EventsListResp> eventListPage = eventsService.getEventListWithPagination(pageable);
     return ResponseEntity.ok(eventListPage);
+  }
+
+  @Operation(summary = "공연/전시 탭에서 목록 조회", description = "헤더의 공연/전시 탭을 통해 사이트에 등록된 공연과 전시를 목록으로 조회")
+  @ApiSuccessResponses
+  @ApiErrorResponses
+  @GetMapping("/contents/list")
+  public ResponseEntity<Slice<EventsListResp>> getEventListByContents(@RequestParam String category, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "30") int size) {
+    Slice<EventsListResp> eventListSlice = eventsService.getEventListByContents(category, page, size);
+    return ResponseEntity.ok(eventListSlice);
   }
 
   @Operation(summary = "캘린더 이벤트 조회", description = "해당 월의 예매 시작/종료 이벤트를 구분하여 조회합니다")
