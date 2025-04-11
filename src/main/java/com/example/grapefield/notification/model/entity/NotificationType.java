@@ -1,4 +1,4 @@
-package com.example.grapefield.user.model.entity;
+package com.example.grapefield.notification.model.entity;
 
 import lombok.Getter;
 
