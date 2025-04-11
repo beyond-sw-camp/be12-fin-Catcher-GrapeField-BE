@@ -22,6 +22,8 @@ public class EventsCalendarListResp {
     private EventCategory category;
     @Schema(description="예매 시작일",  example = "2024-12-30T00:00:00")
     private LocalDateTime saleStart;
+    @Schema(description="예매 종료",  example = "2025-01-15T00:00:00")
+    private LocalDateTime saleEnd;
     @Schema(description="예메처 정보", example="인터파크")
     private TicketVendor ticketVendor;
     @Schema(description = "선예매 여부", example = "true")

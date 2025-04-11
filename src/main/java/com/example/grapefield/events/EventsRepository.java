@@ -1,10 +1,12 @@
 package com.example.grapefield.events;
 
+import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.events.model.entity.Events;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface EventsRepository extends JpaRepository<Events, Long> {
-    List<Events> getByDate();
+public interface EventsRepository extends JpaRepository<Events, Long>, EventsCustomRepository {
+  List<Events> findByTitle(String title);
+  List<Events> findByCategory(EventCategory category);
 }

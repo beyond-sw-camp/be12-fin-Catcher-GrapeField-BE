@@ -1,7 +1,9 @@
 package com.example.grapefield.events;
 
 import com.example.grapefield.common.PageResponse;
+import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.events.model.entity.Events;
+import com.example.grapefield.events.model.entity.TicketVendor;
 import com.example.grapefield.events.model.request.EventsRegisterReq;
 import com.example.grapefield.events.model.response.EventsCalendarListResp;
 import com.example.grapefield.events.model.response.EventsListResp;
@@ -14,7 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -45,8 +49,48 @@ public class EventsService {
     return PageResponse.from(eventDtoPage, eventDtoPage.getContent());
   }
 
-  public List<EventsCalendarListResp> getCalendarEvents(LocalDateTime date) {
-    List<Events> events = eventsRepository.getByDate();
-    List<EventsCalendarListResp> eventList = new ArrayList<>();
+  public Map<String, List<EventsCalendarListResp>> getCalendarEvents(
+      LocalDateTime date) {
+
+    LocalDateTime startOfMonth = date.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+    LocalDateTime endOfMonth = date.withDayOfMonth(date.toLocalDate().lengthOfMonth())
+        .withHour(23).withMinute(59).withSecond(59);
+
+    // 시작일, 종료일 기준으로 각각 조회
+    List<EventsCalendarListResp> startEvents = eventsRepository.findEventsBySaleStartBetween(
+        startOfMonth, endOfMonth);
+
+    List<EventsCalendarListResp> endEvents = eventsRepository.findEventsBySaleEndBetween(
+        startOfMonth, endOfMonth);
+
+    // 결과 맵 구성
+    Map<String, List<EventsCalendarListResp>> result = new HashMap<>();
+    result.put("startEvents", startEvents);
+    result.put("endEvents", endEvents);
+
+    return result;
   }
+
+//  public Map<String, List<EventsCalendarListResp>> getFilteredCalendarEvents(
+//      LocalDateTime date, EventCategory category, Boolean isPresale, TicketVendor ticketVendor) {
+//
+//    LocalDateTime startOfMonth = date.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+//    LocalDateTime endOfMonth = date.withDayOfMonth(date.toLocalDate().lengthOfMonth())
+//        .withHour(23).withMinute(59).withSecond(59);
+//
+//    // 시작일, 종료일 기준으로 각각 조회
+//    List<EventsCalendarListResp> startEvents = eventsRepository.findEventsBySaleStartBetween(
+//        startOfMonth, endOfMonth, category, isPresale, ticketVendor);
+//
+//    List<EventsCalendarListResp> endEvents = eventsRepository.findEventsBySaleEndBetween(
+//        startOfMonth, endOfMonth, category, isPresale, ticketVendor);
+//
+//    // 결과 맵 구성
+//    Map<String, List<EventsCalendarListResp>> result = new HashMap<>();
+//    result.put("startEvents", startEvents);
+//    result.put("endEvents", endEvents);
+//
+//    return result;
+//  }
+
 }

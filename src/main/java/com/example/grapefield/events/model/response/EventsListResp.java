@@ -28,4 +28,6 @@ public class EventsListResp {
   private String posterImgUrl;
   @Schema(description="공연/전시 위치", example = "예술의전당 오페라극장")
   private String venue;
+  @Schema(description="즐겨찾기 수", example = "전시/공연의 유저가 즐겨찾기한 수")
+  private int interestCtn;
 }

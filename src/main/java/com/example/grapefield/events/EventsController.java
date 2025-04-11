@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -56,17 +57,30 @@ public class EventsController {
     return ResponseEntity.ok(eventListPage);
   }
 
-  //(캘린더용)날짜 선택하면 해당 날짜의 공연/전시 불러오기
-  @Operation(summary = "특정 날짜의 공연/전시 조회", description = "입력한 날짜에 진행 중인 공연/전시를 목록으로 반환합니다. (캘린더 전용)")
+  @Operation(summary = "캘린더 이벤트 조회", description = "해당 월의 예매 시작/종료 이벤트를 구분하여 조회합니다")
   @ApiSuccessResponses
   @ApiErrorResponses
   @GetMapping("/calendar")
-  public ResponseEntity<List<EventsCalendarListResp>> getCalendarEvents(
-          @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date
+  public ResponseEntity<Map<String, List<EventsCalendarListResp>>> getCalendarEvents(
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date
   ) {
-    List<EventsCalendarListResp> eventList = eventsService.getCalendarEvents(date);
-    return ResponseEntity.ok(eventList);
+    Map<String, List<EventsCalendarListResp>> eventMap = eventsService.getCalendarEvents(date);
+    return ResponseEntity.ok(eventMap);
   }
+
+  //TODO : 캘린더 개별날짜 공연/전시 불러오기
+//  @Operation(summary = "특정 날짜 이벤트 조회", description = "특정 날짜의 예매 시작/종료 이벤트를 구분하여 조회합니다")
+//  @ApiSuccessResponses
+//  @ApiErrorResponses
+//  @GetMapping("/calendar/day")
+//  public ResponseEntity<Map<String, List<EventsCalendarListResp>>> getDailyEvents(
+//      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date
+//  ) {
+//    Map<String, List<EventsCalendarListResp>> eventMap = eventsService.getEventsForDay(date);
+//    return ResponseEntity.ok(eventMap);
+//  }
+
+
 
 
   @Operation(summary = "공연/전시 상세 조회", description = "사이트에 등록된 공연 및 전시의 상세한 정보를 조회")
