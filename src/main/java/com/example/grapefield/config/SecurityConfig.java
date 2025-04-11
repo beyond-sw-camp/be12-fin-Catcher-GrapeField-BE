@@ -16,56 +16,81 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
-import java.util.Arrays;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
 @Configuration
 public class SecurityConfig {
-    private final AuthenticationConfiguration authConfiguration;
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+  private final AuthenticationConfiguration authConfiguration;
+  @Bean
+  public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+  }
 
-    @Bean
-    public SecurityFilterChain configureChain(HttpSecurity http) throws Exception {
-//      CorsConfiguration configuration = new CorsConfiguration();
-//      configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://www.grapefield.kro.kr"));
-        http.csrf(AbstractHttpConfigurer::disable);
-        http.httpBasic(AbstractHttpConfigurer::disable);
-        http.formLogin(AbstractHttpConfigurer::disable);
-        http.logout(logout -> logout.logoutUrl("/logout")
-            .logoutSuccessHandler((request, response, authentication) -> {
-              ResponseCookie deleteCookie = ResponseCookie.from("ATOKEN", "")
-                  .path("/") // 로그인 시와 동일하게
-                  .httpOnly(true)
-                  .secure(true)
-                  .maxAge(0) // 즉시 만료
-                  .build();
-              response.setHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
-              response.setStatus(HttpServletResponse.SC_OK);
-            }).deleteCookies("ATOKEN"));
-        http.authorizeHttpRequests(authorizeRequests -> {
-            authorizeRequests
-                    .requestMatchers("/admin/**", "/events/register", "/events/update","/user/**", "/post/register","/post/update/**", "/post/delete/**","/comment/register","/comment/update/**","/comment/delete/**").hasRole("ADMIN")
-                    .requestMatchers("/post/register","/post/update/**", "/post/delete/**","/comment/register","/comment/update/**","/comment/delete/**", "/user/**").hasRole("USER")
-                    .requestMatchers("/user/logout", "/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**").permitAll()
-                    .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**","/v3/api-docs", "/swagger-resources/**", "/webjars/**").permitAll()
-                    .anyRequest().authenticated();
-        });
-//        http.oauth2Login(config-> {
-//            config.successHandler(new OAuth2SuccessHandler());
-//            config.userInfoEndpoint(endpoint->
-//                    endpoint.userService(customOAuth2UserService));
-//        });
+  @Bean
+  public SecurityFilterChain configureChain(HttpSecurity http) throws Exception {
+    // CSRF 보호 설정
+    http.csrf(csrf -> csrf
+        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+        // 인증이 필요 없는 경로는 CSRF 보호 제외 (RESTful API 호출 용이성을 위해)
+        .ignoringRequestMatchers("/user/signup", "/login", "/user/email_verify/**")
+    );
 
-      // 세션은 그냥 쓰지 않음
-      http.sessionManagement(AbstractHttpConfigurer::disable);
-        http.addFilterAt(new LoginFilter(authConfiguration.getAuthenticationManager()), UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
+    // 기본 HTTP 인증과 폼 로그인 비활성화 (JWT 사용)
+    http.httpBasic(AbstractHttpConfigurer::disable);
+    http.formLogin(AbstractHttpConfigurer::disable);
+
+    // 로그아웃 설정
+    http.logout(logout -> logout
+        .logoutUrl("/logout")  // API 경로 형태로 변경
+        .deleteCookies("ATOKEN")
+          .logoutSuccessHandler((request, response, authentication) -> {
+          // 토큰 쿠키 삭제
+          ResponseCookie deleteCookie = ResponseCookie.from("ATOKEN", "")
+              .path("/")
+              .httpOnly(true)
+              .secure(true)
+              .sameSite("Strict")  // CSRF 추가 보호
+              .maxAge(0)           // 즉시 만료
+              .build();
+          response.setHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
+
+          // JSON 응답 반환
+          response.setContentType("application/json");
+          response.setCharacterEncoding("UTF-8");
+          response.setStatus(HttpServletResponse.SC_OK);
+          response.getWriter().write("{\"message\":\"로그아웃 성공\"}");
+        })
+    );
+
+    // URL 기반 권한 설정
+    http.authorizeHttpRequests(authorizeRequests -> {
+      authorizeRequests
+          // 인증 없이 접근 가능한 경로
+          .requestMatchers("/user/signup", "/login", "/api/logout", "/user/email_verify", "/user/email_verify/**").permitAll()
+          // 관리자 권한 필요
+          .requestMatchers("/admin/**", "/events/register").hasRole("ADMIN")
+          // 일반 사용자 권한 필요
+          .requestMatchers("/post/register", "/post/update/**", "/post/delete/**",
+              "/comment/register", "/comment/update/**", "/comment/delete/**",
+              "/user/**").hasAnyRole("USER", "ADMIN")
+          // Swagger UI 접근 허용
+          .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
+              "/v3/api-docs", "/swagger-resources/**", "/webjars/**").permitAll()
+          // 기타 모든 요청은 인증 필요
+          .anyRequest().authenticated();
+    });
+
+    // 세션 비활성화 (JWT 사용)
+    http.sessionManagement(AbstractHttpConfigurer::disable);
+
+    // 인증 필터 등록
+    http.addFilterAt(new LoginFilter(authConfiguration.getAuthenticationManager()),
+        UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
+
+    return http.build();
+  }
 }

@@ -1,6 +1,6 @@
 package com.example.grapefield.events.model.entity;
 
-import com.example.grapefield.events.chat.model.entity.ChatRoom;
+import com.example.grapefield.chat.model.entity.ChatRoom;
 import com.example.grapefield.events.participant.model.entity.EventsCast;
 import com.example.grapefield.events.participant.model.entity.EventsParticipation;
 import com.example.grapefield.events.post.model.entity.Board;
@@ -59,6 +59,7 @@ public class Events {
     private Board board;
 
     @OneToOne(mappedBy = "events")
+    @PrimaryKeyJoinColumn
     private ChatRoom chatRoom;
 }
 

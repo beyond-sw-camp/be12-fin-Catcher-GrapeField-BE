@@ -1,4 +1,4 @@
-package com.example.grapefield.events.chat.model.entity;
+package com.example.grapefield.chat.model.entity;
 
 import com.example.grapefield.user.model.entity.User;
 import jakarta.persistence.*;
@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
+//@Table(name="CHAT_MESSAGE_CURRENT")
 @Entity
 @Builder
 @AllArgsConstructor
@@ -32,5 +33,8 @@ public class ChatMessageCurrent {
 
     private String content;
     private LocalDateTime createdAt;
-    private Boolean isHighlighted;
+
+    @Builder.Default
+    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean isHighlighted = false;
 }
