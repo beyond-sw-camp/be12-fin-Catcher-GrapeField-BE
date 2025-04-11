@@ -6,16 +6,12 @@ import com.example.grapefield.events.model.entity.Review;
 import com.example.grapefield.events.post.model.entity.Post;
 import com.example.grapefield.events.post.model.entity.PostComment;
 import com.example.grapefield.events.post.model.entity.PostRecommend;
+import com.example.grapefield.notification.model.entity.EventsInterest;
+import com.example.grapefield.notification.model.entity.EventsNotification;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.ColumnDefault;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 @Entity
