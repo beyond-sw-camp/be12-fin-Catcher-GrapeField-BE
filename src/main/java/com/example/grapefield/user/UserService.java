@@ -32,8 +32,9 @@ public class UserService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    Optional<User> user = userRepository.findByEmail(username);
-    return user.orElse(null);
+    Optional<User> userOpt = userRepository.findByEmail(username);
+    User user = userOpt.orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    return new CustomUserDetails(user);
   }
 
   public void sendVerifyEmail(String uuid, String email) {
