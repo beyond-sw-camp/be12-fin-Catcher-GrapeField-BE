@@ -72,14 +72,36 @@ public class EventsService {
 
     return result;
   }
-  public Slice<EventsListResp> getEventListByContents(String category, int page, int size) {
-    Pageable pageable = PageRequest.of(page, size);
-    if (category == null || category.trim().isEmpty() || category.equals("전체")) {
-      return eventsRepository.findAllOrdered(pageable);
-    } else {
-      EventCategory eventCategory = EventCategory.valueOf(category.toUpperCase());
-      return eventsRepository.findAllFilteredByCategory(eventCategory, pageable);
+
+  public Map<String, Slice<EventsListResp>> getMainEvents(String category) {
+    Pageable pageable = PageRequest.of(0, 10);
+    LocalDateTime now = LocalDateTime.now();
+
+    EventCategory eventCategory = null;
+    if (category != null && !category.trim().isEmpty() && !category.equals("전체")) {
+      eventCategory = EventCategory.valueOf(category.toUpperCase());
     }
+
+    Slice<EventsListResp> recommended = eventsRepository.findTopRecommended(eventCategory, now, pageable);
+    Slice<EventsListResp> popular = eventsRepository.findTopPopular(eventCategory, pageable);
+    Slice<EventsListResp> upcoming = eventsRepository.findTopUpcoming(eventCategory, now, pageable);
+
+    Map<String, Slice<EventsListResp>> result = new HashMap<>();
+    result.put("recommend", recommended);
+    result.put("popular", popular);
+    result.put("new", upcoming);
+    return result;
+  }
+
+  public Slice<EventsListResp> getMoreEventList(String category, String array, Pageable pageable) {
+    LocalDateTime now = LocalDateTime.now();
+    EventCategory eventCategory = EventCategory.valueOf(category.toUpperCase());
+      return switch (array) {
+          case "recommend" -> eventsRepository.findTopRecommended(eventCategory, now, pageable);
+          case "popular" -> eventsRepository.findTopPopular(eventCategory, pageable);
+          case "new" -> eventsRepository.findTopUpcoming(eventCategory, now, pageable);
+          default -> null;
+      };
   }
 
 

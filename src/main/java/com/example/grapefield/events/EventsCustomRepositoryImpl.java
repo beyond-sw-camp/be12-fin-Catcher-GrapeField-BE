@@ -8,10 +8,8 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
@@ -135,5 +133,98 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
         pageable,
         hasNext
     );
+  }
+
+  private Slice<EventsListResp> toSlice(List<Tuple> tuples, Pageable pageable) {
+    QEvents e = QEvents.events;
+    QEventsInterest ei = QEventsInterest.eventsInterest;
+
+    List<EventsListResp> result = tuples.stream()
+            .map(tuple -> EventsListResp.from(
+                    tuple.get(e), tuple.get(ei.count())
+            ))
+            .toList();
+
+    boolean hasNext = result.size() > pageable.getPageSize();
+    return new SliceImpl<>(
+            hasNext ? result.subList(0, pageable.getPageSize()) : result,
+            pageable,
+            hasNext
+    );
+  }
+
+
+  @Override
+  public Slice<EventsListResp> findTopRecommended(EventCategory category, LocalDateTime now, Pageable pageable) {
+    QEvents e = QEvents.events;
+    QEventsInterest ei = QEventsInterest.eventsInterest;
+
+    BooleanBuilder builder = new BooleanBuilder();
+    if (category != null) {
+      builder.and(e.category.eq(category));
+    }
+    builder.and(e.endDate.goe(now)); // 추천 조건
+
+    List<Tuple> tuples = queryFactory
+            .select(e, ei.count())
+            .from(e)
+            .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
+            .where(builder)
+            .groupBy(e)
+            .orderBy(ei.count().desc(), e.startDate.asc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize() + 1)
+            .fetch();
+
+    return toSlice(tuples, pageable);
+  }
+
+  @Override
+  public Slice<EventsListResp> findTopPopular(EventCategory category, Pageable pageable) {
+    QEvents e = QEvents.events;
+    QEventsInterest ei = QEventsInterest.eventsInterest;
+
+    BooleanBuilder builder = new BooleanBuilder();
+    if (category != null) {
+      builder.and(e.category.eq(category));
+    }
+
+    List<Tuple> tuples = queryFactory
+            .select(e, ei.count())
+            .from(e)
+            .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
+            .where(builder)
+            .groupBy(e)
+            .orderBy(ei.count().desc(), e.startDate.asc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize() + 1)
+            .fetch();
+
+    return toSlice(tuples, pageable);
+  }
+
+  @Override
+  public Slice<EventsListResp> findTopUpcoming(EventCategory category, LocalDateTime now, Pageable pageable) {
+    QEvents e = QEvents.events;
+    QEventsInterest ei = QEventsInterest.eventsInterest;
+
+    BooleanBuilder builder = new BooleanBuilder();
+    if (category != null) {
+      builder.and(e.category.eq(category));
+    }
+    builder.and(e.startDate.gt(now));
+
+    List<Tuple> tuples = queryFactory
+            .select(e, ei.count())
+            .from(e)
+            .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
+            .where(builder)
+            .groupBy(e)
+            .orderBy(e.startDate.asc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize() + 1)
+            .fetch();
+
+    return toSlice(tuples, pageable);
   }
 }

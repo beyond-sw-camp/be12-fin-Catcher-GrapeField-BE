@@ -26,4 +26,10 @@ public interface EventsCustomRepository {
   // 특정 카테고리 필터링
   Slice<EventsListResp> findAllFilteredByCategory(EventCategory category, Pageable pageable);
 
+  //추천 (진행 중 or 예정 중 즐찾 많은 순)
+  Slice<EventsListResp> findTopRecommended(EventCategory category, LocalDateTime now, Pageable pageable);
+  //인기 (진행 여부 상관없이 즐찾 많은 순)
+  Slice<EventsListResp> findTopPopular(EventCategory category, Pageable pageable);
+  //신규 (startDate > now)
+  Slice<EventsListResp> findTopUpcoming(EventCategory category, LocalDateTime now, Pageable pageable);
 }
