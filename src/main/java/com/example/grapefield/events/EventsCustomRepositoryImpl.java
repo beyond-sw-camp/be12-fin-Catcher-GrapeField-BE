@@ -160,10 +160,10 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
     QEventsInterest ei = QEventsInterest.eventsInterest;
 
     BooleanBuilder builder = new BooleanBuilder();
-    if (category != null) {
+    if (category != null && category != EventCategory.ALL) {
       builder.and(e.category.eq(category));
     }
-    builder.and(e.endDate.goe(now)); // 추천 조건
+    builder.and(e.endDate.goe(now)); //종료일이 현재 이후인 공연
 
     List<Tuple> tuples = queryFactory
             .select(e, ei.count())
@@ -185,7 +185,7 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
     QEventsInterest ei = QEventsInterest.eventsInterest;
 
     BooleanBuilder builder = new BooleanBuilder();
-    if (category != null) {
+    if (category != EventCategory.ALL) {
       builder.and(e.category.eq(category));
     }
 
@@ -209,7 +209,7 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
     QEventsInterest ei = QEventsInterest.eventsInterest;
 
     BooleanBuilder builder = new BooleanBuilder();
-    if (category != null) {
+    if (category != EventCategory.ALL) {
       builder.and(e.category.eq(category));
     }
     builder.and(e.startDate.gt(now));

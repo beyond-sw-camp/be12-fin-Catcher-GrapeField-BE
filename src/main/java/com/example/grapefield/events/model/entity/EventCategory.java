@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum EventCategory {
+    ALL("ALL"),
     MUSICAL("MUSICAL"),
     PLAY("PLAY"),
     CONCERT("CONCERT"),

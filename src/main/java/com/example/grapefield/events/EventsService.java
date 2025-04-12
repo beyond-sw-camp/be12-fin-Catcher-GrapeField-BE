@@ -77,10 +77,7 @@ public class EventsService {
     Pageable pageable = PageRequest.of(0, 10);
     LocalDateTime now = LocalDateTime.now();
 
-    EventCategory eventCategory = null;
-    if (category != null && !category.trim().isEmpty() && !category.equals("전체")) {
-      eventCategory = EventCategory.valueOf(category.toUpperCase());
-    }
+    EventCategory eventCategory = EventCategory.valueOf(category.toUpperCase());
 
     Slice<EventsListResp> recommended = eventsRepository.findTopRecommended(eventCategory, now, pageable);
     Slice<EventsListResp> popular = eventsRepository.findTopPopular(eventCategory, pageable);
