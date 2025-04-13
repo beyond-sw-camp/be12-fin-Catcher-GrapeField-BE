@@ -5,6 +5,7 @@ import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.model.entity.TicketVendor;
 import com.example.grapefield.events.model.response.EventsCalendarListResp;
 import com.example.grapefield.events.model.response.EventsListResp;
+import com.example.grapefield.events.model.response.EventsTicketScheduleListResp;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -32,4 +33,10 @@ public interface EventsCustomRepository {
   Slice<EventsListResp> findTopPopular(EventCategory category, Pageable pageable);
   //신규 (startDate > now)
   Slice<EventsListResp> findTopUpcoming(EventCategory category, LocalDateTime now, Pageable pageable);
+
+  //(티켓팅) 오픈 예정 공연
+  Slice<EventsTicketScheduleListResp> findEventsWithUpcomingTicketOpenings(LocalDateTime now, Pageable pageable);
+  //(티켓팅) 종료 예정 공연
+  Slice<EventsTicketScheduleListResp> findEventsWithUpcomingTicketClosures(LocalDateTime now, Pageable pageable);
+
 }

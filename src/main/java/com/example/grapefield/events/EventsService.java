@@ -7,6 +7,7 @@ import com.example.grapefield.events.model.entity.TicketVendor;
 import com.example.grapefield.events.model.request.EventsRegisterReq;
 import com.example.grapefield.events.model.response.EventsCalendarListResp;
 import com.example.grapefield.events.model.response.EventsListResp;
+import com.example.grapefield.events.model.response.EventsTicketScheduleListResp;
 import com.example.grapefield.events.post.BoardRepository;
 import com.example.grapefield.events.post.model.entity.Board;
 import lombok.RequiredArgsConstructor;
@@ -99,6 +100,27 @@ public class EventsService {
           case "new" -> eventsRepository.findTopUpcoming(eventCategory, now, pageable);
           default -> null;
       };
+  }
+
+  public Map<String, Slice<EventsTicketScheduleListResp>> getMainEventsTicketSchedule() {
+    Pageable pageable = PageRequest.of(0, 6);
+    LocalDateTime now = LocalDateTime.now();
+    Slice<EventsTicketScheduleListResp> openings = eventsRepository.findEventsWithUpcomingTicketOpenings(now, pageable);
+    Slice<EventsTicketScheduleListResp> closures = eventsRepository.findEventsWithUpcomingTicketClosures(now, pageable);
+
+    Map<String, Slice<EventsTicketScheduleListResp>> result = new HashMap<>();
+    result.put("openings", openings);
+    result.put("closures", closures);
+    return result;
+  }
+
+  public Slice<EventsTicketScheduleListResp> getMoreEventsTicketSchedule(String type, Pageable pageable) {
+    LocalDateTime now = LocalDateTime.now();
+    return switch (type){
+      case "openings" -> eventsRepository.findEventsWithUpcomingTicketOpenings(now, pageable);
+      case "closures" -> eventsRepository.findEventsWithUpcomingTicketClosures(now, pageable);
+      default -> null;
+    };
   }
 
 

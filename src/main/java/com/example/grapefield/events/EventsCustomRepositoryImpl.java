@@ -3,6 +3,7 @@ package com.example.grapefield.events;
 import com.example.grapefield.events.model.entity.*;
 import com.example.grapefield.events.model.response.EventsCalendarListResp;
 import com.example.grapefield.events.model.response.EventsListResp;
+import com.example.grapefield.events.model.response.EventsTicketScheduleListResp;
 import com.example.grapefield.notification.model.entity.QEventsInterest;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
@@ -153,7 +154,6 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
     );
   }
 
-
   @Override
   public Slice<EventsListResp> findTopRecommended(EventCategory category, LocalDateTime now, Pageable pageable) {
     QEvents e = QEvents.events;
@@ -226,5 +226,79 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
             .fetch();
 
     return toSlice(tuples, pageable);
+  }
+
+  private Slice<EventsTicketScheduleListResp> toScheduleSlice(List<Tuple> tuples, Pageable pageable) {
+    QEvents e = QEvents.events;
+    QTicketInfo t = QTicketInfo.ticketInfo;
+    QEventsInterest ei = QEventsInterest.eventsInterest;
+
+    List<EventsTicketScheduleListResp> result = tuples.stream()
+            .map(tuple -> EventsTicketScheduleListResp.from(
+                    tuple.get(e),
+                    tuple.get(t),
+                    tuple.get(ei.count())
+            ))
+            .toList();
+
+    boolean hasNext = result.size() > pageable.getPageSize();
+    return new SliceImpl<>(
+            hasNext ? result.subList(0, pageable.getPageSize()) : result,
+            pageable,
+            hasNext
+    );
+  }
+
+  @Override
+  public Slice<EventsTicketScheduleListResp> findEventsWithUpcomingTicketOpenings(LocalDateTime now, Pageable pageable) {
+    QEvents e = QEvents.events;
+    QTicketInfo t = QTicketInfo.ticketInfo;
+    QEventsInterest ei = QEventsInterest.eventsInterest;
+
+    LocalDateTime sevenDaysLater = now.plusDays(7);
+
+    List<Tuple> tuples = queryFactory
+            .select(e, ei.count())
+            .from(t)
+            .join(t.events, e)
+            .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
+            .where(
+                    t.saleStart.gt(now)
+                            .and(t.saleStart.loe(sevenDaysLater)) // 7일 이내
+            )
+            .groupBy(e)
+            .orderBy(t.saleStart.asc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize() + 1)
+            .fetch();
+
+    return toScheduleSlice(tuples, pageable);
+  }
+
+  @Override
+  public Slice<EventsTicketScheduleListResp> findEventsWithUpcomingTicketClosures(LocalDateTime now, Pageable pageable) {
+    QEvents e = QEvents.events;
+    QTicketInfo t = QTicketInfo.ticketInfo;
+    QEventsInterest ei = QEventsInterest.eventsInterest;
+
+    LocalDateTime sevenDaysLater = now.plusDays(7);
+
+    List<Tuple> tuples = queryFactory
+            .select(e, ei.count())
+            .from(t)
+            .join(t.events, e)
+            .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
+            .where(
+                    t.saleStart.loe(now) // 이미 오픈된 공연
+                            .and(t.saleEnd.gt(now)) // 마감되지 않았고
+                            .and(t.saleEnd.loe(sevenDaysLater)) // 7일 이내 종료될 예정
+            )
+            .groupBy(e)
+            .orderBy(t.saleEnd.asc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize() + 1)
+            .fetch();
+
+    return toScheduleSlice(tuples, pageable);
   }
 }
