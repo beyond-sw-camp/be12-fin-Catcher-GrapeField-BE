@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -26,21 +28,27 @@ public class ChatMessageService {
 
     @Transactional
     public void saveMessage(ChatMessageKafkaReq req) {
+        // 1. 채팅방 정보 가져오기
         ChatRoom room = chatRoomRepository.findById(req.getRoomIdx())
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
+        // 2. 사용자 정보 가져오기
         User user = userRepository.findById(req.getSendUserIdx())
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        // 영속 상태 보장
-        ChatMessageBase base = baseRepository.saveAndFlush(ChatMessageBase.builder().build());
+        // 3. 메시지 base 저장 (createdAt도 포함)
+        ChatMessageBase base = ChatMessageBase.builder()
+                .createdAt(LocalDateTime.now())
+                .build();
+        baseRepository.saveAndFlush(base); // flush로 영속성 컨텍스트에 반영
 
+        // 4. 메시지 current 저장
         ChatMessageCurrent current = ChatMessageCurrent.builder()
-                .base(base)
+                .base(base) // 반드시 방금 저장한 base 사용
                 .chatRoom(room)
                 .user(user)
                 .content(req.getContent())
-                .createdAt(base.getCreatedAt()) // 자동설정되었다면 그대로
+                .createdAt(base.getCreatedAt()) // 정렬을 위해 동일 시간 사용
                 .isHighlighted(false)
                 .build();
 
