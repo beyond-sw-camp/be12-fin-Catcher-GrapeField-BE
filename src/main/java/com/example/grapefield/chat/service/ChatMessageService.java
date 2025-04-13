@@ -9,6 +9,7 @@ import com.example.grapefield.chat.repository.ChatMessageCurrentRepository;
 import com.example.grapefield.chat.repository.ChatRoomRepository;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,31 +24,28 @@ public class ChatMessageService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public void saveMessage(ChatMessageKafkaReq req) {
-        // 1. 채팅방 정보 가져오기
         ChatRoom room = chatRoomRepository.findById(req.getRoomIdx())
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
 
-        // 2. 사용자 정보 가져오기
         User user = userRepository.findById(req.getSendUserIdx())
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        // 3. 메시지 base 저장 (자동 생성된 IDX 사용)
-        ChatMessageBase base = baseRepository.save(ChatMessageBase.builder().build());
+        // 영속 상태 보장
+        ChatMessageBase base = baseRepository.saveAndFlush(ChatMessageBase.builder().build());
 
-        // 4. 메시지 current 저장 (base 포함)
         ChatMessageCurrent current = ChatMessageCurrent.builder()
                 .base(base)
                 .chatRoom(room)
                 .user(user)
                 .content(req.getContent())
-                .createdAt(base.getCreatedAt())
+                .createdAt(base.getCreatedAt()) // 자동설정되었다면 그대로
                 .isHighlighted(false)
                 .build();
 
         currentRepository.save(current);
 
-        // 로그 확인
         log.info("✅ 채팅 메시지 저장 완료 | baseId={}, user={}, room={}, content={}",
                 base.getMessageIdx(), user.getUsername(), room.getRoomName(), req.getContent());
     }

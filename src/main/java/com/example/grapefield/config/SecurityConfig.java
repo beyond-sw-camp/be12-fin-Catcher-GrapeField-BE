@@ -35,7 +35,7 @@ public class SecurityConfig {
     http.csrf(csrf -> csrf
         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
         // 인증이 필요 없는 경로는 CSRF 보호 제외 (RESTful API 호출 용이성을 위해)
-        .ignoringRequestMatchers("/user/signup", "/login", "/user/email_verify/**")
+        .ignoringRequestMatchers("/user/signup", "/login", "/user/email_verify/**", "/chat-test/**")
     );
 
     // 기본 HTTP 인증과 폼 로그인 비활성화 (JWT 사용)
@@ -78,7 +78,7 @@ public class SecurityConfig {
               "/user/**").hasAnyRole("USER", "ADMIN")
           // Swagger UI 접근 허용
           .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
-              "/v3/api-docs", "/swagger-resources/**", "/webjars/**").permitAll()
+              "/v3/api-docs", "/swagger-resources/**", "/webjars/**", "/chat-test/**").permitAll()
           // 기타 모든 요청은 인증 필요
           .anyRequest().authenticated();
     });
