@@ -3,9 +3,11 @@ package com.example.grapefield.chat.service;
 import com.example.grapefield.chat.model.entity.ChatMessageBase;
 import com.example.grapefield.chat.model.entity.ChatMessageCurrent;
 import com.example.grapefield.chat.model.entity.ChatRoom;
+import com.example.grapefield.chat.model.entity.ChatroomMember;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.repository.ChatMessageBaseRepository;
 import com.example.grapefield.chat.repository.ChatMessageCurrentRepository;
+import com.example.grapefield.chat.repository.ChatRoomMemberRepository;
 import com.example.grapefield.chat.repository.ChatRoomRepository;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.repository.UserRepository;
@@ -25,6 +27,7 @@ public class ChatMessageService {
     private final ChatMessageCurrentRepository currentRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final ChatRoomMemberRepository chatRoomMemberRepository;
 
     @Transactional
     public void saveMessage(ChatMessageKafkaReq req) {
@@ -37,7 +40,24 @@ public class ChatMessageService {
         User user = userRepository.findById(req.getSendUserIdx())
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-        // 3. 메시지 base 저장 (createdAt도 포함)
+            // ✅ [추가] ChatroomMember에 존재하지 않으면 insert, 존재하면 lastActiveAt 갱신
+            chatRoomMemberRepository.findByChatRoomAndUser(room, user)
+                    .ifPresentOrElse(
+                            member -> member.updateLastActiveAt(LocalDateTime.now()),
+                            () -> {
+                                ChatroomMember newMember = ChatroomMember.builder()
+                                        .chatRoom(room)
+                                        .user(user)
+                                        .lastActiveAt(LocalDateTime.now())
+                                        .lastReadAt(null)
+                                        .mute(false)
+                                        .build();
+                                chatRoomMemberRepository.save(newMember);
+                            }
+                    );
+
+
+            // 3. 메시지 base 저장 (createdAt도 포함)
         ChatMessageBase base = ChatMessageBase.builder()
                 .createdAt(LocalDateTime.now())
                 .build();
