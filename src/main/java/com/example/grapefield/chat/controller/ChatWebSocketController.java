@@ -3,6 +3,8 @@ package com.example.grapefield.chat.controller;
 import com.example.grapefield.chat.kafka.ChatKafkaProducer;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.model.request.ChatMessageReq;
+import com.example.grapefield.chat.service.ChatMessageService;
+import com.example.grapefield.chat.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -41,6 +43,7 @@ public class ChatWebSocketController {
     }
     */
     private final ChatKafkaProducer chatKafkaProducer;
+    private final ChatRoomService chatRoomService;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -51,6 +54,9 @@ public class ChatWebSocketController {
         // 개발 테스트용 로그
         log.info("WebSocket 메시지 수신: roomIdx={}, content={}",
                 chatMessageReq.getRoomIdx(), chatMessageReq.getContent());
+
+        // ✅ 1. 채팅방이 DB와 Kafka 모두 존재하는지 보장
+        chatRoomService.ensureRoomExists(chatMessageReq.getRoomIdx(), "기본 채팅방");
 
         // 1. kafka로 메시지 전송
         //  Kafka의 이벤트에 담아서 클라이언트로부터의 메시지를 kafka로 전송
