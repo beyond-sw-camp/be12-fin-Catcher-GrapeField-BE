@@ -5,6 +5,7 @@ import com.example.grapefield.events.model.entity.EventCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Schema(description="공연/전시 상세 정보 응답")
+@Builder
 public class EventsDetailResp {
   @Schema(description="공연 제목", example = "웃는 남자")
   private String title;
@@ -33,17 +35,14 @@ public class EventsDetailResp {
   private String notification;
   @Schema(description="공연/전시 위치", example = "예술의전당 오페라극장")
   private String venue;
-  @Schema(description="상영 및 관람 시간, 분 단위로 표기", example = "120분")
+  @Schema(description="상영 및 관람 시간, 분 단위로 표기", example = "120")
   private Integer runningTime;
   @Schema(description="관람 연령", example="12세 이상")
   private AgeLimit ageLimit;
-
+//TODO : 한줄평 별점 합산
   @Schema(description = "티켓 정보 목록")
   private List<TicketInfoDetailResp> ticketInfoList;
 
   @Schema(description = "좌석별 가격 정보 목록")
-  private List<SeatPriceDetailReq> seatPriceList;
-
-  @Schema(description = "추가 이미지 목록 (선택사항)")
-  private List<EventsImgDetailReq> eventsImgList;
+  private List<SeatPriceDetailResp> seatPriceList;
 }

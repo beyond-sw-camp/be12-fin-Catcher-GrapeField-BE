@@ -62,4 +62,3 @@ public class Events {
     @PrimaryKeyJoinColumn
     private ChatRoom chatRoom;
 }
-

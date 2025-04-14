@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Getter
 @Schema(description="공연/전시 좌석별 가격 정보 응답")
-public class SeatPriceDetailReq {
+public class SeatPriceDetailResp {
   @Schema(description="좌석 타입", example="VIP석")
   private String seatType;
   @Schema(description="좌석 가격", example="250,000원")

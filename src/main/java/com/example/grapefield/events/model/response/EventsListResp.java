@@ -1,6 +1,7 @@
 package com.example.grapefield.events.model.response;
 
 import com.example.grapefield.events.model.entity.EventCategory;
+import com.example.grapefield.events.model.entity.Events;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,4 +31,17 @@ public class EventsListResp {
   private String venue;
   @Schema(description="즐겨찾기 수", example = "전시/공연의 유저가 즐겨찾기한 수")
   private int interestCtn;
+
+  public static EventsListResp from(Events event, Long interestCtn) {
+    return EventsListResp.builder()
+            .idx(event.getIdx())
+            .title(event.getTitle())
+            .category(event.getCategory())
+            .startDate(event.getStartDate())
+            .endDate(event.getEndDate())
+            .posterImgUrl(event.getPosterImgUrl())
+            .venue(event.getVenue())
+            .interestCtn(interestCtn != null ? interestCtn.intValue() : 0)
+            .build();
+  }
 }
