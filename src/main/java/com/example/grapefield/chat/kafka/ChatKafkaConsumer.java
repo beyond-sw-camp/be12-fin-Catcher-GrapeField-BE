@@ -14,7 +14,9 @@ public class ChatKafkaConsumer {
 
     private final ChatMessageService chatMessageService;
 
-    @KafkaListener(topics = "chat-message-topic", groupId = "chat-group")
+    @KafkaListener(topicPattern = "chat-.*",
+            groupId = "chat-group",
+            containerFactory = "kafkaListenerContainerFactory")
     public void consume(ChatMessageKafkaReq message) {
         log.info("✅ Kafka 메시지 수신: roomIdx={}, userIdx={}, content={}",
                 message.getRoomIdx(), message.getSendUserIdx(), message.getContent());
