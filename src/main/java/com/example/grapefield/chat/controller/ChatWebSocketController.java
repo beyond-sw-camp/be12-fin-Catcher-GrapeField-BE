@@ -41,6 +41,7 @@ public class ChatWebSocketController {
     }
     */
     private final ChatKafkaProducer chatKafkaProducer;
+
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 

@@ -17,8 +17,17 @@ public class ChatTestController {
 
     @PostMapping("/send")
     public ResponseEntity<String> sendTestMessage(@RequestBody ChatMessageReq req) {
-        ChatMessageKafkaReq event = new ChatMessageKafkaReq(req.getRoomIdx(), req.getSendUserIdx(), req.getContent());
-        kafkaTemplate.send("chat-message-topic", event);
+        ChatMessageKafkaReq event = new ChatMessageKafkaReq(
+                req.getRoomIdx(),
+                req.getSendUserIdx(),
+                req.getContent()
+        );
+
+        // roomIdx 기반 동적 토픽
+        String topic = "chat-" + req.getRoomIdx();
+        kafkaTemplate.send(topic, event);
+
         return ResponseEntity.ok("Kafka 메시지 전송 완료");
     }
+
 }
