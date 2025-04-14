@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,19 +40,29 @@ public class ChatWebSocketController {
     }
     */
     private final ChatKafkaProducer chatKafkaProducer;
+    private SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat.send.{roomIdx}")
     public void sendMessage(@Payload ChatMessageReq chatMessageReq,
                             SimpMessageHeaderAccessor headerAccessor) {
+        // 개발 테스트용 로그
         log.info("WebSocket 메시지 수신: roomIdx={}, content={}",
                 chatMessageReq.getRoomIdx(), chatMessageReq.getContent());
+
+        // 1. kafka로 메시지 전송
+        //  Kafka의 이벤트에 담아서 클라이언트로부터의 메시지를 kafka로 전송
         ChatMessageKafkaReq event = new ChatMessageKafkaReq(
                 chatMessageReq.getRoomIdx(),
                 chatMessageReq.getSendUserIdx(),
                 chatMessageReq.getContent()
         );
         chatKafkaProducer.sendMessage(event);
+
+        // 2. WebSocket 브로커로도 전송
+        messagingTemplate.convertAndSend("/topic/chat.room." + chatMessageReq.getRoomIdx(), chatMessageReq);
     }
+
+
 
 
     //Swagger 노출용으로, 실제로는 아무 기능이 없는 빈 메소드
