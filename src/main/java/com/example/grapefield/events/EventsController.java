@@ -5,10 +5,7 @@ import com.example.grapefield.base.ApiSuccessResponses;
 import com.example.grapefield.common.PageResponse;
 import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.events.model.request.EventsRegisterReq;
-import com.example.grapefield.events.model.response.EventsCalendarListResp;
-import com.example.grapefield.events.model.response.EventsDetailResp;
-import com.example.grapefield.events.model.response.EventsListResp;
-import com.example.grapefield.events.model.response.EventsTicketScheduleListResp;
+import com.example.grapefield.events.model.response.*;
 import com.example.grapefield.events.post.model.request.PostRegisterReq;
 import com.example.grapefield.user.model.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
@@ -133,15 +130,22 @@ public class EventsController {
 //  }
 
 
-
   @Operation(summary = "공연/전시 상세 조회", description = "사이트에 등록된 공연 및 전시의 상세한 정보를 조회")
   @ApiSuccessResponses
   @ApiErrorResponses
-  @GetMapping("/{eventsIdx}")
-  public ResponseEntity<EventsDetailResp> getEventsDetail(@PathVariable Long eventsIdx
-      ) {
-    EventsDetailResp dummy = new EventsDetailResp();
-    return ResponseEntity.ok().body(dummy);
+  @GetMapping("/{idx}")
+  public ResponseEntity<EventsDetailResp> getEventDetail(@PathVariable Long idx) {
+    EventsDetailResp response = eventsService.getEventDetail(idx);
+    return ResponseEntity.ok(response);
+  }
+
+  @Operation(summary = "공연/전시 상세 페이지의 상세 이미지 목록 가져오기", description = "공연/전시 상세 페이지에서 하단에 표시될 상세 이미지 목록 가져오기")
+  @ApiSuccessResponses
+  @ApiErrorResponses
+  @GetMapping("/images/{idx}")
+  public ResponseEntity<List<EventsImgDetailResp>> getEventDetailImages(@PathVariable Long idx) {
+    List<EventsImgDetailResp> response = eventsService.getEventDetailImages(idx);
+    return ResponseEntity.ok(response);
   }
 
   @Operation(summary = "공연/전시 수정", description = "등록된 공연/전시의 내용을 수정(관리자만 가능)")
@@ -154,8 +158,8 @@ public class EventsController {
                           examples = @ExampleObject(value = "권한이 없습니다.")))
   })
   @ApiErrorResponses
-  @PutMapping("/update/{eventsIdx}")
-  public ResponseEntity<String> updateComment(@PathVariable Long eventsIdx, @RequestBody EventsRegisterReq request, @AuthenticationPrincipal User user) {
+  @PutMapping("/update/{idx}")
+  public ResponseEntity<String> updateComment(@PathVariable Long idx, @RequestBody EventsRegisterReq request, @AuthenticationPrincipal User user) {
     return ResponseEntity.ok("수정 성공");
   }
 
@@ -169,8 +173,8 @@ public class EventsController {
                           examples = @ExampleObject(value = "권한이 없습니다.")))
   })
   @ApiErrorResponses
-  @PutMapping("/delete/{eventsIdx}")
-  public ResponseEntity<String> updateComment(@PathVariable Long eventsIdx, @AuthenticationPrincipal User user) {
+  @PutMapping("/delete/{idx}")
+  public ResponseEntity<String> updateComment(@PathVariable Long idx, @AuthenticationPrincipal User user) {
     return ResponseEntity.ok("게시글 삭제 성공");
   }
 
@@ -191,4 +195,6 @@ public class EventsController {
   //TODO: Review(한줄평, 별점) 목록 조회
 
   //TODO: 공지사항, Qna, FaQ,
+
+  //TODO : 검색
 }

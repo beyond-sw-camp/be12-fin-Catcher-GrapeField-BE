@@ -63,12 +63,12 @@ public class SecurityConfig {
     http.authorizeHttpRequests(authorizeRequests -> {
       authorizeRequests
           // 인증 없이 접근 가능한 경로
-          .requestMatchers("/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**").permitAll()
+          .requestMatchers("/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**", "/participant/**").permitAll()
           // Swagger UI 접근 허용
           .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
               "/v3/api-docs", "/swagger-resources/**", "/webjars/**").permitAll()
           // 관리자 권한 필요
-          .requestMatchers("/admin/**", "/events/register").hasRole("ADMIN")
+          .requestMatchers("/admin/**", "/events/register", "/participant/register").hasRole("ADMIN")
           // 일반 사용자 권한 필요
           .requestMatchers("/post/register", "/post/update/**", "/post/delete/**",
               "/comment/register", "/comment/update/**", "/comment/delete/**",

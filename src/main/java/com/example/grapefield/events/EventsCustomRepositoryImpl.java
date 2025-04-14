@@ -1,9 +1,10 @@
 package com.example.grapefield.events;
 
 import com.example.grapefield.events.model.entity.*;
-import com.example.grapefield.events.model.response.EventsCalendarListResp;
-import com.example.grapefield.events.model.response.EventsListResp;
-import com.example.grapefield.events.model.response.EventsTicketScheduleListResp;
+import com.example.grapefield.events.model.response.*;
+import com.example.grapefield.events.participant.model.entity.*;
+import com.example.grapefield.events.participant.model.response.OrganizationListResp;
+import com.example.grapefield.events.participant.model.response.PerformerListResp;
 import com.example.grapefield.notification.model.entity.QEventsInterest;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
@@ -17,7 +18,10 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -300,5 +304,122 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
             .fetch();
 
     return toScheduleSlice(tuples, pageable);
+  }
+
+  @Override
+  public EventsDetailResp getEventDetail(Long eventsIdx) {
+    QEvents e = QEvents.events;
+    QTicketInfo ti = QTicketInfo.ticketInfo;
+    QSeatPrice sp = QSeatPrice.seatPrice;
+
+    // 이벤트 기본 정보 조회
+    Events event = queryFactory
+        .selectFrom(e)
+        .where(e.idx.eq(eventsIdx))
+        .fetchOne();
+
+    if (event == null) {
+      return null; // 또는 예외 처리
+    }
+
+    // 별도 쿼리로 티켓 정보 조회 (N+1 방지를 위해 in 절 사용)
+    List<TicketInfo> ticketInfos = queryFactory
+        .selectFrom(ti)
+        .where(ti.events.idx.eq(eventsIdx))
+        .fetch();
+
+    // 별도 쿼리로 좌석 가격 정보 조회 (N+1 방지를 위해 in 절 사용)
+    List<SeatPrice> seatPrices = queryFactory
+        .selectFrom(sp)
+        .where(sp.events.idx.eq(eventsIdx))
+        .fetch();
+
+    // DTO 변환 및 반환
+    return EventsDetailResp.builder()
+        .title(event.getTitle())
+        .category(event.getCategory())
+        .startDate(event.getStartDate())
+        .endDate(event.getEndDate())
+        .posterImgUrl(event.getPosterImgUrl())
+        .description(event.getDescription())
+        .notification(event.getNotification())
+        .venue(event.getVenue())
+        .runningTime(event.getRunningTime())
+        .ageLimit(event.getAgeLimit())
+        .ticketInfoList(ticketInfos.stream()
+            .map(this::convertToTicketInfoDetailResp)
+            .toList())
+        .seatPriceList(seatPrices.stream()
+            .map(this::convertToSeatPriceDetailResp)
+            .toList())
+        .build();
+  }
+
+  //TicketInfo 엔티티를 TicketInfoDetailResp DTO로 변환
+  private TicketInfoDetailResp convertToTicketInfoDetailResp(TicketInfo ticketInfo) {
+    return new TicketInfoDetailResp(
+        ticketInfo.getTicketLink(),
+        ticketInfo.getIsPresale(),
+        ticketInfo.getSaleStart(),
+        ticketInfo.getSaleEnd(),
+        ticketInfo.getTicketVendor()
+    );
+  }
+
+  //SeatPrice 엔티티를 SeatPriceDetailResp DTO로 변환
+  private SeatPriceDetailResp convertToSeatPriceDetailResp(SeatPrice seatPrice) {
+    return new SeatPriceDetailResp(
+        seatPrice.getSeatType(),
+        seatPrice.getPrice(),
+        seatPrice.getDescription()
+    );
+  }
+
+  @Override
+  public Map<String, Object> getParticipantDetail(Long eventsIdx) {
+    QEventsCast ec = QEventsCast.eventsCast;
+    QPerformer p = QPerformer.performer;
+    QEventsParticipation ep = QEventsParticipation.eventsParticipation;
+    QOrganization o = QOrganization.organization;
+
+    // 출연진 정보 조회 (fetch join으로 N+1 문제 해결)
+    List<EventsCast> eventsCasts = queryFactory
+        .selectFrom(ec)
+        .join(ec.performer, p).fetchJoin()
+        .where(ec.events.idx.eq(eventsIdx))
+        .orderBy(ec.castOrder.asc())
+        .fetch();
+
+    List<PerformerListResp> performers = eventsCasts.stream()
+        .map(cast -> PerformerListResp.builder()
+            .idx(cast.getPerformer().getIdx())
+            .name(cast.getPerformer().getName())
+            .imgUrl(cast.getPerformer().getImgUrl())
+            .role(cast.getRole())
+            .build())
+        .collect(Collectors.toList());
+
+    // 참여 기관 정보 조회 (fetch join으로 N+1 문제 해결)
+    List<EventsParticipation> participations = queryFactory
+        .selectFrom(ep)
+        .join(ep.organization, o).fetchJoin()
+        .where(ep.events.idx.eq(eventsIdx))
+        .fetch();
+
+    List<OrganizationListResp> organizations = participations.stream()
+        .map(participation -> OrganizationListResp.builder()
+            .idx(participation.getOrganization().getIdx())
+            .name(participation.getOrganization().getName())
+            .imgUrl(participation.getOrganization().getImgUrl())
+            .type(participation.getAssociationType())
+            .build())
+        .collect(Collectors.toList());
+
+    // 결과 Map 생성
+    Map<String, Object> result = new HashMap<>();
+    result.put("performers", performers);
+    result.put("organizations", organizations);
+
+    return result;
   }
 }
