@@ -78,7 +78,7 @@ public class SecurityConfig {
               "/user/**").hasAnyRole("USER", "ADMIN")
           // Swagger UI 접근 허용
           .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
-              "/v3/api-docs", "/swagger-resources/**", "/webjars/**", "/chat-test/**").permitAll()
+              "/v3/api-docs", "/swagger-resources/**", "/webjars/**", "/chat-test/**", "/ws/**").permitAll()
           // 기타 모든 요청은 인증 필요
           .anyRequest().authenticated();
     });
