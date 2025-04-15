@@ -1,7 +1,13 @@
 package com.example.grapefield.chat.service;
 
+import com.example.grapefield.chat.model.entity.ChatMessageCurrent;
 import com.example.grapefield.chat.model.entity.ChatRoom;
+import com.example.grapefield.chat.model.entity.ChatroomMember;
+import com.example.grapefield.chat.model.response.ChatListResp;
+import com.example.grapefield.chat.repository.ChatMessageCurrentRepository;
+import com.example.grapefield.chat.repository.ChatRoomMemberRepository;
 import com.example.grapefield.chat.repository.ChatRoomRepository;
+import com.example.grapefield.events.model.entity.Events;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -18,7 +24,10 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final AdminClient adminClient;
+    private final ChatRoomMemberRepository memberRepository;
+    private final ChatMessageCurrentRepository currentRepository;
 
+    // 채팅방(ChatRoom)이 DB에 없으면 새로 만들고, Kafka 토픽도 같이 보장
     public ChatRoom ensureRoomExists(Long roomIdx, String roomName) {
         return chatRoomRepository.findById(roomIdx).orElseGet(() -> {
             ChatRoom room = ChatRoom.builder()
@@ -38,6 +47,7 @@ public class ChatRoomService {
         });
     }
 
+    // Kafka에 해당 채팅방 토픽이 없으면 새로 생성
     private void createKafkaTopicIfNotExists(Long roomIdx) {
         String topicName = "chat-" + roomIdx;
         try {
@@ -51,5 +61,27 @@ public class ChatRoomService {
         } catch (Exception e) {
             log.warn("⚠️ Kafka 토픽 생성 중 에러: {}", e.getMessage());
         }
+    }
+    // 사용자가 참여한 채팅방 목록 불러오기
+    public List<ChatListResp> getMyRooms(Long userIdx) {
+        List<ChatroomMember> members = memberRepository.findByUser_Idx(userIdx);
+
+        return members.stream().map(member -> {
+            ChatRoom room = member.getChatRoom();
+            ChatMessageCurrent lastMsg = currentRepository.findTopByChatRoomOrderByCreatedAtDesc(room);
+            int unreadCount = currentRepository.countByChatRoomAndCreatedAtAfter(room, member.getLastReadAt());
+            Events event = room.getEvents();  // events 필드 꺼내기
+
+            return ChatListResp.builder()
+                    .roomIdx(room.getIdx())
+                    .roomName(room.getRoomName())
+                    .lastMessage(lastMsg != null ? lastMsg.getContent() : "")
+                    .lastMessageTime(lastMsg != null ? lastMsg.getCreatedAt() : null)
+                    .unreadCount(unreadCount)
+                    .eventPosterUrl(event.getPosterImgUrl()) // 포스터
+                    .eventStartDate(event.getStartDate())  // 시작일
+                    .eventEndDate(event.getEndDate())      // 종료일
+                    .build();
+        }).toList();
     }
 }
