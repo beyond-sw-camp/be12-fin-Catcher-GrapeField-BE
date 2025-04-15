@@ -20,4 +20,11 @@ public class ChatListResp {
     private LocalDateTime lastMessageTime;
     @Schema(description = "읽지 않은 메시지 수", example = "2")
     private int unreadCount;
+    @Schema(description = "이벤트 포스터 이미지 URL", example = "https://example.com/poster.jpg")
+    private String eventPosterUrl;
+    @Schema(description = "이벤트 시작 날짜", example = "2025-04-04T00:00:00")
+    private LocalDateTime eventStartDate;
+    @Schema(description = "이벤트 종료 날짜", example = "2025-04-30T23:59:59")
+    private LocalDateTime eventEndDate;
+
 }
