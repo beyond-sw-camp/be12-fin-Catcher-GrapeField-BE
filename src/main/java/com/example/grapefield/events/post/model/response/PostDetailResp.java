@@ -26,7 +26,7 @@ public class PostDetailResp {
   @Schema(description="게시글 내용", example = "지난 주말에 보고 왔는데 배우들의 연기가 좋고 스토리도 좋았습니다.")
   private String content;
   @Schema(description="게시글 조회수", example="100")
-  private Long viewCnt;
+  private int viewCnt;
   @Schema(example="후기")
   private PostType postType;
   @Schema(description="게시글 등록일",  example = "2025-01-09T00:00:00")

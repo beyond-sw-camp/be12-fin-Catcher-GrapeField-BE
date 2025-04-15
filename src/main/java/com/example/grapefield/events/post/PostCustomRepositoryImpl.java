@@ -3,12 +3,14 @@ package com.example.grapefield.events.post;
 import com.example.grapefield.events.post.model.entity.PostType;
 import com.example.grapefield.events.post.model.entity.QPost;
 import com.example.grapefield.events.post.model.entity.QPostRecommend;
+import com.example.grapefield.events.post.model.response.PostDetailResp;
 import com.example.grapefield.events.post.model.response.PostListResp;
 import com.example.grapefield.user.model.entity.QUser;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.model.entity.UserRole;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -81,5 +83,48 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
         .where(builder); // 동일한 조건 적용
 
     return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
+  }
+
+  @Override
+  public PostDetailResp findPostDetail(Long idx, User user) {
+    QPost post = QPost.post;
+    QUser qUser = QUser.user;
+    QPostRecommend recommend = QPostRecommend.postRecommend;
+
+    // 조건 생성
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(post.idx.eq(idx));
+
+    boolean editable = false; // 사용자 권한 확인하여 editable 결정
+
+    if (user != null) {
+      // 관리자거나 작성자인 경우 편집 가능
+      editable = user.getRole().equals(UserRole.ROLE_ADMIN) ||
+          queryFactory.selectOne()
+              .from(post)
+              .where(post.idx.eq(idx).and(post.user.idx.eq(user.getIdx())))
+              .fetchFirst() != null;
+    }
+
+    return queryFactory
+        .select(Projections.constructor(PostDetailResp.class,
+            post.idx,
+            qUser.idx,
+            qUser.username,
+            post.title,
+            post.content,
+            post.viewCnt,
+            post.postType,
+            post.createdAt,
+            recommend.idx.count().intValue(),
+            Expressions.constant(editable)))
+        .from(post)
+        .join(post.user, qUser)
+        .leftJoin(recommend).on(recommend.post.eq(post))
+        .where(builder)
+        .groupBy(post.idx, qUser.idx, qUser.username, post.title, post.content,
+            post.viewCnt, post.postType, post.createdAt)
+        .fetchOne();
+
   }
 }

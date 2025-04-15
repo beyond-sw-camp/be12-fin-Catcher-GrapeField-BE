@@ -12,11 +12,17 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 
 @EnableWebSecurity
@@ -24,6 +30,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 @Configuration
 public class SecurityConfig {
   private final AuthenticationConfiguration authConfiguration;
+
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
@@ -31,13 +38,6 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain configureChain(HttpSecurity http) throws Exception {
-    // CSRF 보호 설정
-    http.csrf(csrf -> csrf
-        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-        // 인증이 필요 없는 경로는 CSRF 보호 제외 (RESTful API 호출 용이성을 위해)
-        .ignoringRequestMatchers("/user/signup", "/login", "/user/email_verify/**", "/chat-test/**", "/chatroom/**")
-    );
-
     // 기본 HTTP 인증과 폼 로그인 비활성화 (JWT 사용)
     http.httpBasic(AbstractHttpConfigurer::disable);
     http.formLogin(AbstractHttpConfigurer::disable);
@@ -57,8 +57,6 @@ public class SecurityConfig {
               .maxAge(0)           // 즉시 만료
               .build();
           response.setHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
-
-          // JSON 응답 반환
           response.setContentType("application/json");
           response.setCharacterEncoding("UTF-8");
           response.setStatus(HttpServletResponse.SC_OK);
@@ -70,21 +68,19 @@ public class SecurityConfig {
     http.authorizeHttpRequests(authorizeRequests -> {
       authorizeRequests
           // 인증 없이 접근 가능한 경로
-          .requestMatchers("/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**", "/participant/**","post/list/**").permitAll()
+          .requestMatchers("/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**", "/participant/**","/post/list/**", "/post/**").permitAll()
           // Swagger UI 접근 허용
           .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
               "/v3/api-docs", "/swagger-resources/**", "/webjars/**").permitAll()
-
           // 관리자 권한 필요
           .requestMatchers("/admin/**", "/events/register", "/participant/register").hasRole("ADMIN")
           // 일반 사용자 권한 필요
           .requestMatchers("/post/register", "/post/update/**", "/post/delete/**",
               "/comment/register", "/comment/update/**", "/comment/delete/**",
               "/user/**").hasAnyRole("USER", "ADMIN")
-          // Swagger UI 접근 허용
-          .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
-              "/v3/api-docs", "/swagger-resources/**", "/webjars/**", "/chat-test/**", "/ws/**", "/chatroom/**").permitAll()
-          // 기타 모든 요청은 인증 필요 (가장 일반적인 패턴)
+          // 게시글 상세 조회는 인증 필요 (이 부분을 수정)
+          .requestMatchers("/post/**").authenticated()
+          // 기타 모든 요청은 인증 필요
           .anyRequest().authenticated();
     });
     // 세션 비활성화 (JWT 사용)
