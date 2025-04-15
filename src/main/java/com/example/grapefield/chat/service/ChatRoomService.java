@@ -1,0 +1,55 @@
+package com.example.grapefield.chat.service;
+
+import com.example.grapefield.chat.model.entity.ChatRoom;
+import com.example.grapefield.chat.repository.ChatRoomRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.admin.AdminClient;
+import org.apache.kafka.clients.admin.NewTopic;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@RequiredArgsConstructor
+@Slf4j
+@Service
+public class ChatRoomService {
+
+    private final ChatRoomRepository chatRoomRepository;
+    private final AdminClient adminClient;
+
+    public ChatRoom ensureRoomExists(Long roomIdx, String roomName) {
+        return chatRoomRepository.findById(roomIdx).orElseGet(() -> {
+            ChatRoom room = ChatRoom.builder()
+                    .idx(roomIdx)
+                    .roomName(roomName)
+                    .createdAt(LocalDateTime.now())
+                    .heartCnt(0L)
+                    .build();
+
+            chatRoomRepository.save(room);
+            log.info("✅ 채팅방 DB 저장 완료: {}", roomIdx);
+
+            // Kafka 토픽도 보장
+            createKafkaTopicIfNotExists(roomIdx);
+
+            return room;
+        });
+    }
+
+    private void createKafkaTopicIfNotExists(Long roomIdx) {
+        String topicName = "chat-" + roomIdx;
+        try {
+            var existingTopics = adminClient.listTopics().names().get();
+            if (!existingTopics.contains(topicName)) {
+                adminClient.createTopics(List.of(new NewTopic(topicName, 1, (short) 1)));
+                log.info("✅ Kafka 토픽 생성 완료: {}", topicName);
+            } else {
+                log.info("ℹ️ Kafka 토픽 이미 존재: {}", topicName);
+            }
+        } catch (Exception e) {
+            log.warn("⚠️ Kafka 토픽 생성 중 에러: {}", e.getMessage());
+        }
+    }
+}

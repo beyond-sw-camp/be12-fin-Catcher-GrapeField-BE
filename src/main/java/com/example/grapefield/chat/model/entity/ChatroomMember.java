@@ -29,4 +29,13 @@ public class ChatroomMember {
     @JoinColumn(name = "user_idx")
     private User user;
 
+    public void updateLastActiveAt(LocalDateTime newTime) {
+        this.lastActiveAt = newTime;
+    }
+
+    // (추후 필요하면 읽음 시간 갱신도 추가 가능)
+    public void updateLastReadAt(LocalDateTime time) {
+        this.lastReadAt = time;
+    }
+
 }
