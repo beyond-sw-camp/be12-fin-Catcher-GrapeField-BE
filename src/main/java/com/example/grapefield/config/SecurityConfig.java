@@ -41,6 +41,7 @@ public class SecurityConfig {
     // 기본 HTTP 인증과 폼 로그인 비활성화 (JWT 사용)
     http.httpBasic(AbstractHttpConfigurer::disable);
     http.formLogin(AbstractHttpConfigurer::disable);
+    http.csrf(AbstractHttpConfigurer::disable);
 
     // 로그아웃 설정
     http.logout(logout -> logout
@@ -69,9 +70,9 @@ public class SecurityConfig {
     http.authorizeHttpRequests(authorizeRequests -> {
       authorizeRequests
           // 인증 없이 접근 가능한 경로
-          .requestMatchers("/user/signup", "/login", "/api/logout", "/user/email_verify", "/user/email_verify/**").permitAll()
+          .requestMatchers("/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**", "/participant/**").permitAll()
           // 관리자 권한 필요
-          .requestMatchers("/admin/**", "/events/register").hasRole("ADMIN")
+          .requestMatchers("/admin/**", "/events/register", "/participant/register").hasRole("ADMIN")
           // 일반 사용자 권한 필요
           .requestMatchers("/post/register", "/post/update/**", "/post/delete/**",
               "/comment/register", "/comment/update/**", "/comment/delete/**",
@@ -79,10 +80,9 @@ public class SecurityConfig {
           // Swagger UI 접근 허용
           .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
               "/v3/api-docs", "/swagger-resources/**", "/webjars/**", "/chat-test/**", "/ws/**", "/chatroom/**").permitAll()
-          // 기타 모든 요청은 인증 필요
+          // 기타 모든 요청은 인증 필요 (가장 일반적인 패턴)
           .anyRequest().authenticated();
     });
-
     // 세션 비활성화 (JWT 사용)
     http.sessionManagement(AbstractHttpConfigurer::disable);
 

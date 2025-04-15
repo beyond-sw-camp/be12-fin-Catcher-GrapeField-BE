@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 @Schema(description="공연/전시 상세 정보 이미지 응답")
-public class EventsImgDetailReq {
+public class EventsImgDetailResp {
   @Schema(description = "공연/전시 소개 이미지 URL", example = "/sample/images/poster/poster1.jpg")
   private String imgUrl;
   @Schema(description = "이미지 나열 순서, 숫자가 작을수록 상단에 먼저 표시", example = "1")

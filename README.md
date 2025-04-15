@@ -61,25 +61,6 @@
 │   │       └── TicketInfoResp.java  
 │   ├── EventsController.java  
 │   ├── EventsService.java  
-│   └── EventsRepository.java
-
-├── 📁 events  
-│   ├── 📁 model  
-│   │   ├── 📁 entity  
-│   │   │   ├── Events.java  
-│   │   │   ├── EventsImg.java  
-│   │   │   ├── TicketInfo.java  
-│   │   │   ├── SeatPrice.java  
-│   │   │   ├── Participant.java  
-│   │   │   └── Review.java  
-│   │   ├── 📁 request  
-│   │   │   └── EventCreateReq.java  
-│   │   └── 📁 response  
-│   │       ├── EventsListItemResp.java  
-│   │       ├── EventsDetailResp.java  
-│   │       └── TicketInfoResp.java  
-│   ├── EventsController.java  
-│   ├── EventsService.java  
 │   └── EventsRepository.java  
 │  
 │   ├── 📁 post  
