@@ -46,7 +46,7 @@ public class ChatWebSocketController {
     private final ChatRoomService chatRoomService;
 
     @Autowired
-    private final SimpMessagingTemplate messagingTemplate;
+    private SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat.send.{roomIdx}")
     public void sendMessage(@Payload ChatMessageReq chatMessageReq,
