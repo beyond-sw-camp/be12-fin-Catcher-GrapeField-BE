@@ -54,9 +54,9 @@ public class PostController {
   public ResponseEntity<PageResponse<PostListResp>> getPostList(
       @AuthenticationPrincipal User user,
       @PathVariable("board_idx") Long boardIdx,
-      @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+      @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, String type
   ) {
-    Page<PostListResp> postPage = postService.getPostList(user, boardIdx, pageable);
+    Page<PostListResp> postPage = postService.getPostList(user, boardIdx, pageable, type);
     PageResponse<PostListResp> response = PageResponse.from(postPage, postPage.getContent());
     return ResponseEntity.ok(response);
   }
