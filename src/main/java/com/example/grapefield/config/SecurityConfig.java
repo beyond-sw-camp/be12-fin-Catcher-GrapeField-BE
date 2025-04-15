@@ -63,7 +63,7 @@ public class SecurityConfig {
     http.authorizeHttpRequests(authorizeRequests -> {
       authorizeRequests
           // 인증 없이 접근 가능한 경로
-          .requestMatchers("/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**", "/participant/**").permitAll()
+          .requestMatchers("/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**", "/participant/**","post/list/**").permitAll()
           // Swagger UI 접근 허용
           .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
               "/v3/api-docs", "/swagger-resources/**", "/webjars/**").permitAll()
