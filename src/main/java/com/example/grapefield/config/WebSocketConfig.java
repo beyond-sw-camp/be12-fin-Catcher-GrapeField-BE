@@ -1,12 +1,18 @@
 package com.example.grapefield.config;
 
+import com.example.grapefield.config.security.JwtChannelIntercepter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
 
 @Configuration // 스프링 설정 클래스로 등록해주기
 @EnableWebSocketMessageBroker //웹소켓 메시지 브로커 활성화. "STOMP 기반 메시징을 사용하겠다"
+@RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
+    private final JwtChannelIntercepter jwtChannelIntercepter;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) { // 인터페이스의 추상메서드 구현
@@ -29,5 +35,11 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         */
         registry.enableSimpleBroker("/topic"); // 구독용 메시지 브로커 활성화. 브로커가 발행publish할 경로 prefix, 클라이언트가 구독subscribe할 때 사용
         registry.setApplicationDestinationPrefixes("/app");
+    }
+
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(jwtChannelIntercepter);
     }
 }
