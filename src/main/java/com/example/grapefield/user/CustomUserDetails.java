@@ -71,8 +71,4 @@ public record CustomUserDetails(User user) implements UserDetails {
   public UserRole getRole() {
     return user.getRole();
   }
-
-  public User getUser() {
-    return user;
-  }
 }
