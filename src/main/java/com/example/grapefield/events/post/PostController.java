@@ -3,11 +3,10 @@ package com.example.grapefield.events.post;
 import com.example.grapefield.base.ApiErrorResponses;
 import com.example.grapefield.base.ApiSuccessResponses;
 import com.example.grapefield.common.PageResponse;
-import com.example.grapefield.events.post.model.entity.Post;
-import com.example.grapefield.events.post.model.entity.PostType;
 import com.example.grapefield.events.post.model.request.PostRegisterReq;
 import com.example.grapefield.events.post.model.response.PostDetailResp;
 import com.example.grapefield.events.post.model.response.PostListResp;
+import com.example.grapefield.user.CustomUserDetails;
 import com.example.grapefield.user.model.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,9 +22,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -64,11 +60,11 @@ public class PostController {
   @Operation(summary = "게시글 상세 확인", description = "게시판에 등록된 게시글을 상세하게 조회")
   @ApiSuccessResponses
   @ApiErrorResponses
-  @GetMapping("/{postIdx}")
-  public ResponseEntity<PostDetailResp> getPostDetail(@PathVariable Long postIdx, @AuthenticationPrincipal User user
-  ) {
-    PostDetailResp dummy = new PostDetailResp();
-    return ResponseEntity.ok().body(dummy);
+  @GetMapping("/{idx}")
+  public ResponseEntity<PostDetailResp> getPostDetail(@PathVariable Long idx, @AuthenticationPrincipal CustomUserDetails principal) {
+    User user = (principal != null) ? principal.getUser() : null;
+    PostDetailResp post = postService.getPostDetail(idx, user);
+    return ResponseEntity.ok(post);
   }
 
   @Operation(summary = "게시글 내용 수정", description = "기존에 게시한 글을 수정(작성자만 가능)")
