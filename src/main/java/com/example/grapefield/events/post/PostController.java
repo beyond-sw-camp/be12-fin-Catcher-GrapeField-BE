@@ -2,6 +2,8 @@ package com.example.grapefield.events.post;
 
 import com.example.grapefield.base.ApiErrorResponses;
 import com.example.grapefield.base.ApiSuccessResponses;
+import com.example.grapefield.common.PageResponse;
+import com.example.grapefield.events.post.model.entity.Post;
 import com.example.grapefield.events.post.model.entity.PostType;
 import com.example.grapefield.events.post.model.request.PostRegisterReq;
 import com.example.grapefield.events.post.model.response.PostDetailResp;
@@ -14,6 +16,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +32,8 @@ import java.util.List;
 @RequestMapping("/post")
 @Tag(name="4. 게시판 기능 ", description = "각 공연/전시마다 사람들이 의견을 나누고 정보를 공유할 수 있는 게시판")
 public class PostController {
+  private final PostService postService;
+
   @Operation(summary="게시글 등록", description = "공연 및 전시 게시판에서 게시글을 등록")
   @ApiResponses(
       @ApiResponse(responseCode = "200", description = "게시글 등록 성공",
@@ -42,14 +50,15 @@ public class PostController {
   @Operation(summary = "게시글 목록 조회", description = "게시판에 등록된 게시글을 리스트 형식으로 반환하여 조회")
   @ApiSuccessResponses
   @ApiErrorResponses
-  @GetMapping("/list")
-  public ResponseEntity<List<PostListResp>> getPostList(
-      @AuthenticationPrincipal User user) {
-    List<PostListResp> dummyList = List.of(
-        new PostListResp(1L,"김독자", "웃는 남자 재미있었습니다.", 100, false, PostType.REVIEW, LocalDateTime.now(), true, 50),
-        new PostListResp(1L,"박독자", "우는 남자가 더 재미있습니다.", 30, false, PostType.REVIEW, LocalDateTime.now(), true, 1)
-    );
-    return ResponseEntity.ok(dummyList);
+  @GetMapping("/list/{board_idx}")
+  public ResponseEntity<PageResponse<PostListResp>> getPostList(
+      @AuthenticationPrincipal User user,
+      @PathVariable("board_idx") Long boardIdx,
+      @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, String type
+  ) {
+    Page<PostListResp> postPage = postService.getPostList(user, boardIdx, pageable, type);
+    PageResponse<PostListResp> response = PageResponse.from(postPage, postPage.getContent());
+    return ResponseEntity.ok(response);
   }
 
   @Operation(summary = "게시글 상세 확인", description = "게시판에 등록된 게시글을 상세하게 조회")
@@ -91,4 +100,8 @@ public class PostController {
   public ResponseEntity<String> updateComment(@PathVariable Long postIdx, @AuthenticationPrincipal User user) {
     return ResponseEntity.ok("게시글 삭제 성공");
   }
+  
+  //TODO : 게시글 상단 고정(최대 5개)
+
+  //TODO : 상단에 고정된 게시글 목록 불러오기
 }

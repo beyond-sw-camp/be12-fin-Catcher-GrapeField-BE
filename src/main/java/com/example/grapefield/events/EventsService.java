@@ -9,6 +9,7 @@ import com.example.grapefield.events.model.request.EventsRegisterReq;
 import com.example.grapefield.events.model.response.*;
 import com.example.grapefield.events.post.BoardRepository;
 import com.example.grapefield.events.post.model.entity.Board;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,24 +31,16 @@ public class EventsService {
   public Long eventsRegister(EventsRegisterReq request) {
     Events events = eventsRepository.save(request.toEntity());
     //events의 idx를 받아서 board 추가
-    Board board = Board.builder().events(events).title(events.getTitle()).build();
-    boardRepository.save(board);
+    if (!boardRepository.existsById(events.getIdx())) {
+      Board board = Board.builder().events(events).title(events.getTitle()).build();
+      boardRepository.save(board);
+    }
   //TODO : 채팅방 추가
     return events.getIdx();
   }
 
-  public PageResponse<EventsListResp> getEventListWithPagination(Pageable pageable) {
-    Page<Events> eventPage = eventsRepository.findAll(pageable);
-    Page<EventsListResp> eventDtoPage = eventPage.map(event -> EventsListResp.builder()
-            .idx(event.getIdx())
-            .title(event.getTitle())
-            .category(event.getCategory())
-            .startDate(event.getStartDate())
-            .endDate(event.getEndDate())
-            .posterImgUrl(event.getPosterImgUrl())
-            .venue(event.getVenue())
-            .build());
-    return PageResponse.from(eventDtoPage, eventDtoPage.getContent());
+  public Page<Events> getEventListWithPagination(Pageable pageable) {
+    return eventsRepository.findAll(pageable);
   }
 
   public Map<String, List<EventsCalendarListResp>> getCalendarEvents(
