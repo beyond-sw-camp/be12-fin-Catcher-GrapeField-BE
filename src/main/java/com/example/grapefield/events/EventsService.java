@@ -36,18 +36,8 @@ public class EventsService {
     return events.getIdx();
   }
 
-  public PageResponse<EventsListResp> getEventListWithPagination(Pageable pageable) {
-    Page<Events> eventPage = eventsRepository.findAll(pageable);
-    Page<EventsListResp> eventDtoPage = eventPage.map(event -> EventsListResp.builder()
-            .idx(event.getIdx())
-            .title(event.getTitle())
-            .category(event.getCategory())
-            .startDate(event.getStartDate())
-            .endDate(event.getEndDate())
-            .posterImgUrl(event.getPosterImgUrl())
-            .venue(event.getVenue())
-            .build());
-    return PageResponse.from(eventDtoPage, eventDtoPage.getContent());
+  public Page<Events> getEventListWithPagination(Pageable pageable) {
+    return eventsRepository.findAll(pageable);
   }
 
   public Map<String, List<EventsCalendarListResp>> getCalendarEvents(
