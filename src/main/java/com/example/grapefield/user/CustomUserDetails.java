@@ -10,10 +10,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-/**
- * @param user 원본 사용자 객체 접근 메서드 실제 User 엔티티
- */
-public record CustomUserDetails(User user) implements UserDetails {
+
+@Getter
+public class CustomUserDetails implements UserDetails {
+  private final User user;
+
+  public CustomUserDetails(User user) {
+    this.user = user;
+  }
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -70,9 +74,5 @@ public record CustomUserDetails(User user) implements UserDetails {
   // 사용자 Role을 직접 접근할 수 있는 편의 메서드
   public UserRole getRole() {
     return user.getRole();
-  }
-
-  public User getUser(){
-    return this.user;
   }
 }
