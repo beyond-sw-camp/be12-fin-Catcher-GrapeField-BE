@@ -4,6 +4,7 @@ import com.example.grapefield.chat.model.entity.ChatRoom;
 import com.example.grapefield.events.participant.model.entity.EventsCast;
 import com.example.grapefield.events.participant.model.entity.EventsParticipation;
 import com.example.grapefield.events.post.model.entity.Board;
+import com.example.grapefield.events.review.model.entity.Review;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

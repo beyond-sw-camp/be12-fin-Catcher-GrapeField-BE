@@ -1,6 +1,6 @@
 package com.example.grapefield.common;
 
-import com.example.grapefield.events.EventsRepository;
+import com.example.grapefield.events.repository.EventsRepository;
 import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.post.repository.BoardRepository;
 import com.example.grapefield.events.post.model.entity.Board;

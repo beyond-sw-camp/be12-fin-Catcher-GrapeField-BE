@@ -1,13 +1,10 @@
-package com.example.grapefield.events;
+package com.example.grapefield.events.repository;
 
 import com.example.grapefield.events.model.entity.EventCategory;
-import com.example.grapefield.events.model.entity.Events;
-import com.example.grapefield.events.model.entity.TicketVendor;
 import com.example.grapefield.events.model.response.EventsCalendarListResp;
 import com.example.grapefield.events.model.response.EventsDetailResp;
 import com.example.grapefield.events.model.response.EventsListResp;
 import com.example.grapefield.events.model.response.EventsTicketScheduleListResp;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
