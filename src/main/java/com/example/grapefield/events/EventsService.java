@@ -1,15 +1,12 @@
 package com.example.grapefield.events;
 
-import com.example.grapefield.common.PageResponse;
 import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.model.entity.EventsImg;
-import com.example.grapefield.events.model.entity.TicketVendor;
 import com.example.grapefield.events.model.request.EventsRegisterReq;
 import com.example.grapefield.events.model.response.*;
-import com.example.grapefield.events.post.BoardRepository;
+import com.example.grapefield.events.post.repository.BoardRepository;
 import com.example.grapefield.events.post.model.entity.Board;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

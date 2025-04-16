@@ -13,6 +13,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @Schema(description="게시글 등록 body")
 public class PostRegisterReq {
+  @Schema(description="게시판 idx")
+  private Long boardIdx;
   @NotBlank
   @Schema(description="게시글 제목, 필수", example = "웃는 남자 무척 재미있었습니다.")
   private String title;

@@ -1,4 +1,4 @@
-package com.example.grapefield.events.post;
+package com.example.grapefield.events.post.repository;
 
 import com.example.grapefield.events.post.model.entity.PostType;
 import com.example.grapefield.events.post.model.response.PostDetailResp;
