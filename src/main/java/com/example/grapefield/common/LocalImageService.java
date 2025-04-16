@@ -17,55 +17,124 @@ public class LocalImageService implements ImageService {
   @Value("${file.upload.path}")
   private String defaultUploadPath;
 
-  //디렉토리가 없으면 생성
-  private String makeDir(){
-    String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-    String uploadPath = defaultUploadPath + File.separator + date; // OS에 맞는 경로 구분자 사용
-    File uploadDir = new File(uploadPath);
-    if(!uploadDir.exists()){
-      uploadDir.mkdirs();
+  // 범용 디렉토리 생성 메서드
+  private String makeDir(String... subDirs) {
+    StringBuilder pathBuilder = new StringBuilder(defaultUploadPath);
+
+    for (String dir : subDirs) {
+      pathBuilder.append(File.separator).append(dir);
     }
-    return uploadPath;  // "/" 제거하여 경로 중복 문제 해결
+
+    String path = pathBuilder.toString();
+    File directory = new File(path);
+
+    if (!directory.exists()) {
+      boolean created = directory.mkdirs();
+      if (!created) {
+        throw new RuntimeException("디렉토리 생성 실패: " + path);
+      }
+    }
+
+    return path;
   }
 
-  @Override
-  public String userProfileUpload(MultipartFile file) {
-    //폴더가 없으면 생성
-    String uploadPath = defaultUploadPath + File.separator + "userProfile";
-    File uploadDir = new File(uploadPath);
-    if(!uploadDir.exists()){
-      uploadDir.mkdirs();
+  // DB에 저장할 상대 경로 생성 메서드
+  private String makeRelativePath(String... subDirs) {
+    StringBuilder pathBuilder = new StringBuilder("images");
+
+    for (String dir : subDirs) {
+      pathBuilder.append("/").append(dir); // 웹 경로는 항상 / 사용
     }
 
-    String originalFilename = file.getOriginalFilename();
-    String uploadFilePath = UUID.randomUUID().toString() + "_" + originalFilename;  // 파일명에 UUID 추가
-    File uploadFile = new File(uploadPath, uploadFilePath);  // File 생성 방식 개선 (OS 호환성)
+    return pathBuilder.toString();
+  }
+
+  // 파일명에 사용할 수 없는 문자 제거
+  private String sanitizeDirectoryName(String name) {
+    // 파일 시스템에서 사용할 수 없는 문자를 제거하거나 대체
+    return name.replaceAll("[\\\\/:*?\"<>|]", "_");
+  }
+
+  // 실제 파일 시스템에 파일 저장
+  private void saveFileToSystem(MultipartFile file, String uploadPath, String filename) {
+    if (file.isEmpty()) {
+      throw new RuntimeException("빈 파일은 업로드할 수 없습니다.");
+    }
+
+    File uploadFile = new File(uploadPath, filename);
+
     try {
       file.transferTo(uploadFile);
     } catch (IOException e) {
       throw new RuntimeException("파일 업로드 실패: " + e.getMessage(), e);
     }
+  }
 
-    return uploadFilePath;
+  @Override
+  public String userProfileUpload(MultipartFile file) {
+    // 실제 파일 저장 경로
+    String uploadPath = makeDir("images", "userprofile");
+
+    // 파일명 생성
+    String originalFilename = file.getOriginalFilename();
+    String uploadFilename = UUID.randomUUID().toString() + "_" + originalFilename;
+
+    // 파일 저장
+    saveFileToSystem(file, uploadPath, uploadFilename);
+
+    // DB에 저장할 상대 경로 반환
+    return makeRelativePath("userprofile", uploadFilename);
   }
 
   @Override
   public List<String> upload(MultipartFile[] files) {
-    List<String> uploadFilePaths = new ArrayList<>();
-    String uploadPath = makeDir();  // 수정된 `makeDir()` 사용
+    // 날짜별 디렉토리 생성
+    String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+    String uploadPath = makeDir("images", date);
+
+    List<String> relativePaths = new ArrayList<>();
 
     for (MultipartFile file : files) {
-      String originalFilename = file.getOriginalFilename();
-      String uploadFilePath = UUID.randomUUID().toString() + "_" + originalFilename;  // 파일명에 UUID 추가
+      if (file.isEmpty()) continue;
 
-      File uploadFile = new File(uploadPath, uploadFilePath);  // File 생성 방식 개선 (OS 호환성)
-      try {
-        file.transferTo(uploadFile);
-        uploadFilePaths.add(uploadFile.getAbsolutePath());  // 절대 경로 저장
-      } catch (IOException e) {
-        throw new RuntimeException("파일 업로드 실패: " + e.getMessage(), e);
-      }
+      // 파일명 생성
+      String originalFilename = file.getOriginalFilename();
+      String uploadFilename = UUID.randomUUID().toString() + "_" + originalFilename;
+
+      // 파일 저장
+      saveFileToSystem(file, uploadPath, uploadFilename);
+
+      // DB에 저장할 상대 경로 추가
+      String relativePath = makeRelativePath(date, uploadFilename);
+      relativePaths.add(relativePath);
     }
-    return uploadFilePaths;
+
+    return relativePaths;
+  }
+
+  @Override
+  public List<String> postAttachmentsUpload(String boardTitle, MultipartFile[] files) {
+    // 파일 시스템 경로 생성
+    String sanitizedBoardTitle = sanitizeDirectoryName(boardTitle).toLowerCase();
+    String uploadPath = makeDir("images", sanitizedBoardTitle, "post");
+
+    List<String> relativePaths = new ArrayList<>();
+
+    for (MultipartFile file : files) {
+      if (file.isEmpty()) continue;
+
+      // 파일명 생성
+      String originalFilename = file.getOriginalFilename();
+      String uploadFilename = UUID.randomUUID().toString() + "_" + originalFilename;
+
+      // 파일 저장
+      saveFileToSystem(file, uploadPath, uploadFilename);
+
+      // DB에 저장할 상대 경로 추가
+      String relativePath = makeRelativePath(sanitizedBoardTitle, "post", uploadFilename);
+      relativePaths.add(relativePath);
+    }
+
+    return relativePaths;
   }
 }

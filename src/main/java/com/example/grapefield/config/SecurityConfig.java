@@ -44,6 +44,7 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable);
 
     // 로그아웃 설정
+    //TODO: 로그아웃해도 ATOKEN이 남아있는 문제 해결 필요 (새로 로그인할 경우 바뀐 코드로 반환하긴 함)
     http.logout(logout -> logout
         .logoutUrl("/logout")  // API 경로 형태로 변경
         .deleteCookies("ATOKEN")
