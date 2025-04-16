@@ -2,6 +2,7 @@ package com.example.grapefield.events.post.repository;
 
 import com.example.grapefield.events.post.model.entity.PostType;
 import com.example.grapefield.events.post.model.entity.QPost;
+import com.example.grapefield.events.post.model.entity.QPostAttachment;
 import com.example.grapefield.events.post.model.entity.QPostRecommend;
 import com.example.grapefield.events.post.model.response.PostDetailResp;
 import com.example.grapefield.events.post.model.response.PostListResp;
@@ -90,15 +91,13 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
     QPost post = QPost.post;
     QUser qUser = QUser.user;
     QPostRecommend recommend = QPostRecommend.postRecommend;
+    QPostAttachment attachment = QPostAttachment.postAttachment;
 
-    // 조건 생성
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(post.idx.eq(idx));
 
-    boolean editable = false; // 사용자 권한 확인하여 editable 결정
-
+    boolean editable = false;
     if (user != null) {
-      // 관리자거나 작성자인 경우 편집 가능
       editable = user.getRole().equals(UserRole.ROLE_ADMIN) ||
           queryFactory.selectOne()
               .from(post)
@@ -106,7 +105,8 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
               .fetchFirst() != null;
     }
 
-    return queryFactory
+    // 게시글 기본 정보 조회
+    PostDetailResp result = queryFactory
         .select(Projections.constructor(PostDetailResp.class,
             post.idx,
             qUser.idx,
@@ -126,5 +126,30 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
             post.viewCnt, post.postType, post.createdAt)
         .fetchOne();
 
+    // 첨부파일 경로 리스트 추가
+    if (result != null) {
+      List<String> imagePaths = queryFactory
+          .select(attachment.fileUrl)
+          .from(attachment)
+          .where(attachment.post.idx.eq(idx))
+          .fetch();
+
+      result = PostDetailResp.builder()
+          .idx(result.getIdx())
+          .user_idx(result.getUser_idx())
+          .writer(result.getWriter())
+          .title(result.getTitle())
+          .content(result.getContent())
+          .viewCnt(result.getViewCnt())
+          .postType(result.getPostType())
+          .createdAt(result.getCreatedAt())
+          .recommendCnt(result.getRecommendCnt())
+          .editable(result.isEditable())
+          .images(imagePaths)
+          .build();
+    }
+
+    return result;
   }
+
 }
