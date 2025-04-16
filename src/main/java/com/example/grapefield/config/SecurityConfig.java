@@ -35,7 +35,7 @@ public class SecurityConfig {
     http.csrf(csrf -> csrf
         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
         // 인증이 필요 없는 경로는 CSRF 보호 제외 (RESTful API 호출 용이성을 위해)
-        .ignoringRequestMatchers("/user/signup", "/login", "/user/email_verify/**", "/chat-test/**", "/chatroom/**")
+        .ignoringRequestMatchers("/user/signup", "/login", "/user/email_verify/**", "/chat-test/**", "/chatroom/**", "/ws/**")
     );
 
     // 기본 HTTP 인증과 폼 로그인 비활성화 (JWT 사용)

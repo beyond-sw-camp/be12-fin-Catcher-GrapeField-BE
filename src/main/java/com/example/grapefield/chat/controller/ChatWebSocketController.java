@@ -51,7 +51,7 @@ public class ChatWebSocketController {
                             /*, SimpMessageHeaderAccessor headerAccessor */) {
         // 개발 테스트용 로그
         log.info("📡 WebSocket 메시지 수신: roomIdx={}, content={}, username={}",
-                roomIdx, chatMessageReq.getContent(), userDetails.getUsername());
+                roomIdx, chatMessageReq.getContent(), userDetails.user().getUsername());
         // 1. 라우팅 요청변수 roomIdx와 DTO의 roomIDx 일치여부 검증
         if (!roomIdx.equals(chatMessageReq.getRoomIdx())) {
             throw new IllegalArgumentException("[roomIdx] MessageMapping URL 경로 변수와 메시지 body의 roomIdx 값이 일차하지 않음.");
