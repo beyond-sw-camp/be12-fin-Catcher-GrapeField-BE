@@ -14,14 +14,19 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -37,11 +42,16 @@ public class PostController {
               examples = @ExampleObject(value = "게시글을 성공적으로 등록"))))
   @ApiErrorResponses
   @PostMapping("/register")
-  public ResponseEntity<Long> postRegister(
-      @RequestBody PostRegisterReq request, @AuthenticationPrincipal User user) {
-    //TODO: 게시글 idx를 반환하여 등록된 게시글로 페이지 이동되도록 추후 수정
-    return ResponseEntity.ok(1L);
+  public ResponseEntity<Long> registerPost(
+      @RequestPart("request") @Valid PostRegisterReq request,
+      @RequestPart(name = "images", required = false) MultipartFile[] images,
+      @AuthenticationPrincipal CustomUserDetails principal
+  ) {
+    if (principal == null) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); }
+    Long postIdx = postService.registerPost(request, images, principal.getUser());
+    return ResponseEntity.ok(postIdx);
   }
+
 
   @Operation(summary = "게시글 목록 조회", description = "게시판에 등록된 게시글을 리스트 형식으로 반환하여 조회")
   @ApiSuccessResponses
