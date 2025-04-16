@@ -58,10 +58,11 @@ public class PostController {
   @ApiErrorResponses
   @GetMapping("/list/{board_idx}")
   public ResponseEntity<PageResponse<PostListResp>> getPostList(
-      @AuthenticationPrincipal User user,
+      @AuthenticationPrincipal CustomUserDetails principal,
       @PathVariable("board_idx") Long boardIdx,
       @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, String type
   ) {
+    User user = (principal != null) ? principal.getUser() : null;
     Page<PostListResp> postPage = postService.getPostList(user, boardIdx, pageable, type);
     PageResponse<PostListResp> response = PageResponse.from(postPage, postPage.getContent());
     return ResponseEntity.ok(response);

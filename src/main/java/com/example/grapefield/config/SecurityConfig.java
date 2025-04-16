@@ -69,7 +69,7 @@ public class SecurityConfig {
     http.authorizeHttpRequests(authorizeRequests -> {
       authorizeRequests
           // 인증 없이 접근 가능한 경로
-          .requestMatchers("/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**", "/participant/**","/post/list/**", "/post/**").permitAll()
+          .requestMatchers("/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**", "/participant/**","/post/list/**", "/post/**", "/comment/**").permitAll()
           // Swagger UI 접근 허용
           .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
               "/v3/api-docs", "/swagger-resources/**", "/webjars/**").permitAll()
@@ -79,8 +79,6 @@ public class SecurityConfig {
           .requestMatchers("/post/register", "/post/update/**", "/post/delete/**",
               "/comment/register", "/comment/update/**", "/comment/delete/**",
               "/user/**").hasAnyRole("USER", "ADMIN")
-          // 게시글 상세 조회는 인증 필요 (이 부분을 수정)
-          .requestMatchers("/post/**").authenticated()
           // 기타 모든 요청은 인증 필요
           .anyRequest().authenticated();
     });

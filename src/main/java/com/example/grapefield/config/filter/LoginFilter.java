@@ -42,7 +42,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
   @Override
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication auth) throws IOException, ServletException {
     CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-    User user = userDetails.user(); // CustomUserDetails에서 User 객체 가져오기
+    User user = userDetails.getUser(); // CustomUserDetails에서 User 객체 가져오기
     String jwt = JwtUtil.generateToken(user.getIdx(), user.getUsername(), user.getEmail(), user.getRole());
 
     // 쿠키 설정 - 보안 설정 유지
