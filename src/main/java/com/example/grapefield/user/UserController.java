@@ -83,9 +83,10 @@ public class UserController {
   @ApiResponse(responseCode = "200",description = "성공적으로 정보를 반환",content = @Content(schema = @Schema(implementation =UserInfoDetailResp.class))
   )
   @GetMapping("/mypage")
-  public ResponseEntity<UserInfoDetailResp> getUserInformation(@AuthenticationPrincipal User user) {
-    UserInfoDetailResp dummy = new UserInfoDetailResp();
-    return ResponseEntity.ok().body(dummy);
+  public ResponseEntity<UserInfoDetailResp> getUserInformation(@AuthenticationPrincipal CustomUserDetails principal) {
+    User user = (principal != null) ? principal.getUser() : null;
+    UserInfoDetailResp userInfo = userService.getUserInfo(user.getEmail());
+    return ResponseEntity.ok().body(userInfo);
   }
 
   @Operation(summary="회원 정보 수정", description="회원 정보 일부를 업데이트합니다.")

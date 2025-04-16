@@ -5,6 +5,7 @@ import com.example.grapefield.user.model.entity.AccountStatus;
 import com.example.grapefield.user.model.entity.EmailVerify;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.model.request.UserSignupReq;
+import com.example.grapefield.user.model.response.UserInfoDetailResp;
 import com.example.grapefield.user.repository.EmailVerifyRepository;
 import com.example.grapefield.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -84,5 +85,19 @@ public class UserService implements UserDetailsService {
     user.setStatus(AccountStatus.ACTIVE);
     userRepository.save(user);
     return true;
+  }
+
+  public UserInfoDetailResp getUserInfo(String email) {
+    User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다"));
+
+    return new UserInfoDetailResp(
+            user.getUsername(),
+            user.getEmail(),
+            "********", // 비밀번호는 마스킹 처리
+            user.getPhone(),
+            user.getProfileImg(),
+            user.getCreatedAt()
+    );
   }
 }
