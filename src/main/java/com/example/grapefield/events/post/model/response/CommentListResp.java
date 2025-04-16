@@ -22,8 +22,8 @@ public class CommentListResp {
   private String content;
   @Schema(description="댓글 등록일",  example = "2025-01-09T00:00:00")
   private LocalDateTime createdAt;
-  @Schema(description="댓글 수정일, front에는 따로 표시하지 않고 추후 (수정됨)여부를 반영하기 위한 데이터")
-  private LocalDateTime updatedAt;
+  @Schema(description="이 댓글이 수정된 것인지 여부", example = "true")
+  private boolean edited;
   @Schema(description="현재 로그인한 유저가 작성자이거나 ADMIN일 경우 게시글을 수정/삭제 가능하도록 프론트에 반환하기 위한 값", example = "false")
   private boolean editable;
 }
