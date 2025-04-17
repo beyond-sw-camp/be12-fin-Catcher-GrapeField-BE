@@ -25,7 +25,8 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
-        StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        //StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         accessor.toNativeHeaderMap().forEach((k, v) -> log.info("헤더: {} => {}", k, v));
         log.info("웹소켓 스톰프 MessageHeaderAccessor.getAccessor(message,... 의 message:"+ message.getPayload().toString());
         log.info("웹소켓 스톰프 StompHeaderAccessor.class: " + StompHeaderAccessor.class.toString());
@@ -36,8 +37,6 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
         log.info("웹소켓 스톰프 accessor.getNativeHeader('ATOKEN') = " + accessor.getNativeHeader("ATOKEN"));
         log.info("웹소켓 스톰프 accessor.getNativeHeader('Authorization') = " + accessor.getNativeHeader("Authorization"));
         log.info("웹소켓 스톰프 accessor.getNativeHeader('Credentials') = " + accessor.getNativeHeader("Credentials"));
-
-        // StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
         if (accessor == null ) return message;
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
