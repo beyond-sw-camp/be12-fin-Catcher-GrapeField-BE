@@ -9,7 +9,7 @@ public enum EventCategory {
     PLAY("PLAY"),
     CONCERT("CONCERT"),
     EXHIBITION("EXHIBITION"),
-    FAIR("FAIR");
+    CLASSIC("CLASSIC");
 
     private final String description;
 
