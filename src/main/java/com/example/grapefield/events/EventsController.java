@@ -117,6 +117,18 @@ public class EventsController {
     return ResponseEntity.ok(eventMap);
   }
 
+  @Operation(summary = "캘린더 상세 이벤트 조회", description = "해당 월의 예매 시작/종료 이벤트를 구분하여 조회")
+  @ApiSuccessResponses
+  @ApiErrorResponses
+  @GetMapping("/calendar_detail")
+  public ResponseEntity<Map<String, List<EventsDetailCalendarListResp>>> getDetailCalendarEvents(
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date
+  ) {
+    System.out.println("\n컨트롤러 접근 성공\n");
+    Map<String, List<EventsDetailCalendarListResp>> eventMap = eventsService.getDetailCalendarEvents(date);
+    return ResponseEntity.ok(eventMap);
+  }
+
   //TODO : 캘린더 개별날짜 공연/전시 불러오기
 //  @Operation(summary = "특정 날짜 이벤트 조회", description = "특정 날짜의 예매 시작/종료 이벤트를 구분하여 조회합니다")
 //  @ApiSuccessResponses

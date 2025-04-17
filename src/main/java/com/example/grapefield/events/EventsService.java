@@ -64,6 +64,26 @@ public class EventsService {
     return result;
   }
 
+  public Map<String, List<EventsDetailCalendarListResp>> getDetailCalendarEvents(
+      LocalDateTime date) {
+    System.out.println("\n서비스 접근 성공\n");
+    LocalDateTime startOfMonth = date.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+    LocalDateTime endOfMonth = date.withDayOfMonth(date.toLocalDate().lengthOfMonth())
+        .withHour(23).withMinute(59).withSecond(59);
+
+    // 시작일, 종료일 기준으로 각각 조회
+    List<EventsDetailCalendarListResp> startEvents = eventsRepository.findDetailEventsBySaleStartBetween(
+        startOfMonth, endOfMonth);
+    System.out.println("\n디비 접근 성공\n");
+    System.out.println("\nstartEvents\n"+startEvents.get(1).getTicketLink());
+
+    // 결과 맵 구성
+    Map<String, List<EventsDetailCalendarListResp>> result = new HashMap<>();
+    result.put("startEvents", startEvents);
+
+    return result;
+  }
+
   public Map<String, Slice<EventsListResp>> getMainEvents(String category) {
     Pageable pageable = PageRequest.of(0, 10);
     LocalDateTime now = LocalDateTime.now();
