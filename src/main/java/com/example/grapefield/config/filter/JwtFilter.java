@@ -8,75 +8,136 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Component
+@RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
   private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
 
+  private final JwtUtil jwtUtil;
+
   @Override
-  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
     try {
-      // 현재 요청 URI 로깅
       String requestURI = request.getRequestURI();
       logger.info("JWT 필터 처리 중: {}", requestURI);
 
       Cookie[] cookies = request.getCookies();
-
       String jwtToken = null;
-      if(cookies != null) {
-        for(Cookie cookie : cookies) {
-          if(cookie.getName().equals("ATOKEN")) {
+      String refreshToken = null;
+
+      // 쿠키에서 Access Token과 Refresh Token 추출
+      if (cookies != null) {
+        for (Cookie cookie : cookies) {
+          if (cookie.getName().equals("ATOKEN")) {
             jwtToken = cookie.getValue();
-            break;
+          }
+          if (cookie.getName().equals("RTOKEN")) {
+            refreshToken = cookie.getValue();
           }
         }
       }
 
       logger.info("쿠키에서 추출한 토큰: {}", (jwtToken != null ? "있음" : "없음"));
 
-      // 토큰이 있는 경우에만 인증 처리를 시도
-      if(jwtToken != null && !jwtToken.isEmpty()) {
+      if (jwtToken != null && !jwtToken.isEmpty()) {
         try {
-          User user = JwtUtil.getUser(jwtToken);
-          logger.info("토큰에서 추출한 사용자: {}", (user != null ? user.getUsername() + ", 역할: " + user.getRole() : "없음"));
+          // 토큰 유효성 검사
+          if (!JwtUtil.validate(jwtToken)) {
+            logger.warn("만료된 토큰 감지");
 
-          if(user != null) {
-            // User 대신 CustomUserDetails 사용
-            CustomUserDetails customUserDetails = new CustomUserDetails(user);
-            UsernamePasswordAuthenticationToken authToken =
-                new UsernamePasswordAuthenticationToken(
-                    customUserDetails,
-                    null,
-                    customUserDetails.getAuthorities()
-                );
+            // Refresh Token으로 재발급 시도
+            if (refreshToken != null && !refreshToken.isEmpty()) {
+              try {
+                // Refresh Token으로 새 Access Token 발급
+                String newAccessToken = jwtUtil.reissueAccessToken(refreshToken);
 
-            SecurityContextHolder.getContext().setAuthentication(authToken);
-            logger.info("사용자 인증 성공: {}", user.getUsername());
+                // 새 Access Token을 쿠키에 설정
+                ResponseCookie newAccessTokenCookie = ResponseCookie.from("ATOKEN", newAccessToken)
+                    .path("/")
+                    .httpOnly(true)
+                    .secure(true)
+                    .sameSite("Strict")
+                    .maxAge(3600) // 1시간
+                    .build();
+
+                response.setHeader(HttpHeaders.SET_COOKIE, newAccessTokenCookie.toString());
+
+                // 새 토큰으로 사용자 인증
+                User user = JwtUtil.getUser(newAccessToken);
+                if (user != null) {
+                  CustomUserDetails customUserDetails = new CustomUserDetails(user);
+                  UsernamePasswordAuthenticationToken authToken =
+                      new UsernamePasswordAuthenticationToken(
+                          customUserDetails,
+                          null,
+                          customUserDetails.getAuthorities()
+                      );
+
+                  SecurityContextHolder.getContext().setAuthentication(authToken);
+                  logger.info("토큰 재발급 및 사용자 인증 성공: {}", user.getUsername());
+                } else {
+                  logger.warn("토큰 재발급 후 사용자 정보 추출 실패");
+                  SecurityContextHolder.clearContext();
+                }
+              } catch (Exception e) {
+                logger.error("토큰 재발급 실패: {}", e.getMessage());
+                // 재발급 실패 시 401 Unauthorized 응답
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"message\": \"Token reissue failed\"}");
+                SecurityContextHolder.clearContext();
+                return;
+              }
+            } else {
+              // Refresh Token 없음
+              logger.warn("Refresh Token 없음");
+              response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+              response.setContentType("application/json;charset=UTF-8");
+              response.getWriter().write("{\"message\": \"Refresh Token is missing\"}");
+              SecurityContextHolder.clearContext();
+              return;
+            }
           } else {
-            logger.warn("유효한 토큰이지만 사용자 정보를 추출할 수 없음");
+            // 유효한 토큰 처리
+            User user = JwtUtil.getUser(jwtToken);
+            if (user != null) {
+              CustomUserDetails customUserDetails = new CustomUserDetails(user);
+              UsernamePasswordAuthenticationToken authToken =
+                  new UsernamePasswordAuthenticationToken(
+                      customUserDetails,
+                      null,
+                      customUserDetails.getAuthorities()
+                  );
+
+              SecurityContextHolder.getContext().setAuthentication(authToken);
+              logger.info("사용자 인증 성공: {}", user.getUsername());
+            } else {
+              logger.warn("사용자 정보 추출 실패");
+              SecurityContextHolder.clearContext();
+            }
           }
         } catch (Exception e) {
-          logger.error("토큰 검증 실패: {}", e.getMessage());
-          // 토큰 검증 실패시 SecurityContext는 그대로 두고 다음 필터로 진행
+          logger.error("토큰 처리 중 오류: {}", e.getMessage());
+          SecurityContextHolder.clearContext();
         }
-      } else {
-        logger.debug("JWT 토큰이 없어 인증 없이 진행");
-        // 토큰이 없는 경우에는 인증 시도를 하지 않고 그대로 진행
-        // SecurityContext는 비어있는 상태로 유지됨
       }
 
-      // 어떤 경우든 필터 체인 계속 진행
       filterChain.doFilter(request, response);
     } catch (Exception e) {
-      logger.error("JWT 필터 처리 중 오류 발생: {}", e.getMessage());
-      // 오류가 발생해도 요청은 계속 진행
+      logger.error("JWT 필터 처리 중 전역 오류 발생: {}", e.getMessage());
       filterChain.doFilter(request, response);
     }
   }

@@ -26,6 +26,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
   private final AuthenticationManager authenticationManager;
+  private final JwtUtil jwtUtil; // JwtUtil 의존성 주입 추가
 
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -42,20 +43,40 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
   @Override
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication auth) throws IOException, ServletException {
     CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
-    User user = userDetails.getUser(); // CustomUserDetails에서 User 객체 가져오기
-    String jwt = JwtUtil.generateToken(user.getIdx(), user.getUsername(), user.getEmail(), user.getRole());
+    User user = userDetails.getUser();
 
-    // 쿠키 설정 - 보안 설정 유지
-    ResponseCookie cookie = ResponseCookie.from("ATOKEN", jwt)
+    // Access Token 생성
+    String accessToken = JwtUtil.generateAccessToken(
+        user.getIdx(),
+        user.getUsername(),
+        user.getEmail(),
+        user.getRole()
+    );
+
+    // Refresh Token 생성
+    String refreshToken = jwtUtil.generateRefreshToken(user.getIdx());
+
+    // Access Token 쿠키 설정
+    ResponseCookie accessTokenCookie = ResponseCookie.from("ATOKEN", accessToken)
         .path("/")
-        .httpOnly(true)  // JavaScript에서 접근 불가능
-        .secure(true)    // HTTPS에서만 전송
-        .sameSite("Strict")  // CSRF 보호 강화
+        .httpOnly(true)
+        .secure(true)
+        .sameSite("Strict")
         .maxAge(3600)
         .build();
-    response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-    // 토큰 없이 사용자 기본 정보만 응답 본문에 포함
+    ResponseCookie refreshTokenCookie = ResponseCookie.from("RTOKEN", refreshToken)
+        .path("/")
+        .httpOnly(true)
+        .secure(true)
+        .sameSite("Strict")
+        .maxAge(14 * 24 * 3600) // 2주
+        .build();
+
+    response.setHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+    response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
+    // 사용자 정보 응답
     Map<String, Object> responseBody = new HashMap<>();
     responseBody.put("userIdx", user.getIdx());
     responseBody.put("username", user.getUsername());
