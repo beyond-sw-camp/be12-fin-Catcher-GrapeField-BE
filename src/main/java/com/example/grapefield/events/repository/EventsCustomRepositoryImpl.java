@@ -294,7 +294,7 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
     LocalDateTime sevenDaysLater = now.plusDays(7);
 
     List<Tuple> tuples = queryFactory
-            .select(e, ei.count())
+            .select(e, ei.count(), t)
             .from(t)
             .join(t.events, e)
             .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
@@ -320,7 +320,7 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
     LocalDateTime sevenDaysLater = now.plusDays(7);
 
     List<Tuple> tuples = queryFactory
-            .select(e, ei.count())
+            .select(e, ei.count(), t)
             .from(t)
             .join(t.events, e)
             .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
