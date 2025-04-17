@@ -5,6 +5,7 @@ import com.example.grapefield.chat.model.entity.ChatroomMember;
 import com.example.grapefield.user.model.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,5 +19,7 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatroomMember, 
     List<ChatroomMember> findByUser_Idx(Long userIdx);
 
     // 특정 채팅방에 몇 명 참여 중인지 확인
-    int countByChatRoom(ChatRoom chatRoom);
+    @Query("SELECT cm.chatRoom.idx, COUNT(cm) FROM ChatroomMember cm GROUP BY cm.chatRoom.idx")
+    List<Object[]> countParticipantsGroupedByRoom();
+
 }
