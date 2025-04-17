@@ -5,14 +5,18 @@ import com.example.grapefield.chat.model.entity.ChatRoom;
 import com.example.grapefield.chat.model.entity.ChatroomMember;
 import com.example.grapefield.chat.model.response.ChatListPageResp;
 import com.example.grapefield.chat.model.response.ChatListResp;
+import com.example.grapefield.chat.model.response.PopularChatRoomListResp;
 import com.example.grapefield.chat.repository.ChatMessageCurrentRepository;
 import com.example.grapefield.chat.repository.ChatRoomMemberRepository;
 import com.example.grapefield.chat.repository.ChatRoomRepository;
 import com.example.grapefield.events.model.entity.EventCategory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -61,6 +65,37 @@ public class ChatRoomListService {
     public List<ChatListPageResp> getMyPageRooms(Long userIdx) {
         return memberRepository.findByUser_Idx(userIdx).stream()
                 .map(member -> ChatListPageResp.from(member.getChatRoom(), memberRepository.countByChatRoom(member.getChatRoom())))
+                .toList();
+    }
+
+    // 메인화면 인기 채팅방 목록 5개
+    public List<PopularChatRoomListResp> getAllTimeBestRooms() {
+        Pageable pageable = PageRequest.of(0, 5);
+        List<ChatRoom> chatRooms = chatRoomRepository.findTop10ByHeartCnt(pageable);
+
+        return chatRooms.stream()
+                .map(c -> PopularChatRoomListResp.builder()
+                        .roomIdx(c.getIdx())
+                        .roomName(c.getRoomName())
+                        .venue(c.getEvents().getVenue())
+                        .heartCount(c.getHeartCnt().intValue())
+                        .memberCount(c.getMemberList() == null ? 0 : c.getMemberList().size())
+                        .build())
+                .toList();
+    }
+
+    public List<PopularChatRoomListResp> getHotNowRooms() {
+        Pageable pageable = PageRequest.of(0, 5);
+        List<ChatRoom> chatRooms = chatRoomRepository.findTop10ByRecentEventsAndHeartCnt(pageable);
+
+        return chatRooms.stream()
+                .map(c -> PopularChatRoomListResp.builder()
+                        .roomIdx(c.getIdx())
+                        .roomName(c.getRoomName())
+                        .venue(c.getEvents().getVenue())
+                        .heartCount(c.getHeartCnt().intValue())
+                        .memberCount(c.getMemberList() == null ? 0 : c.getMemberList().size())
+                        .build())
                 .toList();
     }
 
