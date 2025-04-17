@@ -47,12 +47,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     // 쿠키 설정 - 보안 설정 유지
     ResponseCookie cookie = ResponseCookie.from("ATOKEN", jwt)
-        .path("/")
-        .httpOnly(true)  // JavaScript에서 접근 불가능
-        .secure(true)    // HTTPS에서만 전송
-        .sameSite("Strict")  // CSRF 보호 강화
-        .maxAge(3600)
-        .build();
+            .path("/")
+            .httpOnly(false)  // .httpOnly(true) //=> JavaScript에서 접근 불가능
+            .secure(false)    // ..secure(true) //=> HTTPS에서만 전송
+            .sameSite("Lax")  // .sameSite("Strict")  //=> CSRF 보호 강화
+            .maxAge(3600)
+            .build();
     response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
     // 토큰 없이 사용자 기본 정보만 응답 본문에 포함
@@ -71,7 +71,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
   // 로그인 인증 실패 시 처리
   @Override
   protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed)
-      throws IOException, ServletException {
+          throws IOException, ServletException {
     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 기본값 401
     response.setContentType("application/json;charset=UTF-8");
     String message;

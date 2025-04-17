@@ -1,6 +1,6 @@
 package com.example.grapefield.chat.config;
 
-import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
+import com.example.grapefield.chat.model.response.ChatMessageResp;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -10,10 +10,10 @@ import org.springframework.kafka.core.ConsumerFactory;
 public class KafkaConfig {
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, ChatMessageKafkaReq> kafkaListenerContainerFactory(
-            ConsumerFactory<String, ChatMessageKafkaReq> consumerFactory
+    public ConcurrentKafkaListenerContainerFactory<String, ChatMessageResp> kafkaListenerContainerFactory(
+            ConsumerFactory<String, ChatMessageResp> consumerFactory
     ) {
-        ConcurrentKafkaListenerContainerFactory<String, ChatMessageKafkaReq> factory =
+        ConcurrentKafkaListenerContainerFactory<String, ChatMessageResp> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
         return factory;

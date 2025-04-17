@@ -32,6 +32,7 @@ public class ChatRoomDetailController {
                 .messageList(room.getCurrentMessageList().stream()
                         .map(message -> ChatMessageResp.builder()
                                 .messageIdx(message.getMessageIdx())
+                                .roomIdx(roomIdx)
                                 .userIdx(message.getUser().getIdx())
                                 .username(message.getUser().getUsername())
                                 .profileImageUrl(message.getUser().getProfileImg())
