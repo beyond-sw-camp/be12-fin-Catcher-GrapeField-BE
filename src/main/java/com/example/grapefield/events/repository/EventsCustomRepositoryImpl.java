@@ -56,6 +56,38 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
   }
 
   @Override
+  public List<EventsDetailCalendarListResp> findDetailEventsBySaleStartBetween(LocalDateTime startDate, LocalDateTime endDate) {
+
+    QEvents events = QEvents.events;
+    QTicketInfo ticketInfo = QTicketInfo.ticketInfo;
+
+    BooleanBuilder whereBuilder = new BooleanBuilder();
+
+    // 예매 시작일이 해당 기간 내에 있는 경우
+    whereBuilder.and(ticketInfo.saleStart.between(startDate, endDate));
+
+
+    return queryFactory
+            .select(Projections.constructor(EventsDetailCalendarListResp.class,
+                    events.idx,
+                    events.title,
+                    events.category,
+                    ticketInfo.saleStart,
+                    ticketInfo.saleEnd,
+                    ticketInfo.ticketVendor,
+                    ticketInfo.isPresale,
+                    events.venue,
+                    events.startDate,
+                    events.endDate,
+                    ticketInfo.ticketLink))
+            .from(events)
+            .join(ticketInfo).on(ticketInfo.events.eq(events))
+            .where(whereBuilder)
+            .orderBy(ticketInfo.saleStart.asc())
+            .fetch();
+  }
+
+  @Override
   public List<EventsCalendarListResp> findEventsBySaleEndBetween(LocalDateTime startDate, LocalDateTime endDate){
     QEvents events = QEvents.events;
     QTicketInfo ticketInfo = QTicketInfo.ticketInfo;
