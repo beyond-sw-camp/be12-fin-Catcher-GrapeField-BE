@@ -1,4 +1,4 @@
-package com.example.grapefield.events;
+package com.example.grapefield.events.repository;
 
 import com.example.grapefield.events.model.entity.EventsImg;
 import org.springframework.data.jpa.repository.JpaRepository;

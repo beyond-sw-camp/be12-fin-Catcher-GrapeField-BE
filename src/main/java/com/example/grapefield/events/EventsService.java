@@ -7,6 +7,8 @@ import com.example.grapefield.events.model.request.EventsRegisterReq;
 import com.example.grapefield.events.model.response.*;
 import com.example.grapefield.events.post.repository.BoardRepository;
 import com.example.grapefield.events.post.model.entity.Board;
+import com.example.grapefield.events.repository.EventsImgRepository;
+import com.example.grapefield.events.repository.EventsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

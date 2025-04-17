@@ -50,8 +50,8 @@ public class CommentController {
   @GetMapping("/{idx}")
   public ResponseEntity<PageResponse<CommentListResp>> getCommentList(@PathVariable Long idx, @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, @AuthenticationPrincipal CustomUserDetails principal) {
     User user = (principal != null) ? principal.getUser() : null;
-    Page<CommentListResp> postPage = commentService.getCommentList(idx, pageable, user);
-    PageResponse<CommentListResp> response = PageResponse.from(postPage, postPage.getContent());
+    Page<CommentListResp> commentPage = commentService.getCommentList(idx, pageable, user);
+    PageResponse<CommentListResp> response = PageResponse.from(commentPage, commentPage.getContent());
     return ResponseEntity.ok(response);
   }
 
