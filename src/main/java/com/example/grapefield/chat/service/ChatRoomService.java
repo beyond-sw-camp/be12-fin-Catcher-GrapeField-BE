@@ -62,26 +62,4 @@ public class ChatRoomService {
             log.warn("⚠️ Kafka 토픽 생성 중 에러: {}", e.getMessage());
         }
     }
-    // 사용자가 참여한 채팅방 목록 불러오기
-    public List<ChatListResp> getMyRooms(Long userIdx) {
-        List<ChatroomMember> members = memberRepository.findByUser_Idx(userIdx);
-
-        return members.stream().map(member -> {
-            ChatRoom room = member.getChatRoom();
-            ChatMessageCurrent lastMsg = currentRepository.findTopByChatRoomOrderByCreatedAtDesc(room);
-            int unreadCount = currentRepository.countByChatRoomAndCreatedAtAfter(room, member.getLastReadAt());
-            Events event = room.getEvents();  // events 필드 꺼내기
-
-            return ChatListResp.builder()
-                    .roomIdx(room.getIdx())
-                    .roomName(room.getRoomName())
-                    .lastMessage(lastMsg != null ? lastMsg.getContent() : "")
-                    .lastMessageTime(lastMsg != null ? lastMsg.getCreatedAt() : null)
-                    .unreadCount(unreadCount)
-                    .eventPosterUrl(event.getPosterImgUrl()) // 포스터
-                    .eventStartDate(event.getStartDate())  // 시작일
-                    .eventEndDate(event.getEndDate())      // 종료일
-                    .build();
-        }).toList();
-    }
 }
