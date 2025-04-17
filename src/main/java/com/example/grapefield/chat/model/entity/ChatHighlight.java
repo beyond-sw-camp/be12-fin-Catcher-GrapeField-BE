@@ -24,5 +24,5 @@ public class ChatHighlight {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String description;
-    private Long messageCnt;
+    private Long messageCnt; // 필드 삭제 고려하기
 }

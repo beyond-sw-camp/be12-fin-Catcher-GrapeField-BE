@@ -1,6 +1,6 @@
 package com.example.grapefield.chat.controller;
 
-import com.example.grapefield.chat.model.response.ChatDetailResp;
+import com.example.grapefield.chat.model.response.ChatRoomDetailResp;
 import com.example.grapefield.chat.model.response.ChatListResp;
 import com.example.grapefield.chat.model.response.ChatMessageItemResp;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,7 +52,7 @@ public class ChatController {
 
     @GetMapping("/room/{idx}")
     @Operation(summary = "특정 채팅방 메시지 조회", description = "채팅방 Idx를 통해 특정 채팅방의 채팅 내용 확인")
-    public ResponseEntity<ChatDetailResp> getRoomDetail(@PathVariable Long idx) {
+    public ResponseEntity<ChatRoomDetailResp> getRoomDetail(@PathVariable Long idx) {
         //swagger를 위한 더미 데이터
         List<ChatMessageItemResp> messages = List.of(
                 ChatMessageItemResp.builder()
@@ -72,11 +72,11 @@ public class ChatController {
                         .build()
         );
 
-        ChatDetailResp response = ChatDetailResp.builder()
+        ChatRoomDetailResp response = ChatRoomDetailResp.builder()
                 .roomIdx(idx)
                 .roomName("햄이와 식이의 채팅방")
-                .participants(List.of("햄이", "식이"))
-                .messages(messages)
+                /*.participants(List.of("햄이", "식이"))*/
+                /*.messages(messages)*/
                 .build();
         return ResponseEntity.ok(response);
     }

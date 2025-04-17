@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -83,5 +84,11 @@ public class ChatRoomService {
                     .eventEndDate(event.getEndDate())      // 종료일
                     .build();
         }).toList();
+    }
+
+    public ChatRoom findByIdx(Long roomIdx) {
+        return chatRoomRepository.findById(roomIdx)
+                .orElseThrow(()->
+                        new NoSuchElementException("해당 채팅방이 존재하지 않습니다. roomIdx: " + roomIdx));
     }
 }
