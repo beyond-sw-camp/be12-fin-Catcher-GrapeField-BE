@@ -68,7 +68,7 @@ public class ChatWebSocketController {
 
 
         // 2. WebSocket 브로커로도 전송
-        messagingTemplate.convertAndSend("/topic/chat.room." + chatMessageKafkaReq.getRoomIdx(),chatMessageKafkaReq);
+        messagingTemplate.convertAndSend("/topic/chat.room." + resp.getRoomIdx(), resp);
     }
 
 
