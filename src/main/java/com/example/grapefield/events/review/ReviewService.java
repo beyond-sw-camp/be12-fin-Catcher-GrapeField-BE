@@ -35,8 +35,8 @@ public class ReviewService {
     return saveReview.getIdx();
   }
 
-  public Page<ReviewListResp> getReviewList(Long idx, Pageable pageable, User user) {
-    return reviewRepository.findReviewList(idx, pageable, user);
+  public Page<ReviewListResp> getReviewList(Long idx, Pageable pageable, Long rating, User user) {
+    return reviewRepository.findReviewList(idx, pageable, rating, user);
     //TODO : 특정 점수만 가져오는 기능 추가 필요
   }
 }

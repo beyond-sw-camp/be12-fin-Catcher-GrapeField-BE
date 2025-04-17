@@ -49,9 +49,9 @@ public class ReviewController {
   @ApiSuccessResponses
   @ApiErrorResponses
   @GetMapping("/{idx}")
-  public ResponseEntity<PageResponse<ReviewListResp>> getReviewList(@PathVariable Long idx, @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, @AuthenticationPrincipal CustomUserDetails principal) {
+  public ResponseEntity<PageResponse<ReviewListResp>> getReviewList(@PathVariable Long idx, @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, @RequestParam(required = false) Long rating, @AuthenticationPrincipal CustomUserDetails principal) {
     User user = (principal != null) ? principal.getUser() : null;
-    Page<ReviewListResp> reviewPage = reviewService.getReviewList(idx, pageable, user);
+    Page<ReviewListResp> reviewPage = reviewService.getReviewList(idx, pageable, rating, user);
     PageResponse<ReviewListResp> response = PageResponse.from(reviewPage, reviewPage.getContent());
     return ResponseEntity.ok(response);
   }
