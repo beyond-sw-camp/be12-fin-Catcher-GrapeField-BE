@@ -3,6 +3,7 @@ package com.example.grapefield.chat.controller;
 import com.example.grapefield.chat.kafka.ChatKafkaProducer;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.model.request.ChatMessageReq;
+import com.example.grapefield.chat.model.response.ChatMessageResp;
 import com.example.grapefield.chat.service.ChatMessageService;
 import com.example.grapefield.chat.service.ChatRoomService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,31 +45,30 @@ public class ChatWebSocketController {
     */
     private final ChatKafkaProducer chatKafkaProducer;
     private final ChatRoomService chatRoomService;
+    private final ChatMessageService chatMessageService;
 
     @Autowired
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat.send.{roomIdx}")
-    public void sendMessage(@Payload ChatMessageReq chatMessageReq,
+    public void sendMessage(@Payload ChatMessageKafkaReq chatMessageKafkaReq,
                             SimpMessageHeaderAccessor headerAccessor) {
         // 개발 테스트용 로그
         log.info("WebSocket 메시지 수신: roomIdx={}, content={}",
-                chatMessageReq.getRoomIdx(), chatMessageReq.getContent());
+                chatMessageKafkaReq.getRoomIdx(), chatMessageKafkaReq.getContent());
 
         // ✅ 1. 채팅방이 DB와 Kafka 모두 존재하는지 보장
-        chatRoomService.ensureRoomExists(chatMessageReq.getRoomIdx(), "기본 채팅방");
+        chatRoomService.ensureRoomExists(chatMessageKafkaReq.getRoomIdx(), "기본 채팅방");
 
         // 1. kafka로 메시지 전송
-        //  Kafka의 이벤트에 담아서 클라이언트로부터의 메시지를 kafka로 전송
-        ChatMessageKafkaReq event = new ChatMessageKafkaReq(
-                chatMessageReq.getRoomIdx(),
-                chatMessageReq.getSendUserIdx(),
-                chatMessageReq.getContent()
-        );
-        chatKafkaProducer.sendMessage(event);
+
+        ChatMessageResp resp = chatMessageService.saveMessage(chatMessageKafkaReq);
+        //  클라이언트로부터의 메시지를 kafka로 전송
+        chatKafkaProducer.sendMessage(resp);
+
 
         // 2. WebSocket 브로커로도 전송
-        messagingTemplate.convertAndSend("/topic/chat.room." + chatMessageReq.getRoomIdx(), chatMessageReq);
+        messagingTemplate.convertAndSend("/topic/chat.room." + chatMessageKafkaReq.getRoomIdx(),chatMessageKafkaReq);
     }
 
 
