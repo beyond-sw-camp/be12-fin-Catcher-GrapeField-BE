@@ -4,6 +4,7 @@ import com.example.grapefield.config.filter.JwtFilter;
 import com.example.grapefield.config.filter.LoginFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -17,6 +18,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 
 @EnableWebSecurity
@@ -24,6 +30,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 @Configuration
 public class SecurityConfig {
   private final AuthenticationConfiguration authConfiguration;
+
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
@@ -91,6 +98,31 @@ public class SecurityConfig {
         UsernamePasswordAuthenticationFilter.class);
     http.addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
 
+    // websocket jwtChannelInterceptor 관련 설정
+      /*
+    http.cors(cors -> cors.configurationSource( request -> {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true); //쿠키 허용.. Credentials 허용..
+        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:5174", "http://localhost:8080" ));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        return config;
+    }));*/
+
+      http
+              .cors((cors) -> cors
+                      .configurationSource(request -> {
+                          CorsConfiguration configuration = new CorsConfiguration();
+                          configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+                          configuration.setAllowedMethods(Collections.singletonList("*"));
+                          configuration.setAllowCredentials(true);
+                          configuration.setAllowedHeaders(Collections.singletonList("*"));
+                          configuration.setMaxAge(3600L);
+                          // configuration.setExposedHeaders(Collections.singletonList("ATOKEN"));
+                          // configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+                          configuration.setExposedHeaders(Collections.singletonList("*"));
+                          return configuration;
+                      }));
     return http.build();
   }
 }

@@ -3,7 +3,6 @@ package com.example.grapefield.config.security;
 import com.example.grapefield.user.CustomUserDetails;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.utils.JwtUtil;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -13,26 +12,33 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 
-import java.security.Principal;
 import java.util.Arrays;
-import java.util.Optional;
 
 @Slf4j
 @Component
-public class JwtChannelIntercepter implements ChannelInterceptor {
+public class JwtChannelInterceptor implements ChannelInterceptor {
 
     private static final String COOKIE_HEADER = "cookie";
-    private static final String TOKEN_NAME = "ATOKEN";
+    private static final String TOKEN_NAME = "Authorization";
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-        log.info("MessageHeaderAccessor.getAccessor(message,... 의 message:"+ message.getPayload().toString());
-        log.info("StompHeaderAccessor.class: " + StompHeaderAccessor.class.toString());
-        log.info("StompHeader Accessor accessor: " + accessor.toString());
+        accessor.toNativeHeaderMap().forEach((k, v) -> log.info("헤더: {} => {}", k, v));
+        log.info("웹소켓 스톰프 MessageHeaderAccessor.getAccessor(message,... 의 message:"+ message.getPayload().toString());
+        log.info("웹소켓 스톰프 StompHeaderAccessor.class: " + StompHeaderAccessor.class.toString());
+        log.info("웹소켓 스톰프 StompHeaderAccessor accessor: " + accessor.toString());
+        log.info("웹소켓 스톰프 StompHeaderAccessor accessor.getSessionId() = " + accessor.getSessionId());
+        log.info("웹소켓 스톰프 StompHeaderAccessor accessor.getDestination() = " + accessor.getDestination());
+        log.info("웹소켓 스톰프 StompHeaderAccessor accessor.getPasscode() = " + accessor.getPasscode());
+        log.info("웹소켓 스톰프 accessor.getNativeHeader('ATOKEN') = " + accessor.getNativeHeader("ATOKEN"));
+        log.info("웹소켓 스톰프 accessor.getNativeHeader('Authorization') = " + accessor.getNativeHeader("Authorization"));
+        log.info("웹소켓 스톰프 accessor.getNativeHeader('Credentials') = " + accessor.getNativeHeader("Credentials"));
+
+        // StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+
         if (accessor == null ) return message;
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String cookieHeader = accessor.getFirstNativeHeader(COOKIE_HEADER);

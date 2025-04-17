@@ -6,6 +6,7 @@ import com.example.grapefield.chat.model.request.ChatMessageReq;
 import com.example.grapefield.chat.service.ChatMessageService;
 import com.example.grapefield.chat.service.ChatRoomService;
 import com.example.grapefield.user.CustomUserDetails;
+import com.example.grapefield.user.model.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -47,11 +48,11 @@ public class ChatWebSocketController {
     @MessageMapping("/chat.send.{roomIdx}")
     public void sendMessage(@DestinationVariable Long roomIdx,
                             @Payload ChatMessageReq chatMessageReq,
-                            @AuthenticationPrincipal CustomUserDetails userDetails
+                            @AuthenticationPrincipal( expression = "user") User user
                             /*, SimpMessageHeaderAccessor headerAccessor */) {
         // 개발 테스트용 로그
         log.info("📡 WebSocket 메시지 수신: roomIdx={}, content={}, username={}",
-                roomIdx, chatMessageReq.getContent(), userDetails.user().getUsername());
+                roomIdx, chatMessageReq.getContent(), user.getUsername());
         // 1. 라우팅 요청변수 roomIdx와 DTO의 roomIDx 일치여부 검증
         if (!roomIdx.equals(chatMessageReq.getRoomIdx())) {
             throw new IllegalArgumentException("[roomIdx] MessageMapping URL 경로 변수와 메시지 body의 roomIdx 값이 일차하지 않음.");
@@ -64,7 +65,7 @@ public class ChatWebSocketController {
         //  Kafka의 이벤트에 담아서 클라이언트로부터의 메시지를 kafka로 전송
         ChatMessageKafkaReq event = new ChatMessageKafkaReq(
                 roomIdx,
-                userDetails.user().getIdx(), // (인증) 사용자 ID를 서버에서 직접 가져오기
+                user.getIdx(), // (인증) 사용자 ID를 서버에서 직접 가져오기
                 chatMessageReq.getContent()
         );
         chatKafkaProducer.sendMessage(event);
