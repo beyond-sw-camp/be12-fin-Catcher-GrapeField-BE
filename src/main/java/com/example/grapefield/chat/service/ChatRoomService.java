@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -61,5 +62,11 @@ public class ChatRoomService {
         } catch (Exception e) {
             log.warn("⚠️ Kafka 토픽 생성 중 에러: {}", e.getMessage());
         }
+    }
+
+    public ChatRoom findByIdx(Long roomIdx) {
+        return chatRoomRepository.findById(roomIdx)
+                .orElseThrow(()->
+                        new NoSuchElementException("해당 채팅방이 존재하지 않습니다. roomIdx: " + roomIdx));
     }
 }
