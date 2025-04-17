@@ -34,7 +34,6 @@ public class UserService implements UserDetailsService {
     private final ImageService imageService;
     private final PasswordEncoder encoder = new BCryptPasswordEncoder();
 
-
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOpt = userRepository.findByEmail(username);

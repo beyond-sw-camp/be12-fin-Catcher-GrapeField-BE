@@ -9,6 +9,8 @@ import com.example.grapefield.user.model.request.UserInfoDetailReq;
 import com.example.grapefield.user.model.request.UserSignupReq;
 import com.example.grapefield.user.model.response.UserInfoDetailResp;
 import com.example.grapefield.user.repository.UserRepository;
+import com.example.grapefield.utils.JwtUtil;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,10 +20,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +44,7 @@ public class UserController {
     private final ImageService imageService;
     private final UserRepository userRepository;
     private boolean aBoolean;
+  private final JwtUtil jwtUtil;
 
     @Operation(summary = "회원가입", description = "회원 가입을 합니다")
     @PostMapping("/signup")
@@ -169,4 +176,75 @@ public class UserController {
     }
 
     //TODO: 사용자 신고
+
+  //refresh token이 살아있을 경우 atoken 재발급
+  @PostMapping("/refresh-token")
+  public ResponseEntity<?> refreshToken(
+      HttpServletRequest request,
+      HttpServletResponse response
+  ) {
+    // 쿠키에서 Refresh Token 추출
+    Cookie[] cookies = request.getCookies();
+    String refreshToken = null;
+
+    if (cookies != null) {
+      for (Cookie cookie : cookies) {
+        if (cookie.getName().equals("RTOKEN")) {
+          refreshToken = cookie.getValue();
+          break;
+        }
+      }
+    }
+
+    // Refresh Token 없을 경우 401 응답
+    if (refreshToken == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of(
+              "success", false,
+              "message", "Refresh Token is missing."
+          ));
+    }
+
+    try {
+      // Access Token 재발급
+      String newAccessToken = jwtUtil.reissueAccessToken(refreshToken);
+
+      // 새 Access Token을 쿠키로 설정
+      ResponseCookie newAccessTokenCookie = ResponseCookie.from("ATOKEN", newAccessToken)
+          .path("/")
+          .httpOnly(true)
+          .secure(true)
+          .sameSite("Strict")
+          .maxAge(3600) // 1시간
+          .build();
+
+      response.setHeader(HttpHeaders.SET_COOKIE, newAccessTokenCookie.toString());
+
+      // 사용자 정보 포함하여 응답
+      User user = JwtUtil.getUser(newAccessToken);
+      return ResponseEntity.ok().body(
+          Map.of(
+              "success", true,
+              "userIdx", user.getIdx(),
+              "username", user.getUsername(),
+              "email", user.getEmail(),
+              "role", user.getRole()
+          )
+      );
+    } catch (ExpiredJwtException e) {
+      // Refresh Token 만료
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of(
+              "success", false,
+              "message", "Refresh Token expired. Please login again."
+          ));
+    } catch (Exception e) {
+      // 기타 토큰 관련 예외
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+          .body(Map.of(
+              "success", false,
+              "message", "Invalid Refresh Token."
+          ));
+    }
+  }
 }

@@ -2,8 +2,14 @@ package com.example.grapefield.config;
 
 import com.example.grapefield.config.filter.JwtFilter;
 import com.example.grapefield.config.filter.LoginFilter;
+import com.example.grapefield.user.CustomUserDetails;
+import com.example.grapefield.user.model.entity.User;
+import com.example.grapefield.utils.JwtUtil;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -12,24 +18,18 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.Arrays;
-
 
 @EnableWebSecurity
 @RequiredArgsConstructor
 @Configuration
 public class SecurityConfig {
   private final AuthenticationConfiguration authConfiguration;
+  private final JwtUtil jwtUtil; // JwtUtil 의존성 주입
+  private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -44,20 +44,59 @@ public class SecurityConfig {
     http.csrf(AbstractHttpConfigurer::disable);
 
     // 로그아웃 설정
-    //TODO: 로그아웃해도 ATOKEN이 남아있는 문제 해결 필요 (새로 로그인할 경우 바뀐 코드로 반환하긴 함)
     http.logout(logout -> logout
-        .logoutUrl("/logout")  // API 경로 형태로 변경
-        .deleteCookies("ATOKEN")
-          .logoutSuccessHandler((request, response, authentication) -> {
-          // 토큰 쿠키 삭제
-          ResponseCookie deleteCookie = ResponseCookie.from("ATOKEN", "")
+        .logoutUrl("/logout")
+        .addLogoutHandler((request, response, authentication) -> {
+          try {
+            // 쿠키에서 사용자 정보 추출
+            Cookie[] cookies = request.getCookies();
+            Long userIdx = null;
+
+            if (cookies != null) {
+              for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("ATOKEN")) {
+                  // 만료된 토큰에서도 사용자 정보 추출 시도
+                  User user = JwtUtil.getUserAllowExpired(cookie.getValue());
+                  if (user != null) {
+                    userIdx = user.getIdx();
+                    break;
+                  }
+                }
+              }
+            }
+
+            if (userIdx != null) {
+              log.info("로그아웃 - 사용자 ID 추출: {}", userIdx);
+              jwtUtil.removeRefreshToken(userIdx);
+            } else {
+              log.warn("로그아웃 - 사용자 ID 추출 실패");
+            }
+          } catch (Exception e) {
+            log.error("로그아웃 처리 중 오류", e);
+          }
+        })
+        .logoutSuccessHandler((request, response, authentication) -> {
+          // Access Token 쿠키 삭제
+          ResponseCookie accessTokenCookie = ResponseCookie.from("ATOKEN", "")
               .path("/")
               .httpOnly(true)
               .secure(true)
-              .sameSite("Strict")  // CSRF 추가 보호
-              .maxAge(0)           // 즉시 만료
+              .sameSite("Strict")
+              .maxAge(0)
               .build();
-          response.setHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
+
+          // Refresh Token 쿠키도 삭제
+          ResponseCookie refreshTokenCookie = ResponseCookie.from("RTOKEN", "")
+              .path("/")
+              .httpOnly(true)
+              .secure(true)
+              .sameSite("Strict")
+              .maxAge(0)
+              .build();
+
+          response.setHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+          response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
           response.setContentType("application/json");
           response.setCharacterEncoding("UTF-8");
           response.setStatus(HttpServletResponse.SC_OK);
@@ -65,30 +104,31 @@ public class SecurityConfig {
         })
     );
 
-    // URL 기반 권한 설정
+    // URL 기반 권한 설정 (기존 코드 유지)
     http.authorizeHttpRequests(authorizeRequests -> {
       authorizeRequests
-          // 인증 없이 접근 가능한 경로
           .requestMatchers("/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**", "/participant/**","/post/list/**", "/post/**", "/comment/**", "/review/**").permitAll()
-          // Swagger UI 접근 허용
           .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
               "/v3/api-docs", "/swagger-resources/**", "/webjars/**").permitAll()
-          // 관리자 권한 필요
           .requestMatchers("/admin/**", "/events/register", "/participant/register").hasRole("ADMIN")
-          // 일반 사용자 권한 필요
           .requestMatchers("/post/register", "/post/update/**", "/post/delete/**",
               "/comment/register", "/comment/update/**", "/comment/delete/**",
-              "/user/**", "/review/register", "/review/udadte", "/review/delete").hasAnyRole("USER", "ADMIN")
-          // 기타 모든 요청은 인증 필요
+              "/user/**", "/review/register", "/review/update", "/review/delete").hasAnyRole("USER", "ADMIN")
           .anyRequest().authenticated();
     });
+
     // 세션 비활성화 (JWT 사용)
     http.sessionManagement(AbstractHttpConfigurer::disable);
 
     // 인증 필터 등록
-    http.addFilterAt(new LoginFilter(authConfiguration.getAuthenticationManager()),
-        UsernamePasswordAuthenticationFilter.class);
-    http.addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
+    LoginFilter loginFilter = new LoginFilter(
+        authConfiguration.getAuthenticationManager(),
+        jwtUtil
+    );
+    JwtFilter jwtFilter = new JwtFilter(jwtUtil);
+
+    http.addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
+    http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
