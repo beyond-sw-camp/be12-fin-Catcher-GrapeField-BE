@@ -10,14 +10,18 @@ import com.example.grapefield.chat.repository.ChatMessageCurrentRepository;
 import com.example.grapefield.chat.repository.ChatRoomMemberRepository;
 import com.example.grapefield.chat.repository.ChatRoomRepository;
 import com.example.grapefield.events.model.entity.EventCategory;
+import org.springframework.data.domain.Pageable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -26,46 +30,79 @@ public class ChatRoomListService {
     private final ChatRoomMemberRepository memberRepository;
     private final ChatMessageCurrentRepository currentRepository;
     private final ChatRoomRepository chatRoomRepository;
+    private final ChatRoomMemberService chatRoomMemberService;
 
     // 사용자가 참여한 채팅방 목록 불러오기(사이드바 채팅)
     public List<ChatListResp> getMyRooms(Long userIdx) {
         List<ChatroomMember> members = memberRepository.findByUser_Idx(userIdx);
+        List<ChatRoom> rooms = members.stream().map(ChatroomMember::getChatRoom).toList();
+
+        Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountMap();
+        Map<Long, ChatMessageCurrent> lastMsgMap = currentRepository.findLatestMessagesByRooms(rooms).stream()
+                .collect(Collectors.toMap(msg -> msg.getChatRoom().getIdx(), msg -> msg));
 
         return members.stream().map(member -> {
             ChatRoom room = member.getChatRoom();
-            ChatMessageCurrent lastMsg = currentRepository.findTopByChatRoomOrderByCreatedAtDesc(room);
+            ChatMessageCurrent lastMsg = lastMsgMap.get(room.getIdx());
             int unreadCount = currentRepository.countByChatRoomAndCreatedAtAfter(room, member.getLastReadAt());
-            int participantCount = memberRepository.countByChatRoom(room);
+            int participantCount = participantCountMap.getOrDefault(room.getIdx(), 0);
 
             return ChatListResp.from(room, lastMsg, unreadCount, participantCount);
         }).toList();
     }
 
     // 전체 채팅방 목록
-    public List<ChatListPageResp> getAllRooms() {
-        return chatRoomRepository.findAll().stream()
-                .map(room -> ChatListPageResp.from(room, memberRepository.countByChatRoom(room)))
-                .toList();
+    public Slice<ChatListPageResp> getAllRooms(Pageable pageable) {
+        Slice<ChatRoom> rooms = chatRoomRepository.findAllWithEventsSlice(pageable);
+        Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountMap();
+
+        return rooms.map(room -> ChatListPageResp.from(
+                room,
+                participantCountMap.getOrDefault(room.getIdx(), 0)
+        ));
     }
 
     // 공연 / 전시 각각 채팅방 목록
-    public List<ChatListPageResp> getRoomsByType(String type) {
+    public Slice<ChatListPageResp> getRoomsByType(String type, Pageable pageable) {
         List<EventCategory> typeList = switch (type) {
             case "performance" -> List.of(EventCategory.MUSICAL, EventCategory.PLAY, EventCategory.CONCERT);
             case "exhibition" -> List.of(EventCategory.EXHIBITION, EventCategory.FAIR);
             default -> throw new IllegalArgumentException("유효하지 않은 type: " + type);
         };
 
-        return chatRoomRepository.findChatRoomsByCategoryIn(typeList).stream()
-                .map(room -> ChatListPageResp.from(room, memberRepository.countByChatRoom(room)))
-                .toList();
+        Slice<ChatRoom> rooms = chatRoomRepository.findChatRoomsByCategoryInSlice(typeList, pageable);
+        Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountMap();
+
+        return rooms.map(room -> ChatListPageResp.from(
+                room,
+                participantCountMap.getOrDefault(room.getIdx(), 0)
+        ));
     }
 
     // 내가 참여한 채팅방 목록 (채팅 전체화면 페이지)
-    public List<ChatListPageResp> getMyPageRooms(Long userIdx) {
-        return memberRepository.findByUser_Idx(userIdx).stream()
-                .map(member -> ChatListPageResp.from(member.getChatRoom(), memberRepository.countByChatRoom(member.getChatRoom())))
-                .toList();
+    public Slice<ChatListPageResp> getMyPageRooms(List<ChatRoom> myRooms, Pageable pageable) {
+        Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountMap();
+
+        List<ChatListPageResp> result = myRooms.stream()
+                .map(room -> ChatListPageResp.from(
+                        room,
+                        participantCountMap.getOrDefault(room.getIdx(), 0)
+                ))
+                .collect(Collectors.toList());
+
+        // 슬라이스 형태로 자르기
+        int start = pageable.getPageNumber() * pageable.getPageSize();
+        int end = Math.min(start + pageable.getPageSize(), result.size());
+        boolean hasNext = end < result.size();
+
+        return new org.springframework.data.domain.SliceImpl<>(
+                result.subList(start, end), pageable, hasNext
+        );
+    }
+    public Slice<ChatListPageResp> getMyPageRooms(Long userIdx, Pageable pageable) {
+        List<ChatroomMember> members = memberRepository.findByUser_Idx(userIdx);
+        List<ChatRoom> myRooms = members.stream().map(ChatroomMember::getChatRoom).toList();
+        return getMyPageRooms(myRooms, pageable); // 기존 메서드 재활용
     }
 
     // 메인화면 인기 채팅방 목록 5개
@@ -100,3 +137,4 @@ public class ChatRoomListService {
     }
 
 }
+

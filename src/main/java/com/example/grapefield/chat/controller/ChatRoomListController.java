@@ -6,11 +6,11 @@ import com.example.grapefield.chat.model.response.PopularChatRoomListResp;
 import com.example.grapefield.chat.service.ChatRoomListService;
 import com.example.grapefield.user.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Locale;
 
@@ -35,27 +35,30 @@ public class ChatRoomListController {
 
     // 전체 채팅방 리스트
     @GetMapping("/all")
-    public ResponseEntity<List<ChatListPageResp>> getAllRooms() {
-        return ResponseEntity.ok(chatRoomListService.getAllRooms());
+    public ResponseEntity<?> getAllRooms(@PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(chatRoomListService.getAllRooms(pageable));
     }
 
     // 전체 공연 채팅방 리스트 (뮤지컬, 연극, 콘서트)
     @GetMapping("/performance")
-    public ResponseEntity<List<ChatListPageResp>> getPerformanceRooms() {
-        return ResponseEntity.ok(chatRoomListService.getRoomsByType("performance"));
+    public ResponseEntity<?> getPerformanceRooms(@PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(chatRoomListService.getRoomsByType("performance", pageable));
     }
 
     // 전체 전시 채팅방 리스트 (전시회, 박람회)
     @GetMapping("/exhibition")
-    public ResponseEntity<List<ChatListPageResp>> getExhibitionRooms() {
-        return ResponseEntity.ok(chatRoomListService.getRoomsByType("exhibition"));
+    public ResponseEntity<?> getExhibitionRooms(@PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(chatRoomListService.getRoomsByType("exhibition", pageable));
     }
 
     // 사용자가 참여한 채팅방 리스트 (전체화면)
     @GetMapping("/my-page")
-    public ResponseEntity<List<ChatListPageResp>> getMyPageRooms(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<?> getMyPageRooms(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PageableDefault(size = 20) Pageable pageable
+    ) {
         Long userIdx = userDetails.user().getIdx();
-        return ResponseEntity.ok(chatRoomListService.getMyPageRooms(userIdx));
+        return ResponseEntity.ok(chatRoomListService.getMyPageRooms(userIdx, pageable));
     }
 
     // 인기 채팅방 목록
