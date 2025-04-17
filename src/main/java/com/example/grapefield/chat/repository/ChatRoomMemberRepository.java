@@ -16,4 +16,7 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatroomMember, 
 
     // 유저 idx 기준으로 내가 참여한 모든 채팅방 멤버 조회
     List<ChatroomMember> findByUser_Idx(Long userIdx);
+
+    // 특정 채팅방에 몇 명 참여 중인지 확인
+    int countByChatRoom(ChatRoom chatRoom);
 }

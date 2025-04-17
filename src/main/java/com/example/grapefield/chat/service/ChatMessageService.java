@@ -40,21 +40,7 @@ public class ChatMessageService {
         User user = userRepository.findById(req.getSendUserIdx())
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 
-            // ✅ [추가] ChatroomMember에 존재하지 않으면 insert, 존재하면 lastActiveAt 갱신
-            chatRoomMemberRepository.findByChatRoomAndUser(room, user)
-                    .ifPresentOrElse(
-                            member -> member.updateLastActiveAt(LocalDateTime.now()),
-                            () -> {
-                                ChatroomMember newMember = ChatroomMember.builder()
-                                        .chatRoom(room)
-                                        .user(user)
-                                        .lastActiveAt(LocalDateTime.now())
-                                        .lastReadAt(null)
-                                        .mute(false)
-                                        .build();
-                                chatRoomMemberRepository.save(newMember);
-                            }
-                    );
+        // role로 검증하는거 추가 검증이 되어야만 저장임
 
 
             // 3. 메시지 base 저장 (createdAt도 포함)
@@ -66,15 +52,7 @@ public class ChatMessageService {
         log.info("✅ [1] base 메시지 저장됨 | baseId={}", base.getMessageIdx());
 
         // 4. 메시지 current 저장
-        ChatMessageCurrent current = ChatMessageCurrent.builder()
-                .base(base) // 반드시 방금 저장한 base 사용
-                .chatRoom(room)
-                .user(user)
-                .content(req.getContent())
-                .createdAt(base.getCreatedAt()) // 정렬을 위해 동일 시간 사용
-                .isHighlighted(false)
-                .build();
-
+        ChatMessageCurrent current = req.toEntity(base, room, user);
         currentRepository.save(current);
 
         log.info("✅ [2] current 메시지 저장됨 | baseId={}, user={}, room={}, content={}",
