@@ -2,6 +2,7 @@ package com.example.grapefield.chat.controller;
 
 import com.example.grapefield.chat.model.response.ChatListPageResp;
 import com.example.grapefield.chat.model.response.ChatListResp;
+import com.example.grapefield.chat.model.response.PopularChatRoomListResp;
 import com.example.grapefield.chat.service.ChatRoomListService;
 import com.example.grapefield.user.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Locale;
 
 @RestController
 @RequiredArgsConstructor
@@ -59,5 +61,16 @@ public class ChatRoomListController {
         return ResponseEntity.ok(chatRoomListService.getMyPageRooms(userIdx, pageable));
     }
 
+    // 인기 채팅방 목록
+    @GetMapping("/all-time-best")
+    public ResponseEntity<List<PopularChatRoomListResp>> getAllTimeBestRooms() {
+        return ResponseEntity.ok(chatRoomListService.getAllTimeBestRooms());
+    }
+
+    // 인기 채팅방 목록
+    @GetMapping("/hot-now")
+    public ResponseEntity<List<PopularChatRoomListResp>> getHotNowRooms() {
+        return ResponseEntity.ok(chatRoomListService.getHotNowRooms());
+    }
 
 }
