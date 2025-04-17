@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,7 +22,7 @@ public class UserInfoDetailReq {
   @Pattern(regexp = "[0-9A-Za-z!~$*]{8,}", message="signup wrong pass")
   private String password;
   @Schema(description = "프로필 이미지 URL(문자열): 선택, 이미지 1장을 업로드하여 DB에 저장된 경로", example = "/sample/images/profile/profile1.jpg")
-  private String profileImg;
+  private MultipartFile profileImg;
   @Schema(description = "전화번호(문자열): 선택, 하이픈 없이 숫자만 허용", example = "01012345678")
   private String phoneNumber;
 }
