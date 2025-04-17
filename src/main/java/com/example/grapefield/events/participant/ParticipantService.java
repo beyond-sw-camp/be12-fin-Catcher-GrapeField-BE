@@ -1,8 +1,6 @@
 package com.example.grapefield.events.participant;
 
-import com.example.grapefield.events.EventsRepository;
-import com.example.grapefield.events.model.response.EventsDetailResp;
-import com.example.grapefield.events.participant.model.response.OrganizationListResp;
+import com.example.grapefield.events.repository.EventsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

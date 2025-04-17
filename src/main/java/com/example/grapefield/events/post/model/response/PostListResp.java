@@ -3,6 +3,7 @@ package com.example.grapefield.events.post.model.response;
 import com.example.grapefield.events.post.model.entity.PostType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Schema(description="게시판의 게시글 목록 정보 응답")
+@Builder
 public class PostListResp {
   @Schema(example = "1")
   private Long idx;
@@ -21,8 +23,6 @@ public class PostListResp {
   private String title;
   @Schema(description="게시글 조회수", example="100")
   private int viewCnt;
-  @Schema(description="상단 고정 여부(ex.공지사항)", example="false")
-  private Boolean isPinned;
   @Schema(example="후기")
   private PostType postType;
   @Schema(description="게시글 등록일",  example = "2025-01-09T00:00:00")

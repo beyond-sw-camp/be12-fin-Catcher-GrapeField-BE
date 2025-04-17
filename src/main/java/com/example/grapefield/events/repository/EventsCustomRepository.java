@@ -1,13 +1,14 @@
-package com.example.grapefield.events;
+package com.example.grapefield.events.repository;
 
 import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.model.entity.TicketVendor;
+import com.example.grapefield.events.model.response.*;
+import org.springframework.data.domain.PageRequest;
 import com.example.grapefield.events.model.response.EventsCalendarListResp;
 import com.example.grapefield.events.model.response.EventsDetailResp;
 import com.example.grapefield.events.model.response.EventsListResp;
 import com.example.grapefield.events.model.response.EventsTicketScheduleListResp;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
@@ -19,6 +20,10 @@ public interface EventsCustomRepository {
   // 시작일 기준 이벤트 조회
   List<EventsCalendarListResp> findEventsBySaleStartBetween(
       LocalDateTime startDate, LocalDateTime endDate);
+
+  // 시작일 기준 이벤트 상세 조회
+  List<EventsDetailCalendarListResp> findDetailEventsBySaleStartBetween(
+          LocalDateTime startDate, LocalDateTime endDate);
 
   // 종료일 기준 이벤트 조회
   List<EventsCalendarListResp> findEventsBySaleEndBetween(

@@ -18,6 +18,7 @@ import java.util.UUID;
 
 @RequiredArgsConstructor
 //@Service
+//NOTE : 클라우드 기능 사용할 경우 코드 수정 필요
 public class CloudImageService implements ImageService {
 
   private final S3Client s3Client;
@@ -52,5 +53,10 @@ public class CloudImageService implements ImageService {
       paths.add(userProfileUpload(file)); // 단일 업로드 재활용
     }
     return paths;
+  }
+
+  @Override
+  public List<String> postAttachmentsUpload(String boardTitle, MultipartFile[] files) {
+    return List.of();
   }
 }

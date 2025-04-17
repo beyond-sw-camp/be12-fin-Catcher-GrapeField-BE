@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @Schema(description="댓글 등록 body")
 public class CommentRegisterReq {
+  @Schema(description="게시글 idx")
+  private Long postIdx;
   @NotBlank
   @Schema(description="댓글 내용, 필수", example = "저도 무척이나 재미있게 보았는데 공감되네요.")
   private String content;

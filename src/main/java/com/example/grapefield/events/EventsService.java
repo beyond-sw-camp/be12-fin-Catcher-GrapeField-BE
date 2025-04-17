@@ -1,14 +1,14 @@
 package com.example.grapefield.events;
 
-import com.example.grapefield.common.PageResponse;
 import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.model.entity.EventsImg;
-import com.example.grapefield.events.model.entity.TicketVendor;
 import com.example.grapefield.events.model.request.EventsRegisterReq;
 import com.example.grapefield.events.model.response.*;
-import com.example.grapefield.events.post.BoardRepository;
+import com.example.grapefield.events.post.repository.BoardRepository;
 import com.example.grapefield.events.post.model.entity.Board;
+import com.example.grapefield.events.repository.EventsImgRepository;
+import com.example.grapefield.events.repository.EventsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,24 +30,16 @@ public class EventsService {
   public Long eventsRegister(EventsRegisterReq request) {
     Events events = eventsRepository.save(request.toEntity());
     //events의 idx를 받아서 board 추가
-    Board board = Board.builder().events(events).title(events.getTitle()).build();
-    boardRepository.save(board);
+    if (!boardRepository.existsById(events.getIdx())) {
+      Board board = Board.builder().events(events).title(events.getTitle()).build();
+      boardRepository.save(board);
+    }
   //TODO : 채팅방 추가
     return events.getIdx();
   }
 
-  public PageResponse<EventsListResp> getEventListWithPagination(Pageable pageable) {
-    Page<Events> eventPage = eventsRepository.findAll(pageable);
-    Page<EventsListResp> eventDtoPage = eventPage.map(event -> EventsListResp.builder()
-            .idx(event.getIdx())
-            .title(event.getTitle())
-            .category(event.getCategory())
-            .startDate(event.getStartDate())
-            .endDate(event.getEndDate())
-            .posterImgUrl(event.getPosterImgUrl())
-            .venue(event.getVenue())
-            .build());
-    return PageResponse.from(eventDtoPage, eventDtoPage.getContent());
+  public Page<Events> getEventListWithPagination(Pageable pageable) {
+    return eventsRepository.findAll(pageable);
   }
 
   public Map<String, List<EventsCalendarListResp>> getCalendarEvents(
@@ -68,6 +60,26 @@ public class EventsService {
     Map<String, List<EventsCalendarListResp>> result = new HashMap<>();
     result.put("startEvents", startEvents);
     result.put("endEvents", endEvents);
+
+    return result;
+  }
+
+  public Map<String, List<EventsDetailCalendarListResp>> getDetailCalendarEvents(
+      LocalDateTime date) {
+    System.out.println("\n서비스 접근 성공\n");
+    LocalDateTime startOfMonth = date.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+    LocalDateTime endOfMonth = date.withDayOfMonth(date.toLocalDate().lengthOfMonth())
+        .withHour(23).withMinute(59).withSecond(59);
+
+    // 시작일, 종료일 기준으로 각각 조회
+    List<EventsDetailCalendarListResp> startEvents = eventsRepository.findDetailEventsBySaleStartBetween(
+        startOfMonth, endOfMonth);
+    System.out.println("\n디비 접근 성공\n");
+    System.out.println("\nstartEvents\n"+startEvents.get(1).getTicketLink());
+
+    // 결과 맵 구성
+    Map<String, List<EventsDetailCalendarListResp>> result = new HashMap<>();
+    result.put("startEvents", startEvents);
 
     return result;
   }

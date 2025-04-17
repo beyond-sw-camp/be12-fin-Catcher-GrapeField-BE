@@ -4,6 +4,7 @@ import com.example.grapefield.base.ApiErrorResponses;
 import com.example.grapefield.base.ApiSuccessResponses;
 import com.example.grapefield.common.PageResponse;
 import com.example.grapefield.events.model.entity.EventCategory;
+import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.model.request.EventsRegisterReq;
 import com.example.grapefield.events.model.response.*;
 import com.example.grapefield.events.post.model.request.PostRegisterReq;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
@@ -52,9 +54,19 @@ public class EventsController {
   @ApiErrorResponses
   @GetMapping("/list")
   public ResponseEntity<PageResponse<EventsListResp>> getEventList(@PageableDefault(page = 0, size = 30) Pageable pageable) {
-    PageResponse<EventsListResp> eventListPage = eventsService.getEventListWithPagination(pageable);
-    return ResponseEntity.ok(eventListPage);
+    Page<Events> eventPage = eventsService.getEventListWithPagination(pageable);
+    List<EventsListResp> dtoList = eventPage.stream().map(event -> EventsListResp.builder()
+            .idx(event.getIdx())
+            .title(event.getTitle())
+            .category(event.getCategory())
+            .startDate(event.getStartDate())
+            .endDate(event.getEndDate())
+            .posterImgUrl(event.getPosterImgUrl())
+            .venue(event.getVenue())
+            .build()).toList();
+    return ResponseEntity.ok(PageResponse.from(eventPage, dtoList));
   }
+
 
   @Operation(summary = "추천, 인기, 신규 한꺼번에 불러오기", description = "메인 페이지에서 사이트에 등록된 공연과 전시의 추천, 인기, 신규 목록을 한꺼번에 불러오기")
   @ApiSuccessResponses
@@ -102,6 +114,18 @@ public class EventsController {
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date
   ) {
     Map<String, List<EventsCalendarListResp>> eventMap = eventsService.getCalendarEvents(date);
+    return ResponseEntity.ok(eventMap);
+  }
+
+  @Operation(summary = "캘린더 상세 이벤트 조회", description = "해당 월의 예매 시작/종료 이벤트를 구분하여 조회")
+  @ApiSuccessResponses
+  @ApiErrorResponses
+  @GetMapping("/calendar_detail")
+  public ResponseEntity<Map<String, List<EventsDetailCalendarListResp>>> getDetailCalendarEvents(
+      @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date
+  ) {
+    System.out.println("\n컨트롤러 접근 성공\n");
+    Map<String, List<EventsDetailCalendarListResp>> eventMap = eventsService.getDetailCalendarEvents(date);
     return ResponseEntity.ok(eventMap);
   }
 

@@ -1,5 +1,6 @@
-package com.example.grapefield.events.model.entity;
+package com.example.grapefield.events.review.model.entity;
 
+import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.user.model.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
