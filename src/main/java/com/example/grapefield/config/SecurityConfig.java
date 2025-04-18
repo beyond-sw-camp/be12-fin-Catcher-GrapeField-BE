@@ -107,9 +107,11 @@ public class SecurityConfig {
     // URL 기반 권한 설정 (기존 코드 유지)
     http.authorizeHttpRequests(authorizeRequests -> {
       authorizeRequests
-          .requestMatchers("/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**", "/participant/**","/post/list/**", "/post/**", "/comment/**", "/review/**").permitAll()
+          // 인증 없이 접근 가능한 경로
+          .requestMatchers("/user/signup", "/login", "/logout", "/user/email_verify", "/user/email_verify/**", "/events/**", "/participant/**", "/chat/list/**", "/post/list/**", "/post/**", "/comment/**", "/review/**").permitAll()
           .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**",
               "/v3/api-docs", "/swagger-resources/**", "/webjars/**").permitAll()
+         // 관리자 권한 필요
           .requestMatchers("/admin/**", "/events/register", "/participant/register").hasRole("ADMIN")
           .requestMatchers("/post/register", "/post/update/**", "/post/delete/**",
               "/comment/register", "/comment/update/**", "/comment/delete/**",

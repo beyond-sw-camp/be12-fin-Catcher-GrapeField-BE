@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,5 +49,13 @@ public class ChatRoomMemberService {
                             log.info("🆕 최초입장 → ChatroomMember 저장됨");
                         }
                 );
+    }
+    // 특정 채팅방의 참여자 수
+    public Map<Long, Integer> getParticipantCountMap() {
+        return memberRepository.countParticipantsGroupedByRoom().stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> ((Long) row[1]).intValue()
+                ));
     }
 }
