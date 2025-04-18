@@ -15,6 +15,9 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatroomMember, 
     // 유저가 해당 채팅방에 이미 참여한 적이 있는지 확인
     Optional<ChatroomMember> findByChatRoomAndUser(ChatRoom chatRoom, User user);
 
+    // 최초입장 체크용
+    boolean existsByChatRoomAndUser(ChatRoom chatRoom, User user);
+
     // 유저 idx 기준으로 내가 참여한 모든 채팅방 멤버 조회
     List<ChatroomMember> findByUser_Idx(Long userIdx);
 

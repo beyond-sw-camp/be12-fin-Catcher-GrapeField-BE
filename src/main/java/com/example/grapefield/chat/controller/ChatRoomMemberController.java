@@ -25,5 +25,14 @@ public class ChatRoomMemberController {
         return ResponseEntity.ok("채팅방 입장 완료");
     }
     // 채팅방 퇴장
+    @DeleteMapping("/leave/{roomIdx}")
+    public ResponseEntity<String> leaveRoom(
+            @PathVariable Long roomIdx,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userIdx = userDetails.getUser().getIdx();
+        chatRoomMemberService.leaveRoom(userIdx, roomIdx);
+        return ResponseEntity.ok("채팅방 퇴장 완료");
+    }
 
 }
