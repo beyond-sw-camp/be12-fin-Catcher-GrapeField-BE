@@ -66,7 +66,7 @@ public class ChatRoomListService {
     public Slice<ChatListPageResp> getRoomsByType(String type, Pageable pageable) {
         List<EventCategory> typeList = switch (type) {
             case "performance" -> List.of(EventCategory.MUSICAL, EventCategory.PLAY, EventCategory.CONCERT);
-            case "exhibition" -> List.of(EventCategory.EXHIBITION, EventCategory.FAIR);
+            case "exhibition" -> List.of(EventCategory.EXHIBITION, EventCategory.CLASSIC);
             default -> throw new IllegalArgumentException("유효하지 않은 type: " + type);
         };
 
