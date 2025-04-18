@@ -67,9 +67,9 @@ public class JwtFilter extends OncePerRequestFilter {
                 // 새 Access Token을 쿠키에 설정
                 ResponseCookie newAccessTokenCookie = ResponseCookie.from("ATOKEN", newAccessToken)
                     .path("/")
-                    .httpOnly(true)
-                    .secure(true)
-                    .sameSite("Strict")
+                    .httpOnly(false)
+                    .secure(false)
+                    .sameSite("Lax")
                     .maxAge(3600) // 1시간
                     .build();
 
