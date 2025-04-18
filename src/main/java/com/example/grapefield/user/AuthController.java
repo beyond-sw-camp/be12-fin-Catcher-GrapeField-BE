@@ -1,6 +1,7 @@
 package com.example.grapefield.user;
 
 import com.example.grapefield.user.model.entity.User;
+import com.example.grapefield.utils.CookieUtil;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ public class AuthController {
 
   private final AuthService authService;
 
+  //RTOKEN이 남아있을 경우 ATOKEN 재발급
   @PostMapping("/refresh-token")
   public ResponseEntity<?> refreshToken(HttpServletRequest request, HttpServletResponse response) {
     Cookie[] cookies = request.getCookies();
@@ -46,14 +48,7 @@ public class AuthController {
 
     try {
       String newAccessToken = authService.refreshAccessToken(refreshToken);
-
-      ResponseCookie accessTokenCookie = ResponseCookie.from("ATOKEN", newAccessToken)
-          .path("/")
-          .httpOnly(true)
-          .secure(true)
-          .sameSite("Strict")
-          .maxAge(3600)
-          .build();
+      ResponseCookie accessTokenCookie = CookieUtil.createAccessTokenCookie(newAccessToken);
       response.setHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
 
       User user = authService.parseUserFromToken(newAccessToken);
@@ -78,7 +73,8 @@ public class AuthController {
   @GetMapping("/status")
   public ResponseEntity<?> checkStatus(@AuthenticationPrincipal CustomUserDetails userDetails) {
     if (userDetails == null) {
-      return ResponseEntity.ok(Map.of("authenticated", false));
+      return ResponseEntity.ok(Map.of("authenticated", false, "reason", "no_authentication", "message", "인증 정보가 없습니다."
+      ));
     }
 
     User user = userDetails.getUser();

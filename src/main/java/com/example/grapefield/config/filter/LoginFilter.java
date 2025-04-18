@@ -3,6 +3,7 @@ package com.example.grapefield.config.filter;
 import com.example.grapefield.user.CustomUserDetails;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.model.request.UserLoginReq;
+import com.example.grapefield.utils.CookieUtil;
 import com.example.grapefield.utils.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -26,7 +27,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
   private final AuthenticationManager authenticationManager;
-  private final JwtUtil jwtUtil; // JwtUtil 의존성 주입 추가
+  private final JwtUtil jwtUtil;
 
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -57,27 +58,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     String refreshToken = jwtUtil.generateRefreshToken(user.getIdx());
 
     // Access Token 쿠키 설정
-    ResponseCookie accessTokenCookie = ResponseCookie.from("ATOKEN", accessToken)
-        .path("/")
-        .httpOnly(false) //개발 환경이므로 false
-//                    .httpOnly(true)
-//                    .secure(true)
-        .secure(false)  //개발 환경이므로 false
-//                    .sameSite("None") //크로스 도메인일 땐 반드시 None + Secure
-        .sameSite("Lax")
-        .maxAge(3600)
-        .build();
-
-    ResponseCookie refreshTokenCookie = ResponseCookie.from("RTOKEN", refreshToken)
-        .path("/")
-        .httpOnly(false) //개발 환경이므로 false
-//                    .httpOnly(true)
-//                    .secure(true)
-        .secure(false)  //개발 환경이므로 false
-//                    .sameSite("None") //크로스 도메인일 땐 반드시 None + Secure
-        .sameSite("Lax")
-        .maxAge(14 * 24 * 3600) // 2주
-        .build();
+    ResponseCookie accessTokenCookie = CookieUtil.createAccessTokenCookie(accessToken);
+    // Refresh Token 쿠키 설정
+    ResponseCookie refreshTokenCookie = CookieUtil.createRefreshTokenCookie(refreshToken);
 
     response.setHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
     response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());

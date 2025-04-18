@@ -4,6 +4,7 @@ import com.example.grapefield.config.filter.JwtFilter;
 import com.example.grapefield.config.filter.LoginFilter;
 import com.example.grapefield.user.CustomUserDetails;
 import com.example.grapefield.user.model.entity.User;
+import com.example.grapefield.utils.CookieUtil;
 import com.example.grapefield.utils.JwtUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -77,22 +78,9 @@ public class SecurityConfig {
         })
         .logoutSuccessHandler((request, response, authentication) -> {
           // Access Token 쿠키 삭제
-          ResponseCookie accessTokenCookie = ResponseCookie.from("ATOKEN", "")
-              .path("/")
-              .httpOnly(true)
-              .secure(true)
-              .sameSite("Strict")
-              .maxAge(0)
-              .build();
-
+          ResponseCookie accessTokenCookie = CookieUtil.deleteCookie("ATOKEN");
           // Refresh Token 쿠키도 삭제
-          ResponseCookie refreshTokenCookie = ResponseCookie.from("RTOKEN", "")
-              .path("/")
-              .httpOnly(true)
-              .secure(true)
-              .sameSite("Strict")
-              .maxAge(0)
-              .build();
+          ResponseCookie refreshTokenCookie = CookieUtil.deleteCookie("RTOKEN");
 
           response.setHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
           response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
