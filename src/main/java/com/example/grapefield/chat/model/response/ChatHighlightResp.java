@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 public class ChatHighlightResp {
     @Schema(description = "하이라이트 구간 고유 Idx", example = "101")
     private Long idx;
+    @Schema(description = "하이라이트 구간 시작 메세지 idx", example = "67")
+    private Long messageIdx;
     @Schema(description = "하이라이트 구간 시작 시간", example = "2024-04-10T10:45:00")
     private LocalDateTime startTime;
     @Schema(description = "하이라이트 구간 종료 시간", example = "2024-04-10T10:45:00")

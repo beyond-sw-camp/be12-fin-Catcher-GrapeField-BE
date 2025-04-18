@@ -53,6 +53,7 @@ public class ChatRoomDetailController {
                 .highlightList(room.getHighlightList().stream()
                         .map(h -> ChatHighlightResp.builder()
                                 .idx(h.getIdx())
+                                .messageIdx(h.getMessage().getMessageIdx())
                                 .startTime(h.getStartTime())
                                 .endTime(h.getEndTime())
                                 .description(h.getDescription())

@@ -21,8 +21,13 @@ public class ChatHighlight {
     @JoinColumn(name = "room_idx")
     private ChatRoom chatRoom;
 
+
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private String description;
     private Long messageCnt;
+
+    @OneToOne
+    @JoinColumn(name = "message_idx", unique = true)
+    private ChatMessageBase message;
 }
