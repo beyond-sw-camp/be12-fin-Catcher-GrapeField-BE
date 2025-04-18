@@ -8,6 +8,7 @@ import com.example.grapefield.utils.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,13 @@ import java.util.Map;
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
   private final AuthenticationManager authenticationManager;
   private final JwtUtil jwtUtil;
+  private void setTokenCookies(HttpServletResponse response, String accessToken, String refreshToken) {
+    ResponseCookie atokenCookie = CookieUtil.createAccessTokenCookie(accessToken);
+    ResponseCookie rtokenCookie = CookieUtil.createRefreshTokenCookie(refreshToken);
+
+    response.setHeader(HttpHeaders.SET_COOKIE, atokenCookie.toString());
+    response.addHeader(HttpHeaders.SET_COOKIE, rtokenCookie.toString());
+  }
 
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -46,26 +54,47 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
     User user = userDetails.getUser();
 
-    // Access Token 생성
-    String accessToken = JwtUtil.generateAccessToken(
-        user.getIdx(),
-        user.getUsername(),
-        user.getEmail(),
-        user.getRole()
-    );
+    try {
+      //기존 rtoken이 존재하고 redis에 저장된 정보와 불일치하면 삭제
+      handleOldRefreshTokenIfExists(request, user.getIdx());
 
-    // Refresh Token 생성
-    String refreshToken = jwtUtil.generateRefreshToken(user.getIdx());
+      // Access Token 생성
+      String accessToken = JwtUtil.generateAccessToken(user.getIdx(), user.getUsername(), user.getEmail(), user.getRole());
+      String refreshToken = jwtUtil.generateRefreshToken(user.getIdx());
 
-    // Access Token 쿠키 설정
-    ResponseCookie accessTokenCookie = CookieUtil.createAccessTokenCookie(accessToken);
-    // Refresh Token 쿠키 설정
-    ResponseCookie refreshTokenCookie = CookieUtil.createRefreshTokenCookie(refreshToken);
+      // 쿠키 설정
+      setTokenCookies(response, accessToken, refreshToken);
 
-    response.setHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
-    response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+      // 응답
+      writeLoginSuccessResponse(response, user);
 
-    // 사용자 정보 응답
+    } catch (Exception e) {
+      logger.error("인증 처리 중 오류 발생", e);
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+      response.setContentType("application/json;charset=UTF-8");
+      response.getWriter().write("{\"message\": \"인증 처리 중 오류가 발생했습니다.\"}");
+    }
+  }
+
+  private void handleOldRefreshTokenIfExists(HttpServletRequest request, Long userIdx) {
+    Cookie[] cookies = request.getCookies();
+
+    if (cookies != null) {
+      for (Cookie cookie : cookies) {
+        if ("RTOKEN".equals(cookie.getName())) {
+          try {
+            jwtUtil.removeRefreshToken(userIdx);
+            logger.info("기존 리프레시 토큰 제거 완료");
+          } catch (Exception e) {
+            logger.warn("기존 리프레시 토큰 제거 실패 (없을 수 있음)", e);
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  private void writeLoginSuccessResponse(HttpServletResponse response, User user) throws IOException {
     Map<String, Object> responseBody = new HashMap<>();
     responseBody.put("userIdx", user.getIdx());
     responseBody.put("username", user.getUsername());
