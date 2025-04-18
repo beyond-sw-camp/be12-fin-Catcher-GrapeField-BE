@@ -5,14 +5,14 @@ import com.example.grapefield.events.review.model.entity.QReview;
 import com.example.grapefield.events.review.model.response.ReviewListResp;
 import com.example.grapefield.user.model.entity.QUser;
 import com.example.grapefield.user.model.entity.User;
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -61,5 +61,51 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository{
     Long total = queryFactory.select(qReview.count()).from(qReview).join(qReview.events, qEvents).where(qEvents.idx.eq(idx), ratingCondition).fetchOne();
 
     return new PageImpl<>(reviews, pageable, total != null ? total : 0);
+  }
+
+  @Override
+  public Slice<ReviewListResp> findReviewsByKeyword(String keyword, Pageable pageable) {
+    QReview qReview = QReview.review;
+    QUser qUser = QUser.user;
+    QEvents qEvents = QEvents.events;
+
+    BooleanBuilder builder = new BooleanBuilder();
+
+    if (keyword != null && !keyword.isBlank()) {
+      builder.and(qReview.content.containsIgnoreCase(keyword));
+    }
+
+    List<ReviewListResp> reviews = queryFactory
+        .select(Projections.constructor(
+            ReviewListResp.class,
+            qReview.idx,
+            qReview.user.idx,
+            qUser.username,
+            qReview.rating,
+            qReview.content,
+            qReview.createdAt,
+            Expressions.constant(false) // isOwner 기본 false (간편 모드)
+        ))
+        .from(qReview)
+        .join(qReview.user, qUser)
+        .join(qReview.events, qEvents)
+        .where(builder)
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize() + 1) // ✅ Slice 구조
+        .orderBy(qReview.createdAt.desc())
+        .fetch();
+
+    boolean hasNext = reviews.size() > pageable.getPageSize();
+    if (hasNext) {
+      reviews.remove(pageable.getPageSize()); // 마지막 항목 잘라내기
+    }
+
+    return new SliceImpl<>(reviews, pageable, hasNext);
+  }
+
+
+  @Override
+  public Slice<ReviewListResp> findReviewsByKeywordAnd(List<String> keywords, Pageable pageable) {
+    return null;
   }
 }

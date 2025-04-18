@@ -50,4 +50,8 @@ public interface EventsCustomRepository {
   EventsDetailResp getEventDetail(Long eventsIdx);
 
   Map<String, Object> getParticipantDetail(Long eventsIdx);
+
+  Slice<EventsListResp> findEventsByKeyword(String keyword,  Pageable pageable);
+
+  Slice<EventsListResp> findEventsByKeywordAnd(List<String> keywords, Pageable pageable);
 }

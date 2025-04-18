@@ -454,4 +454,67 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
 
     return result;
   }
+
+  @Override
+  public Slice<EventsListResp> findEventsByKeyword(String keyword, Pageable pageable) {
+    QEvents e = QEvents.events;
+    QEventsInterest ei = QEventsInterest.eventsInterest;
+
+    BooleanBuilder builder = new BooleanBuilder();
+
+    if (keyword != null && !keyword.isBlank()) {
+      builder.and(
+          e.title.containsIgnoreCase(keyword)
+              .or(e.venue.containsIgnoreCase(keyword))
+              .or(e.category.stringValue().containsIgnoreCase(keyword))
+              .or(e.description.containsIgnoreCase(keyword))
+      );
+    }
+
+    List<Tuple> tuples = queryFactory
+        .select(e, ei.count())
+        .from(e)
+        .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
+        .where(builder)
+        .groupBy(e)
+        .orderBy(e.startDate.asc()) // 또는 relevance 등
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize() + 1)
+        .fetch();
+
+    return toSlice(tuples, pageable);
+  }
+
+  @Override
+  public Slice<EventsListResp> findEventsByKeywordAnd(List<String> keywords, Pageable pageable) {
+    QEvents e = QEvents.events;
+    QEventsInterest ei = QEventsInterest.eventsInterest;
+
+    BooleanBuilder builder = new BooleanBuilder();
+
+    if (keywords != null && !keywords.isEmpty()) {
+      for (String keyword : keywords) {
+        builder.and(
+            e.title.containsIgnoreCase(keyword)
+                .or(e.venue.containsIgnoreCase(keyword))
+                .or(e.category.stringValue().containsIgnoreCase(keyword))
+                .or(e.description.containsIgnoreCase(keyword))
+        );
+      }
+    }
+
+    List<Tuple> tuples = queryFactory
+        .select(e, ei.count())
+        .from(e)
+        .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
+        .where(builder)
+        .groupBy(e)
+        .orderBy(e.startDate.asc())
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize() + 1)
+        .fetch();
+
+    return toSlice(tuples, pageable);
+  }
+
 }

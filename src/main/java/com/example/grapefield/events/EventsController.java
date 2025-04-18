@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -203,6 +204,4 @@ public class EventsController {
   public ResponseEntity<String> updateComment(@PathVariable Long idx, @AuthenticationPrincipal User user) {
     return ResponseEntity.ok("게시글 삭제 성공");
   }
-
-  //TODO : 검색
 }
