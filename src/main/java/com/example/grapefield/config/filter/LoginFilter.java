@@ -59,17 +59,23 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     // Access Token 쿠키 설정
     ResponseCookie accessTokenCookie = ResponseCookie.from("ATOKEN", accessToken)
         .path("/")
-        .httpOnly(true)
-        .secure(true)
-        .sameSite("Strict")
+        .httpOnly(false) //개발 환경이므로 false
+//                    .httpOnly(true)
+//                    .secure(true)
+        .secure(false)  //개발 환경이므로 false
+//                    .sameSite("None") //크로스 도메인일 땐 반드시 None + Secure
+        .sameSite("Lax")
         .maxAge(3600)
         .build();
 
     ResponseCookie refreshTokenCookie = ResponseCookie.from("RTOKEN", refreshToken)
         .path("/")
-        .httpOnly(true)
-        .secure(true)
-        .sameSite("Strict")
+        .httpOnly(false) //개발 환경이므로 false
+//                    .httpOnly(true)
+//                    .secure(true)
+        .secure(false)  //개발 환경이므로 false
+//                    .sameSite("None") //크로스 도메인일 땐 반드시 None + Secure
+        .sameSite("Lax")
         .maxAge(14 * 24 * 3600) // 2주
         .build();
 
