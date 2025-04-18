@@ -24,4 +24,3 @@ public class ChatKafkaConsumer {
         chatMessageService.saveMessage(message);
     }
 }
-
