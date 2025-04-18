@@ -27,7 +27,7 @@ public class ChatRoomListController {
     public ResponseEntity<List<ChatListResp>> getMyRooms(
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userIdx = userDetails.user().getIdx(); // 여기서 User 꺼내면 됨
+        Long userIdx = userDetails.getUser().getIdx(); // 여기서 User 꺼내면 됨
         List<ChatListResp> rooms = chatRoomQueryService.getMyRooms(userIdx);
         return ResponseEntity.ok(rooms);
     }
@@ -57,7 +57,7 @@ public class ChatRoomListController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PageableDefault(size = 20) Pageable pageable
     ) {
-        Long userIdx = userDetails.user().getIdx();
+        Long userIdx = userDetails.getUser().getIdx();
         return ResponseEntity.ok(chatRoomListService.getMyPageRooms(userIdx, pageable));
     }
 
