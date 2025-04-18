@@ -20,7 +20,7 @@ public class ChatRoomMemberController {
             @PathVariable Long roomIdx,
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userIdx = userDetails.user().getIdx();
+        Long userIdx = userDetails.getUser().getIdx();
         chatRoomMemberService.joinRoom(userIdx, roomIdx);
         return ResponseEntity.ok("채팅방 입장 완료");
     }
