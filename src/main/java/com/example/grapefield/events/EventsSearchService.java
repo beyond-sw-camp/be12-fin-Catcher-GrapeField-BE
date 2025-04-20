@@ -2,11 +2,15 @@ package com.example.grapefield.events;
 
 import com.example.grapefield.events.model.response.EventsListResp;
 import com.example.grapefield.events.post.model.response.PostListResp;
+import com.example.grapefield.events.post.model.response.PostSearchListResp;
 import com.example.grapefield.events.post.repository.PostRepository;
 import com.example.grapefield.events.repository.EventsRepository;
 import com.example.grapefield.events.review.model.response.ReviewListResp;
+import com.example.grapefield.events.review.model.response.ReviewSearchList;
 import com.example.grapefield.events.review.repository.ReviewRepository;
+import com.example.grapefield.user.model.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -21,42 +25,42 @@ public class EventsSearchService {
   private final PostRepository postRepository;
   private final ReviewRepository reviewRepository;
 
-
-  public List<EventsListResp> searchEvents(String keyword) {
+  public List<EventsListResp> searchEvents(String keyword, User user) {
     Pageable top4 = PageRequest.of(0, 4);
-    return eventsRepository.findEventsByKeyword(keyword, top4).getContent();
+    return eventsRepository.findEventsByKeyword(keyword, top4, user).getContent();
   }
 
-  public Slice<EventsListResp> searchEvents(String keyword, Pageable pageable) {
-    return eventsRepository.findEventsByKeyword(keyword, pageable);
+  public Page<EventsListResp> searchEvents(String keyword, Pageable pageable, User user) {
+    return eventsRepository.findEventsByKeyword(keyword, pageable, user);
   }
 
-  public Slice<EventsListResp> searchEventsRefine(List<String> keywords, Pageable pageable) {
-    return eventsRepository.findEventsByKeywordAnd(keywords, pageable);
+  public Page<EventsListResp> searchEventsRefine(List<String> keywords, Pageable pageable, User user) {
+    return eventsRepository.findEventsByKeywordAnd(keywords, pageable, user);
   }
 
-  public List<PostListResp> searchPosts(String keyword) {
+  public List<PostSearchListResp> searchPosts(String keyword, User user) {
     Pageable top10 = PageRequest.of(0, 10);
-    return postRepository.findPostsByKeyword(keyword, top10).getContent();
-  }
-  public Slice<PostListResp> searchPosts(String keyword, Pageable pageable) {
-    return postRepository.findPostsByKeyword(keyword, pageable);
+    return postRepository.findPostsByKeyword(keyword, top10, user).getContent();
   }
 
-  public Slice<PostListResp> searchPostsRefine(List<String> keywords, Pageable pageable) {
-    return postRepository.findPostsByKeywordAnd(keywords, pageable);
+  public Page<PostSearchListResp> searchPosts(String keyword, Pageable pageable, User user) {
+    return postRepository.findPostsByKeyword(keyword, pageable, user);
   }
 
-  public List<ReviewListResp> searchReviews(String keyword) {
+  public Page<PostSearchListResp> searchPostsRefine(List<String> keywords, Pageable pageable, User user) {
+    return postRepository.findPostsByKeywordAnd(keywords, pageable, user);
+  }
+
+  public List<ReviewSearchList> searchReviews(String keyword, User user) {
     Pageable top10 = PageRequest.of(0, 10);
-    return reviewRepository.findReviewsByKeyword(keyword, top10).getContent();
+    return reviewRepository.findReviewsByKeyword(keyword, top10, user).getContent();
   }
 
-  public Slice<ReviewListResp> searchReviews(String keyword, Pageable pageable) {
-    return reviewRepository.findReviewsByKeyword(keyword, pageable);
+  public Page<ReviewSearchList> searchReviews(String keyword, Pageable pageable, User user) {
+    return reviewRepository.findReviewsByKeyword(keyword, pageable, user);
   }
 
-  public Slice<ReviewListResp> searchReviewsRefine(List<String> keywords, Pageable pageable) {
-    return reviewRepository.findReviewsByKeywordAnd(keywords, pageable);
+  public Page<ReviewSearchList> searchReviewsRefine(List<String> keywords, Pageable pageable, User user) {
+    return reviewRepository.findReviewsByKeywordAnd(keywords, pageable, user);
   }
 }

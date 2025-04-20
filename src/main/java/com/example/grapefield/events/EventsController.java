@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+//TODO : Resp DTO에 isVisible을 넣어서 관리자인지 아닌지 여부에 따라 반환 목록 수정(repository)
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/events")
