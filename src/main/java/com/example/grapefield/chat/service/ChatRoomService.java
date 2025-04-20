@@ -1,7 +1,13 @@
 package com.example.grapefield.chat.service;
 
+import com.example.grapefield.chat.model.entity.ChatMessageCurrent;
 import com.example.grapefield.chat.model.entity.ChatRoom;
+import com.example.grapefield.chat.model.entity.ChatroomMember;
+import com.example.grapefield.chat.model.response.ChatListResp;
+import com.example.grapefield.chat.repository.ChatMessageCurrentRepository;
+import com.example.grapefield.chat.repository.ChatRoomMemberRepository;
 import com.example.grapefield.chat.repository.ChatRoomRepository;
+import com.example.grapefield.events.model.entity.Events;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -10,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -18,7 +25,10 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
     private final AdminClient adminClient;
+    private final ChatRoomMemberRepository memberRepository;
+    private final ChatMessageCurrentRepository currentRepository;
 
+    // 채팅방(ChatRoom)이 DB에 없으면 새로 만들고, Kafka 토픽도 같이 보장
     public ChatRoom ensureRoomExists(Long roomIdx, String roomName) {
         return chatRoomRepository.findById(roomIdx).orElseGet(() -> {
             ChatRoom room = ChatRoom.builder()
@@ -38,6 +48,7 @@ public class ChatRoomService {
         });
     }
 
+    // Kafka에 해당 채팅방 토픽이 없으면 새로 생성
     private void createKafkaTopicIfNotExists(Long roomIdx) {
         String topicName = "chat-" + roomIdx;
         try {
@@ -51,5 +62,11 @@ public class ChatRoomService {
         } catch (Exception e) {
             log.warn("⚠️ Kafka 토픽 생성 중 에러: {}", e.getMessage());
         }
+    }
+
+    public ChatRoom findByIdx(Long roomIdx) {
+        return chatRoomRepository.findById(roomIdx)
+                .orElseThrow(()->
+                        new NoSuchElementException("해당 채팅방이 존재하지 않습니다. roomIdx: " + roomIdx));
     }
 }

@@ -27,4 +27,9 @@ public class ChatMessageBase {
     @OneToOne(mappedBy = "base", cascade = CascadeType.ALL, orphanRemoval = true)
     @PrimaryKeyJoinColumn
     private ChatMessageArchive archive;
+
+    @OneToOne(mappedBy = "message")
+    private ChatHighlight highlight;
+
+
 }

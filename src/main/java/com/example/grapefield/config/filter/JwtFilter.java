@@ -90,6 +90,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authToken);
             logger.info("토큰 재발급 및 사용자 인증 성공: {}", user.getUsername());
+
           } else {
             logger.warn("토큰 재발급 후 사용자 정보 추출 실패");
             SecurityContextHolder.clearContext();
