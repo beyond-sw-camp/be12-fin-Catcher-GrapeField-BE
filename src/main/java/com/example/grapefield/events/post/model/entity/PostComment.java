@@ -20,6 +20,8 @@ public class PostComment {
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    @Builder.Default
+    private Boolean isVisible = true;
 
     @ManyToOne
     @JoinColumn(name = "post_idx")
