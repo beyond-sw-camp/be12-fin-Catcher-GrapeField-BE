@@ -1,8 +1,11 @@
 package com.example.grapefield.events.review.repository;
 
 import com.example.grapefield.events.model.entity.QEvents;
+import com.example.grapefield.events.post.model.entity.PostType;
 import com.example.grapefield.events.review.model.entity.QReview;
+import com.example.grapefield.events.review.model.entity.Review;
 import com.example.grapefield.events.review.model.response.ReviewListResp;
+import com.example.grapefield.events.review.model.response.ReviewSearchList;
 import com.example.grapefield.user.model.entity.QUser;
 import com.example.grapefield.user.model.entity.User;
 import com.querydsl.core.BooleanBuilder;
@@ -28,84 +31,179 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository{
     QUser qUser = QUser.user;
     QEvents qEvents = QEvents.events;
 
-    // rating이 null이 아닐 때만 rating 필터링 추가
-    BooleanExpression ratingCondition = rating != null ? qReview.rating.eq(rating) : null;
+    boolean isAdmin = user != null && user.getRole().name().equals("ROLE_ADMIN");
+
+    BooleanBuilder builder = new BooleanBuilder()
+            .and(qReview.events.idx.eq(idx));
+
+    if (rating != null) {
+      builder.and(qReview.rating.eq(rating));
+    }
+
+    if (!isAdmin) {
+      builder.and(qReview.isVisible.isTrue()); // 일반 유저만 가시성 필터링
+    }
+
+    BooleanExpression editableExpr = getEditableExpr(user, qReview);
 
     List<ReviewListResp> reviews = queryFactory
-        .select(Projections.constructor(ReviewListResp.class,
-            qReview.idx,
-            qReview.user.idx,
-            qUser.username,
-            qReview.rating,
-            qReview.content,
-            qReview.createdAt,
-            user == null
-                ? Expressions.constant(false)
-                : Expressions.booleanTemplate(
-                "({0} = {1}) or ({2} = 'ROLE_ADMIN')",
-                qReview.user.idx,
-                user.getIdx(),
-                user.getRole().name()
-            )
-        ))
-        .from(qReview)
-        .join(qReview.user, qUser)
-        .join(qReview.events, qEvents)
-        .where(qEvents.idx.eq(idx), ratingCondition)  // 여기서 동적 조건 추가
-        .offset(pageable.getOffset())
-        .limit(pageable.getPageSize())
-        .orderBy(qReview.createdAt.desc())
-        .fetch();
+            .select(Projections.constructor(ReviewListResp.class,
+                    qReview.idx,
+                    qReview.user.idx,
+                    qUser.username,
+                    qUser.profileImg,
+                    qReview.rating,
+                    qReview.content,
+                    qReview.createdAt,
+                    editableExpr,
+                    qReview.isVisible
+            ))
+            .from(qReview)
+            .join(qReview.user, qUser)
+            .join(qReview.events, qEvents)
+            .where(builder)
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .orderBy(qReview.createdAt.desc())
+            .fetch();
 
-    // 총 개수 쿼리도 동일한 조건 적용
-    Long total = queryFactory.select(qReview.count()).from(qReview).join(qReview.events, qEvents).where(qEvents.idx.eq(idx), ratingCondition).fetchOne();
+    Long total = queryFactory
+            .select(qReview.count())
+            .from(qReview)
+            .join(qReview.events, qEvents)
+            .where(builder)
+            .fetchOne();
 
     return new PageImpl<>(reviews, pageable, total != null ? total : 0);
   }
 
+  private BooleanExpression getEditableExpr(User user, QReview qReview) {
+    if (user == null) {
+      return Expressions.asBoolean(Expressions.constant(false));
+    }
+    return Expressions.booleanTemplate(
+            "({0} = {1}) or ({2} = 'ROLE_ADMIN')",
+            qReview.user.idx,
+            user.getIdx(),
+            user.getRole().name()
+    );
+  }
+
+  private Page<ReviewSearchList> toReviewSearchPage(List<Tuple> tuples, Pageable pageable, long total) {
+    List<ReviewSearchList> results = tuples.stream()
+            .map(tuple -> {
+              QReview qReview = QReview.review;
+              Review review = tuple.get(qReview);
+              return ReviewSearchList.builder()
+                      .idx(review.getIdx())
+                      .user_idx(review.getUser().getIdx())
+                      .writer(tuple.get(1, String.class))
+                      .profileImg(tuple.get(2, String.class))
+                      .rating(review.getRating())
+                      .content(review.getContent())
+                      .createdAt(review.getCreatedAt())
+                      .editable(tuple.get(5, Boolean.class))
+                      .isVisible(review.getIsVisible())
+                      .boardIdx(tuple.get(3, Long.class)) // eventsIdx
+                      .boardTitle(tuple.get(4, String.class)) // events.title
+                      .build();
+            })
+            .toList();
+
+    return new PageImpl<>(results, pageable, total);
+  }
+
   @Override
-  public Slice<ReviewListResp> findReviewsByKeyword(String keyword, Pageable pageable) {
+  public Page<ReviewSearchList> findReviewsByKeyword(String keyword, Pageable pageable, User user) {
     QReview qReview = QReview.review;
     QUser qUser = QUser.user;
     QEvents qEvents = QEvents.events;
 
+    boolean isAdmin = user != null && user.getRole().name().equals("ROLE_ADMIN");
+
     BooleanBuilder builder = new BooleanBuilder();
 
     if (keyword != null && !keyword.isBlank()) {
-      builder.and(qReview.content.containsIgnoreCase(keyword));
+      builder.and(
+              qReview.content.containsIgnoreCase(keyword)
+                      .or(qUser.username.containsIgnoreCase(keyword))
+                      .or(qReview.events.title.containsIgnoreCase(keyword))
+      );
     }
 
-    List<ReviewListResp> reviews = queryFactory
-        .select(Projections.constructor(
-            ReviewListResp.class,
-            qReview.idx,
-            qReview.user.idx,
-            qUser.username,
-            qReview.rating,
-            qReview.content,
-            qReview.createdAt,
-            Expressions.constant(false) // isOwner 기본 false (간편 모드)
-        ))
-        .from(qReview)
-        .join(qReview.user, qUser)
-        .join(qReview.events, qEvents)
-        .where(builder)
-        .offset(pageable.getOffset())
-        .limit(pageable.getPageSize() + 1) // ✅ Slice 구조
-        .orderBy(qReview.createdAt.desc())
-        .fetch();
-
-    boolean hasNext = reviews.size() > pageable.getPageSize();
-    if (hasNext) {
-      reviews.remove(pageable.getPageSize()); // 마지막 항목 잘라내기
+    if (!isAdmin) {
+      builder.and(qReview.isVisible.isTrue());
     }
 
-    return new SliceImpl<>(reviews, pageable, hasNext);
+    BooleanExpression editableExpr = getEditableExpr(user, qReview);
+
+    List<Tuple> results = queryFactory
+            .select(qReview, qUser.username, qUser.profileImg, qReview.events.idx, qReview.events.title, editableExpr)
+            .from(qReview)
+            .join(qReview.user, qUser)
+            .join(qReview.events, qEvents)
+            .where(builder)
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .orderBy(qReview.createdAt.desc())
+            .fetch();
+
+    Long total = queryFactory
+            .select(qReview.count())
+            .from(qReview)
+            .join(qReview.user, qUser)
+            .join(qReview.events, qEvents)
+            .where(builder)
+            .fetchOne();
+
+    return toReviewSearchPage(results, pageable, total != null ? total : 0);
   }
 
-
   @Override
-  public Slice<ReviewListResp> findReviewsByKeywordAnd(List<String> keywords, Pageable pageable) {
-    return null;
+  public Page<ReviewSearchList> findReviewsByKeywordAnd(List<String> keywords, Pageable pageable, User user) {
+    QReview qReview = QReview.review;
+    QUser qUser = QUser.user;
+    QEvents qEvents = QEvents.events;
+
+    boolean isAdmin = user != null && user.getRole().name().equals("ROLE_ADMIN");
+
+    BooleanBuilder builder = new BooleanBuilder();
+
+    if (keywords != null && !keywords.isEmpty()) {
+      for (String keyword : keywords) {
+        BooleanBuilder keywordCondition = new BooleanBuilder();
+        keywordCondition.or(qReview.content.containsIgnoreCase(keyword));
+        keywordCondition.or(qUser.username.containsIgnoreCase(keyword));
+        keywordCondition.or(qReview.events.title.containsIgnoreCase(keyword));
+        builder.and(keywordCondition); // AND 조건
+      }
+    }
+
+    if (!isAdmin) {
+      builder.and(qReview.isVisible.isTrue());
+    }
+
+    BooleanExpression editableExpr = getEditableExpr(user, qReview);
+
+    List<Tuple> results = queryFactory
+            .select(qReview, qUser.username, qUser.profileImg, qReview.events.idx, qReview.events.title, editableExpr)
+            .from(qReview)
+            .join(qReview.user, qUser)
+            .join(qReview.events, qEvents)
+            .where(builder)
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .orderBy(qReview.createdAt.desc())
+            .fetch();
+
+    Long total = queryFactory
+            .select(qReview.count())
+            .from(qReview)
+            .join(qReview.user, qUser)
+            .join(qReview.events, qEvents)
+            .where(builder)
+            .fetchOne();
+
+    return toReviewSearchPage(results, pageable, total != null ? total : 0);
   }
 }
