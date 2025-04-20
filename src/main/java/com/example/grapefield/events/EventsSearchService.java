@@ -26,7 +26,7 @@ public class EventsSearchService {
   private final ReviewRepository reviewRepository;
 
   public List<EventsListResp> searchEvents(String keyword, User user) {
-    Pageable top4 = PageRequest.of(0, 4);
+    Pageable top4 = PageRequest.of(0, 6);
     return eventsRepository.findEventsByKeyword(keyword, top4, user).getContent();
   }
 
