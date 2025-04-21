@@ -13,10 +13,6 @@ public class ChatMessageReq {
     @NotNull
     private Long roomIdx;
 
-    @Schema(description = "보내는 사용자 ID", example = "3", required = true)
-    @NotNull
-    private Long sendUserIdx;
-
     @Schema(description = "채팅 메시지 내용", example = "안녕하세요!", required = true)
     @NotBlank
     private String content;
