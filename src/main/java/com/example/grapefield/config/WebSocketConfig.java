@@ -1,5 +1,7 @@
 package com.example.grapefield.config;
 
+import com.example.grapefield.config.websocket.CustomHandshakeHandler;
+import com.example.grapefield.config.websocket.JwtHandshakeInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
@@ -12,6 +14,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) { // 인터페이스의 추상메서드 구현
         registry.addEndpoint("/ws") // 클라이언트에서 연결할 엔드포인트 URL 지정
                 .setAllowedOriginPatterns("*") // CORS 설정: 모든 출처origin에서 접근 허용
+                .setHandshakeHandler(new CustomHandshakeHandler())
+                .addInterceptors(new JwtHandshakeInterceptor())
                 .withSockJS(); // WebSocket이 지원되지 않는 브라우저에서 자동으로 SockJS fallback (=HTTP기반 통신) 허용
     }
 
