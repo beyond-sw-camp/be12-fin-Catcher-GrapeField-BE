@@ -44,7 +44,6 @@ public class ReviewController {
     return ResponseEntity.ok(reviewIdx);
   }
 
-  //TODO : 한줄평 목록 가져오기
   @Operation(summary = "한줄평 조회", description = "공연/행사에 달린 모든 한줄평을 내용과 함께 조회")
   @ApiSuccessResponses
   @ApiErrorResponses

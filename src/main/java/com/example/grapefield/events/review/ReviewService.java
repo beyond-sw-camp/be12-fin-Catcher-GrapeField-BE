@@ -7,6 +7,7 @@ import com.example.grapefield.events.review.model.request.ReviewRegisterReq;
 import com.example.grapefield.events.review.model.response.ReviewListResp;
 import com.example.grapefield.events.review.repository.ReviewRepository;
 import com.example.grapefield.user.model.entity.User;
+import com.example.grapefield.user.model.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,5 @@ public class ReviewService {
 
   public Page<ReviewListResp> getReviewList(Long idx, Pageable pageable, Long rating, User user) {
     return reviewRepository.findReviewList(idx, pageable, rating, user);
-    //TODO : 특정 점수만 가져오는 기능 추가 필요
   }
 }

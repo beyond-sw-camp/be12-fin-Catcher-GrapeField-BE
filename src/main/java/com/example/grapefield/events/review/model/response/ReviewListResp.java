@@ -18,6 +18,7 @@ public class ReviewListResp {
   private Long user_idx;
   @Schema(description="작성자", example = "이독자")
   private String writer;
+  private String profileImg;
   @Schema(description="평점", example = "4")
   private Long rating;
   @Schema(description="한줄평 내용", example = "저도 무척이나 재밌게 보고 왔는데 공감되네요.")
@@ -26,4 +27,5 @@ public class ReviewListResp {
   private LocalDateTime createdAt;
   @Schema(description="현재 로그인한 유저가 작성자이거나 ADMIN일 경우 수정/삭제 가능하도록 프론트에 반환하기 위한 값", example = "false")
   private boolean editable;
+  private Boolean isVisible;
 }

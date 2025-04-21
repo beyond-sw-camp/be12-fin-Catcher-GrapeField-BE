@@ -26,7 +26,8 @@ public class Post {
     private PostType postType;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Boolean isVisible;
+    @Builder.Default
+    private Boolean isVisible = true;
 
     @ManyToOne
     @JoinColumn(name = "board_idx")

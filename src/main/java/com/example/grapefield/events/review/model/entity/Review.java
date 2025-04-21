@@ -31,4 +31,6 @@ public class Review {
     private Long rating;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    @Builder.Default
+    private Boolean isVisible = true;
 }

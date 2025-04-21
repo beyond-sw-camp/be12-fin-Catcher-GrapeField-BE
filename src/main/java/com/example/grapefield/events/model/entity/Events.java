@@ -38,6 +38,8 @@ public class Events {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    private Boolean isVisible;
+
     @OneToMany(mappedBy = "events")
     private List<EventsImg> eventsImgList;
 

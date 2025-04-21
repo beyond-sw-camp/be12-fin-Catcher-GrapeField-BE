@@ -33,13 +33,8 @@ public class PostService {
   private final ImageService imageService;
 
   public Page<PostListResp> getPostList(User user, Long boardIdx, Pageable pageable, String type) {
-    boolean isAdmin = user != null && user.getRole() == UserRole.ROLE_ADMIN;
     PostType postType = PostType.valueOf(type);
-    if(isAdmin){
-      return postRepository.findPostListForAdmin(boardIdx, pageable, postType);
-    }else{
-      return postRepository.findPostList(boardIdx, pageable, postType);
-    }
+      return postRepository.findPostList(boardIdx, pageable, postType, user);
   }
 
   public PostDetailResp getPostDetail(Long idx, User user) {

@@ -4,6 +4,8 @@ import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.model.entity.TicketVendor;
 import com.example.grapefield.events.model.response.*;
+import com.example.grapefield.user.model.entity.User;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import com.example.grapefield.events.model.response.EventsCalendarListResp;
 import com.example.grapefield.events.model.response.EventsDetailResp;
@@ -29,11 +31,6 @@ public interface EventsCustomRepository {
   List<EventsCalendarListResp> findEventsBySaleEndBetween(
       LocalDateTime startDate, LocalDateTime endDate);
 
-  // 전체 조회
-  Slice<EventsListResp> findAllOrdered(Pageable pageable);
-  // 특정 카테고리 필터링
-  Slice<EventsListResp> findAllFilteredByCategory(EventCategory category, Pageable pageable);
-
   //추천 (진행 중 or 예정 중 즐찾 많은 순)
   Slice<EventsListResp> findTopRecommended(EventCategory category, LocalDateTime now, Pageable pageable);
   //인기 (진행 여부 상관없이 즐찾 많은 순)
@@ -50,4 +47,7 @@ public interface EventsCustomRepository {
   EventsDetailResp getEventDetail(Long eventsIdx);
 
   Map<String, Object> getParticipantDetail(Long eventsIdx);
+
+  Page<EventsListResp> findEventsByKeyword(String keyword, Pageable pageable, User user);
+  Page<EventsListResp> findEventsByKeywordAnd(List<String> keywords, Pageable pageable, User user);
 }

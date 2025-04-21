@@ -6,15 +6,14 @@ import com.example.grapefield.events.participant.model.entity.*;
 import com.example.grapefield.events.participant.model.response.OrganizationListResp;
 import com.example.grapefield.events.participant.model.response.PerformerListResp;
 import com.example.grapefield.notification.model.entity.QEventsInterest;
+import com.example.grapefield.user.model.entity.User;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -111,65 +110,6 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
         .where(whereBuilder)
         .orderBy(ticketInfo.saleStart.asc())
         .fetch();
-  }
-
-  @Override
-  public Slice<EventsListResp> findAllOrdered(Pageable pageable) {
-    return findEventsByCategory(null, pageable);
-  }
-
-  @Override
-  public Slice<EventsListResp> findAllFilteredByCategory(EventCategory category, Pageable pageable) {
-    return findEventsByCategory(category, pageable);
-  }
-
-  private Slice<EventsListResp> findEventsByCategory(EventCategory category, Pageable pageable) {
-    QEvents e = QEvents.events;
-    QEventsInterest ei = QEventsInterest.eventsInterest;
-    LocalDateTime now = LocalDateTime.now();
-
-    List<Tuple> results = queryFactory
-        .select(e, ei.count())
-        .from(e)
-        .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
-        .where(
-            category != null ? e.category.eq(category) : null
-        )
-        .groupBy(e)
-        .orderBy(
-            new CaseBuilder()
-                .when(e.startDate.loe(now).and(e.endDate.goe(now))).then(0)
-                .when(e.startDate.gt(now)).then(1)
-                .otherwise(2).asc(),
-            e.startDate.asc()
-        )
-        .offset(pageable.getOffset())
-        .limit(pageable.getPageSize() + 1)
-        .fetch();
-
-    List<EventsListResp> content = results.stream()
-        .map(tuple -> {
-          Events event = tuple.get(e);
-          Long count = tuple.get(ei.count());
-          return EventsListResp.builder()
-              .idx(event.getIdx())
-              .title(event.getTitle())
-              .category(event.getCategory())
-              .startDate(event.getStartDate())
-              .endDate(event.getEndDate())
-              .posterImgUrl(event.getPosterImgUrl())
-              .venue(event.getVenue())
-              .interestCtn(count != null ? count.intValue() : 0)
-              .build();
-        })
-        .toList();
-
-    boolean hasNext = content.size() > pageable.getPageSize();
-    return new SliceImpl<>(
-        hasNext ? content.subList(0, pageable.getPageSize()) : content,
-        pageable,
-        hasNext
-    );
   }
 
   private Slice<EventsListResp> toSlice(List<Tuple> tuples, Pageable pageable) {
@@ -294,7 +234,7 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
     LocalDateTime sevenDaysLater = now.plusDays(7);
 
     List<Tuple> tuples = queryFactory
-            .select(e, ei.count())
+            .select(e, ei.count(), t)
             .from(t)
             .join(t.events, e)
             .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
@@ -320,7 +260,7 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
     LocalDateTime sevenDaysLater = now.plusDays(7);
 
     List<Tuple> tuples = queryFactory
-            .select(e, ei.count())
+            .select(e, ei.count(), t)
             .from(t)
             .join(t.events, e)
             .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
@@ -453,5 +393,109 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
     result.put("organizations", organizations);
 
     return result;
+  }
+
+  @Override
+  public Page<EventsListResp> findEventsByKeyword(String keyword, Pageable pageable, User user) {
+    QEvents e = QEvents.events;
+    QEventsInterest ei = QEventsInterest.eventsInterest;
+
+    boolean isAdmin = user != null && user.getRole().name().equals("ROLE_ADMIN");
+    BooleanBuilder builder = new BooleanBuilder();
+
+    if (!isAdmin) {
+      builder.and(e.isVisible.isTrue()); // 일반 유저만 가시성 필터링
+    }
+
+    if (keyword != null && !keyword.isBlank()) {
+      builder.and(
+              e.title.containsIgnoreCase(keyword)
+                      .or(e.venue.containsIgnoreCase(keyword))
+                      .or(e.category.stringValue().containsIgnoreCase(keyword))
+                      .or(e.description.containsIgnoreCase(keyword))
+      );
+    }
+    // 데이터 조회
+    List<Tuple> tuples = queryFactory
+            .select(e, ei.count())
+            .from(e)
+            .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
+            .where(builder)
+            .groupBy(e)
+            .orderBy(e.startDate.asc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+    // 총 개수 조회 쿼리
+    Long totalCount = queryFactory.select(e.count()).from(e).where(builder).fetchOne();
+    long total = totalCount != null ? totalCount : 0L;
+
+    return toPage(tuples, pageable, total);
+  }
+
+  private Page<EventsListResp> toPage(List<Tuple> tuples, Pageable pageable, long total) {
+    List<EventsListResp> result = tuples.stream()
+            .map(tuple -> {
+              Events event = tuple.get(0, Events.class);
+              Long interestCount = tuple.get(1, Long.class);
+
+              return EventsListResp.builder()
+                      .idx(event.getIdx())
+                      .title(event.getTitle())
+                      .category(event.getCategory())
+                      .startDate(event.getStartDate())
+                      .endDate(event.getEndDate())
+                      .venue(event.getVenue())
+                      .posterImgUrl(event.getPosterImgUrl())
+                      .interestCtn(interestCount != null ? interestCount.intValue() : 0)
+                      .isVisible(event.getIsVisible())
+                      .build();
+            })
+            .toList();
+
+    return new PageImpl<>(result, pageable, total);
+  }
+
+
+  @Override
+  public Page<EventsListResp> findEventsByKeywordAnd(List<String> keywords, Pageable pageable, User user) {
+    QEvents e = QEvents.events;
+    QEventsInterest ei = QEventsInterest.eventsInterest;
+
+    boolean isAdmin = user != null && user.getRole().name().equals("ROLE_ADMIN");
+    BooleanBuilder builder = new BooleanBuilder();
+
+    if (!isAdmin) {
+      builder.and(e.isVisible.isTrue()); // 일반 유저만 가시성 필터링
+    }
+
+    if (keywords != null && !keywords.isEmpty()) {
+      for (String keyword : keywords) {
+        builder.and(
+            e.title.containsIgnoreCase(keyword)
+                .or(e.venue.containsIgnoreCase(keyword))
+                .or(e.category.stringValue().containsIgnoreCase(keyword))
+                .or(e.description.containsIgnoreCase(keyword))
+        );
+      }
+    }
+
+    List<Tuple> tuples = queryFactory
+        .select(e, ei.count())
+        .from(e)
+        .leftJoin(ei).on(ei.events.eq(e).and(ei.isFavorite.isTrue()))
+        .where(builder)
+        .groupBy(e)
+        .orderBy(e.startDate.asc())
+        .offset(pageable.getOffset())
+        .limit(pageable.getPageSize())
+        .fetch();
+
+    // 총 개수 조회 쿼리
+    Long totalCount = queryFactory.select(e.count()).from(e).where(builder).fetchOne();
+    long total = totalCount != null ? totalCount : 0L;
+
+    return toPage(tuples, pageable, total);
   }
 }

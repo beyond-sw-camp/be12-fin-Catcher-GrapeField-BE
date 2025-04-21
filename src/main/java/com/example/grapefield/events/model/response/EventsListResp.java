@@ -31,6 +31,7 @@ public class EventsListResp {
   private String venue;
   @Schema(description="즐겨찾기 수", example = "전시/공연의 유저가 즐겨찾기한 수")
   private int interestCtn;
+  private Boolean isVisible;
 
   public static EventsListResp from(Events event, Long interestCtn) {
     return EventsListResp.builder()

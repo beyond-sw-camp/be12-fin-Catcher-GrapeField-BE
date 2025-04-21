@@ -21,4 +21,3 @@ public class ChatKafkaConsumer {
                 message.getRoomIdx(), message.getUserIdx(), message.getContent());
     }
 }
-
