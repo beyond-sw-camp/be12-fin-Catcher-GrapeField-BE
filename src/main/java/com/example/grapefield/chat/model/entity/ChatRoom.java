@@ -35,4 +35,9 @@ public class ChatRoom {
 
     @OneToMany(mappedBy = "chatRoom")
     private List<ChatHighlight> highlightList;
+
+    // 하트 증가 메서드
+    public void increaseHeart() {
+        this.heartCnt += 1;
+    }
 }

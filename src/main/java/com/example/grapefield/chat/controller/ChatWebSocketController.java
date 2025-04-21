@@ -1,6 +1,7 @@
 package com.example.grapefield.chat.controller;
 
 import com.example.grapefield.chat.kafka.ChatKafkaProducer;
+import com.example.grapefield.chat.model.request.ChatHeartKafkaReq;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.model.request.ChatMessageReq;
 import com.example.grapefield.chat.model.response.ChatMessageResp;
@@ -15,6 +16,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import lombok.extern.slf4j.Slf4j;
+// import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -22,6 +25,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -73,5 +77,24 @@ public class ChatWebSocketController {
             @RequestBody @Valid ChatMessageReq request) {
         return ResponseEntity.ok("웹소켓 메시지 포맷 확인용 API입니다.");
     }
+
+
+
+    @MessageMapping("/chat.like.{roomIdx}")
+    public void likeRoom(@DestinationVariable Long roomIdx,
+                         @Payload ChatHeartKafkaReq heartReq,
+                         Principal principal) {
+        CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
+        Long userIdx = userDetails.getUser().getIdx();
+        log.info("❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, userIdx);
+
+        // 1. DB 하트 수 증가
+        chatRoomService.increaseHeartCount(roomIdx);
+
+        // 2. WebSocket 브로커로 브로드캐스트 (프론트에서 애니메이션 띄우게)
+        messagingTemplate.convertAndSend("/topic/chat.room.likes." + heartReq.getRoomIdx(), heartReq);
+
+    }
+
 }
 
