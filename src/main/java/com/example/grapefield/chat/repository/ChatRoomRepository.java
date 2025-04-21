@@ -2,9 +2,11 @@ package com.example.grapefield.chat.repository;
 
 import com.example.grapefield.chat.model.entity.ChatRoom;
 import com.example.grapefield.chat.model.response.PopularChatRoomListResp;
+import com.example.grapefield.chat.repository.custom.ChatRoomRepositoryCustom;
 import com.example.grapefield.events.model.entity.EventCategory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,8 +14,9 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
-public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
-    @Query("SELECT c FROM ChatRoom c JOIN FETCH c.events")
+public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long>, ChatRoomRepositoryCustom {
+    @EntityGraph(attributePaths = {"events"})
+    @Query("SELECT c FROM ChatRoom c")
     Slice<ChatRoom> findAllWithEventsSlice(Pageable pageable);
 
     @Query("SELECT c FROM ChatRoom c JOIN FETCH c.events WHERE c.events.category IN :categories")

@@ -19,7 +19,6 @@ import java.util.Locale;
 @RequestMapping("/chat/list")
 public class ChatRoomListController {
 
-    private final ChatRoomListService chatRoomQueryService;
     private final ChatRoomListService chatRoomListService;
 
     // 사용자가 참여한 채팅방 목록 (사이드바 )
@@ -28,7 +27,7 @@ public class ChatRoomListController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userIdx = userDetails.getUser().getIdx(); // 여기서 User 꺼내면 됨
-        List<ChatListResp> rooms = chatRoomQueryService.getMyRooms(userIdx);
+        List<ChatListResp> rooms = chatRoomListService.getMyRooms(userIdx);
         return ResponseEntity.ok(rooms);
     }
 
