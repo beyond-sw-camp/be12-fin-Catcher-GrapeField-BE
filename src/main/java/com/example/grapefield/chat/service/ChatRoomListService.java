@@ -53,7 +53,8 @@ public class ChatRoomListService {
 
     // 전체 채팅방 목록
     public Slice<ChatListPageResp> getAllRooms(Pageable pageable) {
-        Slice<ChatRoom> rooms = chatRoomRepository.findAllWithEventsSlice(pageable);
+        Slice<ChatRoom> rooms = chatRoomRepository.findAllWithEvents(pageable);
+
         Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountMap();
 
         return rooms.map(room -> ChatListPageResp.from(
