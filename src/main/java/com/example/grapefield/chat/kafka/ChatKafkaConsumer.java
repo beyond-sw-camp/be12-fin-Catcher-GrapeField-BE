@@ -4,6 +4,7 @@ import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.model.response.ChatMessageResp;
 import com.example.grapefield.chat.service.ChatMessageService;
 import com.example.grapefield.chat.service.ChatRoomService;
+import com.example.grapefield.chat.service.KafkaTopicService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -15,9 +16,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ChatKafkaConsumer {
 
-    private final ChatRoomService chatRoomService;
     private final ChatMessageService chatMessageService; //추가
     private final SimpMessagingTemplate simpMessagingTemplate; //추가
+    private final KafkaTopicService kafkaTopicService;
 
 
     @KafkaListener(topicPattern = "^chat-\\d+$",
@@ -27,7 +28,7 @@ public class ChatKafkaConsumer {
         log.info("✅ Kafka 메시지 수신: roomIdx={}, userIdx={}, content={}",
                 chatMessageKafkaReq.getRoomIdx(), chatMessageKafkaReq.getSendUserIdx(), chatMessageKafkaReq.getContent());
 
-        chatRoomService.createKafkaTopicIfNotExists(chatMessageKafkaReq.getRoomIdx());
+        kafkaTopicService.createKafkaTopicIfNotExists(chatMessageKafkaReq.getRoomIdx());
 
         ChatMessageResp resp = chatMessageService.saveMessage(chatMessageKafkaReq); //DB 저장 로직 추가
 

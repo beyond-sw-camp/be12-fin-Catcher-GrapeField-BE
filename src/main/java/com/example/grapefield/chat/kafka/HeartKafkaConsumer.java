@@ -2,6 +2,7 @@ package com.example.grapefield.chat.kafka;
 
 import com.example.grapefield.chat.model.request.ChatHeartKafkaReq;
 import com.example.grapefield.chat.service.ChatRoomService;
+import com.example.grapefield.chat.service.KafkaTopicService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -18,7 +19,7 @@ import java.util.List;
 public class HeartKafkaConsumer {
     private final ChatRoomService chatRoomService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final AdminClient adminClient;
+    private final KafkaTopicService kafkaTopicService;
     @KafkaListener(
             topicPattern="^chat-like-\\d+$",
             groupId="chat-heart-group",
@@ -26,18 +27,8 @@ public class HeartKafkaConsumer {
     )
     public void consumeHeart(ChatHeartKafkaReq chatHeartKafkaReq) {
         log.info("✅ KafkaConsumer 좋아요 ♥\uFE0F 하트 수신: roomIdx={}", chatHeartKafkaReq.getRoomIdx());
-        String topicName = "chat-like-" + chatHeartKafkaReq.getRoomIdx();
-        try {
-            var existingTopics = adminClient.listTopics().names().get();
-            if (!existingTopics.contains(topicName)) {
-                adminClient.createTopics(List.of(new NewTopic(topicName, 1, (short) 1)));
-                log.info("✅ Kafka 토픽 생성 완료: {}", topicName);
-            } else {
-                log.info("ℹ️ Kafka 토픽 이미 존재: {}", topicName);
-            }
-        } catch (Exception e) {
-            log.warn("⚠️ Kafka 토픽 생성 중 에러: {}", e.getMessage());
-        }
+
+        kafkaTopicService.createHeartKafkaTopicIfNotExist(chatHeartKafkaReq);
 
         // 1. DB 하트 수 증가
         chatRoomService.increaseHeartCount(chatHeartKafkaReq.getRoomIdx());
