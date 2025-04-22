@@ -7,7 +7,8 @@ import com.example.grapefield.events.post.model.entity.Post;
 import com.example.grapefield.events.post.model.entity.PostComment;
 import com.example.grapefield.events.post.model.entity.PostRecommend;
 import com.example.grapefield.notification.model.entity.EventsInterest;
-import com.example.grapefield.notification.model.entity.EventsNotification;
+import com.example.grapefield.notification.model.entity.PersonalSchedule;
+import com.example.grapefield.notification.model.entity.ScheduleNotification;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -62,12 +63,15 @@ public class User{
     private List<ChatMessageCurrent> chatMessageList;
 
     @OneToMany(mappedBy = "user")
-    private List<EventsNotification> notificationList;
+    private List<ScheduleNotification> notificationList;
 
     @OneToMany(mappedBy = "user")
     private List<EventsInterest> interestList;
 
   @OneToMany(mappedBy = "user")
   private List<EmailVerify> verifyList;
+
+  @OneToMany(mappedBy = "user")
+  private List<PersonalSchedule> personalScheduleList;
 
 }

@@ -30,9 +30,8 @@ public class EventsInterest {
     @JoinColumn(name = "events_idx")
     private Events events;
 
-    private Boolean isFavorite;
-    private Boolean isNotify;
-    private Boolean isCalendar;
+    private Boolean isFavorite; // 즐겨찾기하면 무조건 캘린더에도 포함
+    private Boolean isNotify; // 알림 여부만 즐겨찾기와 별개로 관리
 
     @Enumerated(EnumType.STRING)
     private NotificationType notificationType;
