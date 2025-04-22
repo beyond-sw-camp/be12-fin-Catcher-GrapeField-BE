@@ -59,9 +59,16 @@ public class ChatWebSocketController {
                 new ChatMessageKafkaReq(chatMessageReq.getRoomIdx(), user.getIdx(), chatMessageReq.getContent());
 
         chatKafkaProducer.sendMessage(chatMessageKafkaReq);//  클라이언트로부터의 메시지를 kafka로 전송
+    }
 
-//        // 2. WebSocket 브로커로도 전송
-//        messagingTemplate.convertAndSend("/topic/chat.room." + resp.getRoomIdx(), resp);
+    @MessageMapping("/chat.like.{roomIdx}")
+    public void likeRoom(@DestinationVariable Long roomIdx,
+                         @Payload ChatHeartKafkaReq heartReq,
+                         Principal principal) {
+        CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
+        Long userIdx = userDetails.getUser().getIdx();
+        log.info("📡 WebSocket ❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, userIdx);
+        chatKafkaProducer.likeRoom(heartReq);
     }
 
 
@@ -73,23 +80,6 @@ public class ChatWebSocketController {
         return ResponseEntity.ok("웹소켓 메시지 포맷 확인용 API입니다.");
     }
 
-
-
-    @MessageMapping("/chat.like.{roomIdx}")
-    public void likeRoom(@DestinationVariable Long roomIdx,
-                         @Payload ChatHeartKafkaReq heartReq,
-                         Principal principal) {
-        CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
-        Long userIdx = userDetails.getUser().getIdx();
-        log.info("📡 WebSocket ❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, userIdx);
-        chatKafkaProducer.likeRoom(heartReq);
-//        // 1. DB 하트 수 증가
-//        chatRoomService.increaseHeartCount(roomIdx);
-//
-//        // 2. WebSocket 브로커로 브로드캐스트 (프론트에서 애니메이션 띄우게)
-//        messagingTemplate.convertAndSend("/topic/chat.room.likes." + heartReq.getRoomIdx(), heartReq);
-
-    }
 
 }
 

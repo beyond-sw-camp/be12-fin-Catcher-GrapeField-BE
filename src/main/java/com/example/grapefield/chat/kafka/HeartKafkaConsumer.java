@@ -22,7 +22,7 @@ public class HeartKafkaConsumer {
     private final KafkaTopicService kafkaTopicService;
     @KafkaListener(
             topicPattern="^chat-like-\\d+$",
-            groupId="chat-heart-group",
+            groupId="chat-like-group",
             containerFactory="heartKafkaListenerContainerFactory"
     )
     public void consumeHeart(ChatHeartKafkaReq chatHeartKafkaReq) {
