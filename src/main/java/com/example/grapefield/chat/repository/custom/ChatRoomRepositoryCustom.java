@@ -6,4 +6,6 @@ import org.springframework.data.domain.Slice;
 
 public interface ChatRoomRepositoryCustom {
     Slice<ChatRoom> findAllWithEvents(Pageable pageable);
+    Slice<ChatRoom> findAllOrderByHeartCnt(Pageable pageable);
+
 }
