@@ -18,7 +18,6 @@ public class ChatKafkaConsumer {
 
     private final ChatMessageService chatMessageService; //추가
     private final SimpMessagingTemplate simpMessagingTemplate; //추가
-    private final KafkaTopicService kafkaTopicService;
 
 
     @KafkaListener(topicPattern = "^chat-\\d+$",
@@ -28,7 +27,6 @@ public class ChatKafkaConsumer {
         log.info("✅ Kafka 메시지 수신: roomIdx={}, userIdx={}, content={}",
                 chatMessageKafkaReq.getRoomIdx(), chatMessageKafkaReq.getSendUserIdx(), chatMessageKafkaReq.getContent());
 
-        kafkaTopicService.createKafkaTopicIfNotExists(chatMessageKafkaReq.getRoomIdx());
 
         ChatMessageResp resp = chatMessageService.saveMessage(chatMessageKafkaReq); //DB 저장 로직 추가
 
