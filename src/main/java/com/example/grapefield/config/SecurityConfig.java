@@ -103,7 +103,7 @@ public class SecurityConfig {
           .requestMatchers("/admin/**", "/events/register", "/participant/register").hasRole("ADMIN")
           .requestMatchers("/post/register", "/post/update/**", "/post/delete/**",
               "/comment/register", "/comment/update/**", "/comment/delete/**",
-              "/user/**", "/review/register", "/review/update", "/review/delete").hasAnyRole("USER", "ADMIN")
+              "/user/**", "/review/register", "/review/update", "/review/delete", "/calendar/**","/personal_calendar/**", "/notify/**", "/interest/**").hasAnyRole("USER", "ADMIN")
           .anyRequest().authenticated();
     });
 

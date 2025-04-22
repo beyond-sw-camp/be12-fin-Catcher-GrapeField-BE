@@ -40,4 +40,9 @@ public class ScheduleNotification {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private ScheduleType scheduleType; // EVENTS_INTEREST or PERSONAL_SCHEDULE
+
+  // 읽음 표시 메서드
+  public void markAsRead() {
+    this.isRead = true;
+  }
 }

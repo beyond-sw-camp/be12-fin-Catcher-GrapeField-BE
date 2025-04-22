@@ -23,7 +23,6 @@ public class PersonalSchedule {
   private String description;
   private Boolean isNotify;
   private LocalDate startDate;
-  private LocalDate endDate;
   private LocalDate createdAt;
   private LocalDate updatedAt;
 
