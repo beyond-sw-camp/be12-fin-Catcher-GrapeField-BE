@@ -19,7 +19,7 @@ import java.util.List;
 public class HeartKafkaConsumer {
     private final ChatRoomService chatRoomService;
     private final SimpMessagingTemplate messagingTemplate;
-    private final KafkaTopicService kafkaTopicService;
+
     @KafkaListener(
             topicPattern="^chat-like-\\d+$",
             groupId="chat-like-group",
@@ -27,8 +27,6 @@ public class HeartKafkaConsumer {
     )
     public void consumeHeart(ChatHeartKafkaReq chatHeartKafkaReq) {
         log.info("✅ KafkaConsumer 좋아요 ♥\uFE0F 하트 수신: roomIdx={}", chatHeartKafkaReq.getRoomIdx());
-
-        kafkaTopicService.createHeartKafkaTopicIfNotExist(chatHeartKafkaReq);
 
         // 1. DB 하트 수 증가
         chatRoomService.increaseHeartCount(chatHeartKafkaReq.getRoomIdx());
