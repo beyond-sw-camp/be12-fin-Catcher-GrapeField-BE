@@ -17,8 +17,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PersonalScheduleService {
   private final PersonalScheduleRepository personalScheduleRepository;
+  private final NotificationService notificationService;
 
   public Long registerSchedule(PersonalScheduleReq request, User user) {
+    //일정 생성
     PersonalSchedule schedule = PersonalSchedule.builder()
         .title(request.getTitle())
         .description(request.getDescription())
@@ -28,7 +30,12 @@ public class PersonalScheduleService {
         .updatedAt(LocalDateTime.now())
         .user(user)
         .build();
+    //일정 저장
     PersonalSchedule saveSchedule = personalScheduleRepository.save(schedule);
+    // isNotify가 true인 경우 알림 생성
+    if (Boolean.TRUE.equals(saveSchedule.getIsNotify())) {
+      notificationService.createPersonalScheduleNotification(saveSchedule);
+    }
     return saveSchedule.getIdx();
   }
 

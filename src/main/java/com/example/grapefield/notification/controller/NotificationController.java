@@ -1,6 +1,7 @@
 package com.example.grapefield.notification.controller;
 
 import com.example.grapefield.notification.model.entity.ScheduleNotification;
+import com.example.grapefield.notification.model.response.NotificationResp;
 import com.example.grapefield.notification.service.NotificationService;
 import com.example.grapefield.user.CustomUserDetails;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -11,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -24,25 +26,43 @@ public class NotificationController {
   public ResponseEntity<Boolean> toggleNotify(@RequestParam Long idx, @AuthenticationPrincipal CustomUserDetails principal) {
     if (principal == null) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); }
     Boolean result = notificationService.toggleNotify(idx, principal.getUser());
-    return  ResponseEntity.ok(result);
+    return ResponseEntity.ok(result);
   }
 
-  //사용자 개인 일정 알림 목록
-  @GetMapping
-  public ResponseEntity<List<ScheduleNotification>> getUserNotifications(
-      @RequestParam Long userIdx) {
-    return ResponseEntity.ok(notificationService.getUserNotifications(userIdx));
-  }
-
-  @GetMapping("/unread")
-  public ResponseEntity<List<ScheduleNotification>> getUnreadNotifications(@AuthenticationPrincipal CustomUserDetails principal) {
+  //사용자 개인 일정 알림 목록 - DTO로 변환하여 반환
+  @GetMapping("/all")
+  public ResponseEntity<List<NotificationResp>> getUserNotifications(@AuthenticationPrincipal CustomUserDetails principal) {
     Long userIdx = principal.getUser().getIdx();
-    return ResponseEntity.ok(notificationService.getUnreadNotifications(userIdx));
+    List<NotificationResp> notifications = notificationService.getUserNotifications(userIdx);
+    return ResponseEntity.ok(notifications);
   }
 
-  @PutMapping("/{notificationId}/read")
-  public ResponseEntity<Void> markAsRead(@PathVariable Long notificationId) {
-    notificationService.markAsRead(notificationId);
+  // 읽지 않은 알림 목록 - DTO로 변환하여 반환
+  @GetMapping("/unread")
+  public ResponseEntity<List<NotificationResp>> getUnreadNotifications(@AuthenticationPrincipal CustomUserDetails principal) {
+    Long userIdx = principal.getUser().getIdx();
+    List<NotificationResp> notifications = notificationService.getUnreadNotifications(userIdx);
+    return ResponseEntity.ok(notifications);
+  }
+
+  @PutMapping("/{notificationIdx}/read")
+  public ResponseEntity<Void> markAsRead(@PathVariable Long notificationIdx) {
+    notificationService.markAsRead(notificationIdx);
+    return ResponseEntity.ok().build();
+  }
+
+  // 모든 알림 읽음 처리 엔드포인트 추가 (프론트엔드에서 사용 중이므로)
+  @PostMapping("/read-all")
+  public ResponseEntity<Void> markAllAsRead(@AuthenticationPrincipal CustomUserDetails principal) {
+    Long userIdx = principal.getUser().getIdx();
+    notificationService.markAllAsRead(userIdx);
+    return ResponseEntity.ok().build();
+  }
+
+  //알림을 스와이프해서 삭제(소프트)
+  @DeleteMapping("/delete/{notificationIdx}")
+  public ResponseEntity<Void> hideNotification(@PathVariable Long notificationIdx) {
+    notificationService.hideNotification(notificationIdx);
     return ResponseEntity.ok().build();
   }
 }

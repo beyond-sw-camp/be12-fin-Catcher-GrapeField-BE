@@ -1,6 +1,7 @@
 package com.example.grapefield.notification.model.entity;
 
 import com.example.grapefield.user.model.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,6 +32,9 @@ public class ScheduleNotification {
 
   private Boolean isRead;
 
+  @Builder.Default
+  private Boolean isVisible = true;
+
   private LocalDateTime notificationTime;
 
   @Enumerated(EnumType.STRING)
@@ -45,4 +49,5 @@ public class ScheduleNotification {
   public void markAsRead() {
     this.isRead = true;
   }
+  public void hide() { this.isVisible = false; }
 }

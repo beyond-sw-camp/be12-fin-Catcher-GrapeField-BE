@@ -4,6 +4,7 @@ import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.repository.EventsRepository;
 import com.example.grapefield.notification.infrastructure.scheduler.NotificationScheduler;
 import com.example.grapefield.notification.model.entity.*;
+import com.example.grapefield.notification.model.response.NotificationResp;
 import com.example.grapefield.notification.reposistory.EventsInterestRepository;
 import com.example.grapefield.notification.reposistory.ScheduleNotificationRepository;
 import com.example.grapefield.user.model.entity.User;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -52,18 +54,41 @@ public class NotificationService {
       boolean alreadyExists = scheduleNotificationRepository.existsByUserAndEventsInterest(user, interest);
 
       if (!alreadyExists) {
-        ScheduleNotification noti = ScheduleNotification.builder()
-            .user(user)
-            .eventsInterest(interest)
-            .notificationTime(calculateNotificationTime(event.getStartDate(), NotificationType.HOUR_REMINDER))
-            .notificationType(NotificationType.HOUR_REMINDER)
-            .scheduleType(ScheduleType.EVENTS_INTEREST)
-            .isRead(false)
-            .build();
+        // 세 가지 알림 유형 모두 생성
 
-        scheduleNotificationRepository.save(noti);
+        // 1. 시작 10분 전 알림
+        ScheduleNotification noti10min = ScheduleNotification.builder()
+                .user(user)
+                .eventsInterest(interest)
+                .notificationTime(calculateNotificationTime(event.getStartDate(), NotificationType.BEFORE_10MIN))
+                .notificationType(NotificationType.BEFORE_10MIN)
+                .scheduleType(ScheduleType.EVENTS_INTEREST)
+                .isRead(false)
+                .build();
+        scheduleNotificationRepository.save(noti10min);
+
+        // 2. 1시간 전 알림
+        ScheduleNotification noti1hour = ScheduleNotification.builder()
+                .user(user)
+                .eventsInterest(interest)
+                .notificationTime(calculateNotificationTime(event.getStartDate(), NotificationType.BEFORE_1HOUR))
+                .notificationType(NotificationType.BEFORE_1HOUR)
+                .scheduleType(ScheduleType.EVENTS_INTEREST)
+                .isRead(false)
+                .build();
+        scheduleNotificationRepository.save(noti1hour);
+
+        // 3. 당일 오전 9시 알림
+        ScheduleNotification noti9am = ScheduleNotification.builder()
+                .user(user)
+                .eventsInterest(interest)
+                .notificationTime(calculateNotificationTime(event.getStartDate(), NotificationType.DAY_9AM))
+                .notificationType(NotificationType.DAY_9AM)
+                .scheduleType(ScheduleType.EVENTS_INTEREST)
+                .isRead(false)
+                .build();
+        scheduleNotificationRepository.save(noti9am);
       }
-
     } else {
       // 알림 해제 시 알림 삭제
       scheduleNotificationRepository.deleteByUserAndEventsInterest(user, interest);
@@ -82,30 +107,65 @@ public class NotificationService {
     if (personalSchedule.getIsNotify()) {
       User user = personalSchedule.getUser();
 
-      ScheduleNotification notification = ScheduleNotification.builder()
-          .user(user)
-          .personalSchedule(personalSchedule)
-          .isRead(false)
-          .notificationTime(calculateNotificationTime(personalSchedule.getStartDate(), NotificationType.START_REMINDER))
-          .notificationType(NotificationType.START_REMINDER)
-          .scheduleType(ScheduleType.PERSONAL_SCHEDULE)
-          .build();
+      // 1. 시작 10분 전 알림
+      ScheduleNotification notification10min = ScheduleNotification.builder()
+              .user(user)
+              .personalSchedule(personalSchedule)
+              .isRead(false)
+              .notificationTime(calculateNotificationTime(personalSchedule.getStartDate(), NotificationType.BEFORE_10MIN))
+              .notificationType(NotificationType.BEFORE_10MIN)
+              .scheduleType(ScheduleType.PERSONAL_SCHEDULE)
+              .build();
+      scheduleNotificationRepository.save(notification10min);
+      notificationScheduler.scheduleNotification(notification10min);
 
-      scheduleNotificationRepository.save(notification);
-      notificationScheduler.scheduleNotification(notification);
+      // 2. 1시간 전 알림
+      ScheduleNotification notification1hour = ScheduleNotification.builder()
+              .user(user)
+              .personalSchedule(personalSchedule)
+              .isRead(false)
+              .notificationTime(calculateNotificationTime(personalSchedule.getStartDate(), NotificationType.BEFORE_1HOUR))
+              .notificationType(NotificationType.BEFORE_1HOUR)
+              .scheduleType(ScheduleType.PERSONAL_SCHEDULE)
+              .build();
+      scheduleNotificationRepository.save(notification1hour);
+      notificationScheduler.scheduleNotification(notification1hour);
+
+      // 3. 당일 오전 9시 알림
+      ScheduleNotification notification9am = ScheduleNotification.builder()
+              .user(user)
+              .personalSchedule(personalSchedule)
+              .isRead(false)
+              .notificationTime(calculateNotificationTime(personalSchedule.getStartDate(), NotificationType.DAY_9AM))
+              .notificationType(NotificationType.DAY_9AM)
+              .scheduleType(ScheduleType.PERSONAL_SCHEDULE)
+              .build();
+      scheduleNotificationRepository.save(notification9am);
+      notificationScheduler.scheduleNotification(notification9am);
     }
   }
 
   /**
    * 알림 시간 계산 유틸
    */
-  private LocalDateTime calculateNotificationTime(LocalDateTime eventStart, NotificationType type) {
-    return switch (type) {
-      case START_REMINDER -> eventStart.toLocalDate().atTime(9, 0); // 당일 오전 9시
-      case HOUR_REMINDER -> eventStart.minusHours(1); // 1시간 전
-      case CUSTOM_MESSAGE -> LocalDateTime.now(); // 지금 즉시
-      default -> eventStart;
-    };
+  private LocalDateTime calculateNotificationTime(LocalDateTime startDate, NotificationType type) {
+    switch (type) {
+      case BEFORE_10MIN:
+        return startDate.minusMinutes(10);
+      case BEFORE_1HOUR:
+        return startDate.minusHours(1);
+      case DAY_9AM:
+        // 당일 오전 9시로 설정
+        return LocalDateTime.of(
+                startDate.toLocalDate(), // 시작 날짜의 날짜 부분만 가져옵니다
+                LocalTime.of(9, 0) // 오전 9시로 설정
+        );
+      case CUSTOM_MESSAGE:
+        // 기타 운영자 알림은 별도 처리 필요
+        return startDate; // 기본값 또는 필요에 따라 조정
+      default:
+        return startDate;
+    }
   }
 
   /**
@@ -121,14 +181,33 @@ public class NotificationService {
   /**
    * 사용자의 모든 알림 조회
    */
-  public List<ScheduleNotification> getUserNotifications(Long userId) {
-    return scheduleNotificationRepository.findByUserIdxOrderByNotificationTimeDesc(userId);
+  public List<NotificationResp> getUserNotifications(Long userId) {
+    return scheduleNotificationRepository.findNotificationsByUserIdx(userId);
   }
 
   /**
    * 사용자의 읽지 않은 알림만 조회
    */
-  public List<ScheduleNotification> getUnreadNotifications(Long userId) {
-    return scheduleNotificationRepository.findByUserIdxAndIsReadFalseOrderByNotificationTimeDesc(userId);
+  public List<NotificationResp> getUnreadNotifications(Long userId) {
+    return scheduleNotificationRepository.findUnreadNotificationsByUserIdx(userId);
+  }
+
+  /**
+   * 사용자의 모든 알림을 읽음 처리
+   */
+  @Transactional
+  public void markAllAsRead(Long userId) {
+    scheduleNotificationRepository.markAllAsReadByUserId(userId);
+  }
+
+  /**
+   * 알림 숨김 처리 (UI에서 제거)
+   */
+  @Transactional
+  public void hideNotification(Long notificationId) {
+    scheduleNotificationRepository.findById(notificationId).ifPresent(notification -> {
+      notification.hide();
+      scheduleNotificationRepository.save(notification);
+    });
   }
 }

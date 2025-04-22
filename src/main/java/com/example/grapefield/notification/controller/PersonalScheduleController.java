@@ -32,7 +32,6 @@ public class PersonalScheduleController {
     return ResponseEntity.ok(scheduleIdx);
   }
 
-  //TODO : 개인 일정 불러오기
   @GetMapping("/list")
   public  ResponseEntity<List<PersonalScheduleResp>> getSchedules(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date, @AuthenticationPrincipal CustomUserDetails principal) {
     if (principal == null) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); }

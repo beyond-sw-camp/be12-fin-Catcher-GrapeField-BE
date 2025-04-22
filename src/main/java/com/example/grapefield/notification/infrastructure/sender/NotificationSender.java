@@ -19,52 +19,32 @@ public class NotificationSender {
 
   // 실제 알림 발송 로직
   public void sendNotification(ScheduleNotification notification) {
-    // 알림 메시지 생성
-    String message = buildNotificationMessage(notification);
+    // 개인 일정 알림인 경우 isNotify 확인
+    if (notification.getScheduleType() == ScheduleType.PERSONAL_SCHEDULE) {
+      PersonalSchedule schedule = notification.getPersonalSchedule();
+      if (schedule == null || !Boolean.TRUE.equals(schedule.getIsNotify())) {
+        // isNotify가 false면 알림을 발송하지 않음
+        return;
+      }
+    }
+
+    // 이벤트 관심 알림인 경우 isNotify 확인 (필요한 경우)
+    if (notification.getScheduleType() == ScheduleType.EVENTS_INTEREST) {
+      EventsInterest interest = notification.getEventsInterest();
+      if (interest == null || !Boolean.TRUE.equals(interest.getIsNotify())) {
+        // isNotify가 false면 알림을 발송하지 않음
+        return;
+      }
+    }
+
     // 엔티티를 응답용 DTO로 변환
     NotificationResp notificationResp = NotificationResp.fromEntity(notification);
 
     // WebSocket으로 알림 발송
     simpMessagingTemplate.convertAndSendToUser(
-        notification.getUser().getUsername(),
-        "/queue/notifications",
-        notificationResp
+            notification.getUser().getUsername(),
+            "/queue/notifications",
+            notificationResp
     );
-  }
-
-  // 알림 메시지 생성
-  private String buildNotificationMessage(ScheduleNotification notification) {
-    StringBuilder message = new StringBuilder();
-
-    if (notification.getScheduleType() == ScheduleType.EVENTS_INTEREST) {
-      EventsInterest interest = notification.getEventsInterest();
-      Events event = interest.getEvents();
-
-      switch (notification.getNotificationType()) {
-        case START_REMINDER:
-          message.append("[오늘] ")
-              .append(event.getTitle())
-              .append(" 티켓팅이 오늘 시작합니다.");
-          break;
-        case HOUR_REMINDER:
-          message.append("[1시간 전] ")
-              .append(event.getTitle())
-              .append(" 티켓팅이 1시간 후에 시작합니다.");
-          break;
-        case CUSTOM_MESSAGE:
-          message.append("[알림] ")
-              .append(event.getTitle())
-              .append("에 관한 소식이 있습니다.");
-          break;
-      }
-    } else if (notification.getScheduleType() == ScheduleType.PERSONAL_SCHEDULE) {
-      PersonalSchedule schedule = notification.getPersonalSchedule();
-
-      message.append("[일정] ")
-          .append(schedule.getTitle())
-          .append("가 오늘 시작합니다.");
-    }
-
-    return message.toString();
   }
 }

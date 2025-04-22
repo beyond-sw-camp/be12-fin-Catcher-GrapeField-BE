@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -22,15 +23,15 @@ import java.util.List;
 public class CalendarController {
   private final CalendarFacadeService calendarFacadeService;
 
-//  @GetMapping("/list")
-//  public ResponseEntity<CalendarMonthResp> getMonthlyCalendar(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date,
-//      @AuthenticationPrincipal CustomUserDetails userDetails) {
-//
-//    Long userIdx = userDetails.getUser().getIdx();
-//    CalendarMonthResp calendarResp = calendarFacadeService.getMonthlyCalendar(userIdx, year, month);
-//
-//    return ResponseEntity.ok(calendarResp);
-//  }
+  @GetMapping("/list")
+  public ResponseEntity<Map<String, Object>> getAllCalendar(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date,
+                                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+    Long userIdx = userDetails.getUser().getIdx();
+    Map<String, Object> calendarResp = calendarFacadeService.getAllCalendar(date, userIdx);
+
+    return ResponseEntity.ok(calendarResp);
+  }
 
   @GetMapping("/interest")
   public ResponseEntity<List<EventInterestCalendarResp>> getInterestEvents(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date, @AuthenticationPrincipal CustomUserDetails userDetails){

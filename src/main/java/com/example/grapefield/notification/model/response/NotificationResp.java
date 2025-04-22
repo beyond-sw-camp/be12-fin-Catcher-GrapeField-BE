@@ -9,6 +9,7 @@ import com.example.grapefield.notification.model.entity.NotificationType;
 import com.example.grapefield.notification.model.entity.PersonalSchedule;
 import com.example.grapefield.notification.model.entity.ScheduleNotification;
 import com.example.grapefield.notification.model.entity.ScheduleType;
+import com.example.grapefield.notification.util.NotificationMessageUtil;
 import lombok.*;
 
 @Getter
@@ -19,56 +20,122 @@ import lombok.*;
 public class NotificationResp {
   private Long idx;                    // 알림 ID
   private Long userIdx;                // 사용자 ID
-  private String title;               // 알림 제목
+  private String title;                // 알림 제목
+  private String message;              // 알림 메시지 (직접 생성)
   private LocalDateTime notificationTime;  // 알림 예정 시간
-  private Boolean isRead;             // 읽음 여부
-  private NotificationType notificationType;  // 알림 유형
-  private ScheduleType scheduleType;  // 알림 대상 유형
+  private Boolean isRead;              // 읽음 여부
+  private String notificationType;     // 알림 유형 (enum이 아닌 문자열로 변환)
+  private String scheduleType;         // 알림 대상 유형 (enum이 아닌 문자열로 변환)
 
-  // 알림 관련 추가 정보
-  private EventSummaryResp event;      // 관련 이벤트 정보
-  private PersonalScheduleResp personalSchedule;  // 관련 개인 일정 정보
+  // 최소한의 필요 정보만 포함
+  private EventMinimalInfo eventInfo;        // 최소한의 이벤트 정보
+  private ScheduleMinimalInfo scheduleInfo;  // 최소한의 일정 정보
 
   // 사용자 친화적 시간 표시
-  private String formattedTime;       // "10분 전", "1시간 전" 등
+  private String formattedTime;        // "10분 전", "1시간 전" 등
+
+  // 내부 DTO 클래스 - 이벤트 최소 정보
+  @Getter @Builder
+  public static class EventMinimalInfo {
+    private Long idx;
+    private String title;
+    private String venue;
+  }
+
+  // 내부 DTO 클래스 - 일정 최소 정보
+  @Getter @Builder
+  public static class ScheduleMinimalInfo {
+    private Long idx;
+    private String title;
+  }
+
+  //QueryDSL 프로젝션을 위한 생성자
+  public NotificationResp(Long idx, Long userIdx, String title, String message, LocalDateTime notificationTime, Boolean isRead, String notificationType, String scheduleType, String formattedTime) {
+    this.idx = idx;
+    this.userIdx = userIdx;
+    this.title = title;
+    this.message = message;
+    this.notificationTime = notificationTime;
+    this.isRead = isRead;
+    this.notificationType = notificationType;
+    this.scheduleType = scheduleType;
+    this.formattedTime = formattedTime;
+    // eventInfo와 scheduleInfo는 초기화하지 않음 (null로 유지)
+  }
 
   // 알림 엔티티를 DTO로 변환
   public static NotificationResp fromEntity(ScheduleNotification notification) {
-    NotificationResp dto = NotificationResp.builder()
-        .idx(notification.getIdx())
-        .userIdx(notification.getUser().getIdx())
-        .notificationType(notification.getNotificationType())
-        .scheduleType(notification.getScheduleType())
-        .notificationTime(notification.getNotificationTime())
-        .isRead(notification.getIsRead())
-        .build();
-
-    // 시간 포맷팅
-    dto.setFormattedTime(formatTimeAgo(notification.getNotificationTime()));
-
-    // 이벤트 정보 추가
-    if (notification.getScheduleType() == ScheduleType.EVENTS_INTEREST &&
-        notification.getEventsInterest() != null) {
-
-      Events event = notification.getEventsInterest().getEvents();
-      if (event != null) {
-        dto.setTitle(event.getTitle());
-        dto.setEvent(EventSummaryResp.fromEntity(event));
-      }
+    if (notification == null) {
+      return null;
     }
 
-    // 개인 일정 정보 추가
-    if (notification.getScheduleType() == ScheduleType.PERSONAL_SCHEDULE &&
-        notification.getPersonalSchedule() != null) {
+    try {
+      NotificationResp dto = NotificationResp.builder()
+              .idx(notification.getIdx())
+              .userIdx(notification.getUser() != null ? notification.getUser().getIdx() : null)
+              .notificationTime(notification.getNotificationTime())
+              .isRead(notification.getIsRead())
+              .notificationType(notification.getNotificationType().name())
+              .scheduleType(notification.getScheduleType().name())
+              .formattedTime(formatTimeAgo(notification.getNotificationTime()))
+              .build();
 
-      PersonalSchedule schedule = notification.getPersonalSchedule();
-      if (schedule != null) {
-        dto.setTitle(schedule.getTitle());
-        dto.setPersonalSchedule(PersonalScheduleResp.fromEntity(schedule));
+      // 공통 유틸리티 클래스를 사용하여 메시지 생성
+      dto.setMessage(NotificationMessageUtil.buildMessage(notification));
+
+      // 이벤트 정보 처리
+      if (notification.getScheduleType() == ScheduleType.EVENTS_INTEREST
+              && notification.getEventsInterest() != null
+              && notification.getEventsInterest().getEvents() != null) {
+
+        Events event = notification.getEventsInterest().getEvents();
+
+        // 제목 설정
+        dto.setTitle("공연/전시 알림");
+
+        // 최소한의 이벤트 정보만 설정
+        EventMinimalInfo eventInfo = EventMinimalInfo.builder()
+                .idx(event.getIdx())
+                .title(event.getTitle())
+                .venue(event.getVenue())
+                .build();
+
+        dto.setEventInfo(eventInfo);
       }
-    }
 
-    return dto;
+      // 개인 일정 정보 처리
+      if (notification.getScheduleType() == ScheduleType.PERSONAL_SCHEDULE
+              && notification.getPersonalSchedule() != null) {
+
+        PersonalSchedule schedule = notification.getPersonalSchedule();
+
+        // 제목 설정
+        dto.setTitle("개인 일정 알림");
+
+        // 최소한의 일정 정보만 설정
+        ScheduleMinimalInfo scheduleInfo = ScheduleMinimalInfo.builder()
+                .idx(schedule.getIdx())
+                .title(schedule.getTitle())
+                .build();
+
+        dto.setScheduleInfo(scheduleInfo);
+      }
+
+      // 제목이 설정되지 않은 경우 기본값 설정
+      if (dto.getTitle() == null) {
+        dto.setTitle("알림");
+      }
+
+      return dto;
+    } catch (Exception e) {
+      // 변환 중 오류 발생 시 기본 값으로 dto 생성
+      return NotificationResp.builder()
+              .idx(notification.getIdx())
+              .title("알림")
+              .message("알림이 도착했습니다.")
+              .isRead(notification.getIsRead())
+              .build();
+    }
   }
 
   // 시간을 사용자 친화적인 형식으로 변환
@@ -104,35 +171,5 @@ public class NotificationResp {
         return DateTimeFormatter.ofPattern("yyyy.MM.dd").format(dateTime);
       }
     }
-  }
-
-  // 알림 메시지 생성
-  private static String buildMessage(ScheduleNotification notification) {
-    if (notification.getScheduleType() == ScheduleType.EVENTS_INTEREST &&
-        notification.getEventsInterest() != null) {
-
-      Events event = notification.getEventsInterest().getEvents();
-      if (event == null) return "알림이 도착했습니다.";
-
-      switch (notification.getNotificationType()) {
-        case START_REMINDER:
-          return String.format("오늘은 '%s' 공연/전시 시작일입니다.", event.getTitle());
-        case HOUR_REMINDER:
-          return String.format("'%s' 공연/전시가 1시간 후에 시작합니다.", event.getTitle());
-        case CUSTOM_MESSAGE:
-          return String.format("'%s' 관련 소식이 있습니다.", event.getTitle());
-        default:
-          return "알림이 도착했습니다.";
-      }
-    } else if (notification.getScheduleType() == ScheduleType.PERSONAL_SCHEDULE &&
-        notification.getPersonalSchedule() != null) {
-
-      PersonalSchedule schedule = notification.getPersonalSchedule();
-      if (schedule == null) return "알림이 도착했습니다.";
-
-      return String.format("오늘은 '%s' 일정이 있는 날입니다.", schedule.getTitle());
-    }
-
-    return "알림이 도착했습니다.";
   }
 }

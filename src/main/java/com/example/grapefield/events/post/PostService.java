@@ -108,13 +108,4 @@ public class PostService {
     // 모든 첨부파일 정보를 한 번에 저장
     if (!attachments.isEmpty()) { postAttachmentRepository.saveAll(attachments); }
   }
-
-
-
-//  public PostDetailResp getPostDetail(Long postIdx, User currentUser){
-//    Post post = postRepository.findById(postIdx)
-//        .orElseThrow();
-//    boolean isAuthor = post.getUser().getIdx().equals(currentUser.getIdx());
-//    return PostDetailResp.from(post, isAuthor);
-//  }
 }
