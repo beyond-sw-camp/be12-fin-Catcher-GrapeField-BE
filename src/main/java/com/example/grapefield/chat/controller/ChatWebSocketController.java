@@ -49,24 +49,19 @@ public class ChatWebSocketController {
         Authentication auth = (Authentication) principal;
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
         User user = userDetails.getUser();
-        log.info("userDetails.getIdx(); : {}", user.getIdx());
+
         // 개발 테스트용 로그
+        log.info("userDetails.getIdx(); : {}", user.getIdx());
         log.info("WebSocket 메시지 수신: roomIdx={}, content={}, principal={}",
                 chatMessageReq.getRoomIdx(), chatMessageReq.getContent(), user.getIdx());
 
-        // ✅ 1. 채팅방이 DB와 Kafka 모두 존재하는지 보장
-        chatRoomService.ensureRoomExists(chatMessageReq.getRoomIdx(), "기본 채팅방");
+        ChatMessageKafkaReq chatMessageKafkaReq =
+                new ChatMessageKafkaReq(chatMessageReq.getRoomIdx(), user.getIdx(), chatMessageReq.getContent());
 
+        chatKafkaProducer.sendMessage(chatMessageKafkaReq);//  클라이언트로부터의 메시지를 kafka로 전송
 
-        ChatMessageKafkaReq chatMessageKafkaReq = new ChatMessageKafkaReq(chatMessageReq.getRoomIdx(), user.getIdx(), chatMessageReq.getContent());
-        // 1. kafka로 메시지 전송
-        ChatMessageResp resp = chatMessageService.saveMessage(chatMessageKafkaReq);
-        //  클라이언트로부터의 메시지를 kafka로 전송
-        chatKafkaProducer.sendMessage(resp);
-
-
-        // 2. WebSocket 브로커로도 전송
-        messagingTemplate.convertAndSend("/topic/chat.room." + resp.getRoomIdx(), resp);
+//        // 2. WebSocket 브로커로도 전송
+//        messagingTemplate.convertAndSend("/topic/chat.room." + resp.getRoomIdx(), resp);
     }
 
 
