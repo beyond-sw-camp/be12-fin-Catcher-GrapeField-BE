@@ -81,7 +81,7 @@ public class ChatWebSocketController {
                          Principal principal) {
         CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         Long userIdx = userDetails.getUser().getIdx();
-        log.info("❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, userIdx);
+        log.info("📡 WebSocket ❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, userIdx);
         chatKafkaProducer.likeRoom(heartReq);
 //        // 1. DB 하트 수 증가
 //        chatRoomService.increaseHeartCount(roomIdx);

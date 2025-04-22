@@ -21,7 +21,7 @@ public class ChatKafkaProducer {
     }
 
     public void likeRoom(ChatHeartKafkaReq chatHeartKafkaReq) {
-        String topic = "chat-heart-" + chatHeartKafkaReq.getRoomIdx();
+        String topic = "chat-like-" + chatHeartKafkaReq.getRoomIdx();
         log.info("✅ KafkaProducer 발행: send heart ♥️ message'{}' to topic'{}'", chatHeartKafkaReq, topic);
         kafkaTemplate.send(topic, chatHeartKafkaReq);
     }

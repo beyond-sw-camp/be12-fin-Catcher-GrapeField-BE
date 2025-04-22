@@ -27,7 +27,7 @@ public class ChatKafkaConsumer {
         log.info("✅ Kafka 메시지 수신: roomIdx={}, userIdx={}, content={}",
                 chatMessageKafkaReq.getRoomIdx(), chatMessageKafkaReq.getSendUserIdx(), chatMessageKafkaReq.getContent());
 
-        chatRoomService.ensureRoomExists(chatMessageKafkaReq.getRoomIdx(), "기본 채팅방");
+        chatRoomService.createKafkaTopicIfNotExists(chatMessageKafkaReq.getRoomIdx());
 
         ChatMessageResp resp = chatMessageService.saveMessage(chatMessageKafkaReq); //DB 저장 로직 추가
 
