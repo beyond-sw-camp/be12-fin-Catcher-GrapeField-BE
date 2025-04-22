@@ -85,6 +85,37 @@ public class KafkaConfig {
         factory.setConsumerFactory(heartConsumerFactory());
         return factory;
     }
+
+
+    // 하이라이트 감지
+    @Bean
+    public ConsumerFactory<String, ChatMessageKafkaReq> highlightConsumerFactory() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "chat-highlight-group"); // 💡 그룹 다르게
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+
+        JsonDeserializer<ChatMessageKafkaReq> deserializer =
+                new JsonDeserializer<>(ChatMessageKafkaReq.class, false);
+        deserializer.addTrustedPackages("com.example.grapefield.chat.model.request");
+
+        return new DefaultKafkaConsumerFactory<>(
+                props,
+                new StringDeserializer(),
+                deserializer
+        );
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, ChatMessageKafkaReq>
+    highlightKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, ChatMessageKafkaReq> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(highlightConsumerFactory());
+        return factory;
+    }
+
     /*
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ChatMessageKafkaReq> kafkaListenerContainerFactory(

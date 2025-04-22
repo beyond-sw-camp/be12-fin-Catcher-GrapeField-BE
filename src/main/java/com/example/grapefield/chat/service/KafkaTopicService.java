@@ -15,6 +15,7 @@ import java.util.List;
 public class KafkaTopicService {
     private final AdminClient adminClient;
 
+    // 하트 토픽
     public void createHeartKafkaTopicIfNotExist(ChatHeartKafkaReq chatHeartKafkaReq) {
         String topicName = "chat-like-" + chatHeartKafkaReq.getRoomIdx();
         try {
@@ -29,7 +30,7 @@ public class KafkaTopicService {
             log.warn("⚠️ Kafka 토픽 생성 중 에러: {}", e.getMessage());
         }
     }
-
+    // 채팅방 토픽
     public void createKafkaTopicIfNotExists(Long roomIdx) {
         String topicName = "chat-" + roomIdx;
         try {
