@@ -20,7 +20,7 @@ public class ChatKafkaConsumer {
     private final SimpMessagingTemplate simpMessagingTemplate; //추가
 
 
-    @KafkaListener(topicPattern = "^chat-like-\\\\d+$",
+    @KafkaListener(topicPattern = "^chat-\\\\d+$",
             groupId = "chat-group",
             containerFactory = "chatKafkaListenerContainerFactory")
     public void consume(ChatMessageKafkaReq chatMessageKafkaReq) { //매개변수 리팩터링
