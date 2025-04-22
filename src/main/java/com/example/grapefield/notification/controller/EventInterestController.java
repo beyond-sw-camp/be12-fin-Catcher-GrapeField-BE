@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/interest")
 @Tag(name="즐겨찾기 기능", description = "공연/전시를 즐겨찾기")
 public class EventInterestController {
-  private EventsInterestService eventsInterestService;
+  private final EventsInterestService eventsInterestService;
 
-  @GetMapping("/register")
+  @PatchMapping("/toggle")
   public ResponseEntity<Boolean> toggleEventInterest(@RequestParam Long idx, @AuthenticationPrincipal CustomUserDetails principal) {
     if (principal == null) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); }
     Boolean result = eventsInterestService.toggleEventInterest(idx, principal.getUser());

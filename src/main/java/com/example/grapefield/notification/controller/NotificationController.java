@@ -19,8 +19,8 @@ import java.util.List;
 public class NotificationController {
   private final NotificationService notificationService;
 
-  //공연/전시 알림 등록
-  @GetMapping("/event")
+  //공연/전시 알림 토글
+  @PatchMapping("/event/toggle")
   public ResponseEntity<Boolean> toggleNotify(@RequestParam Long idx, @AuthenticationPrincipal CustomUserDetails principal) {
     if (principal == null) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); }
     Boolean result = notificationService.toggleNotify(idx, principal.getUser());

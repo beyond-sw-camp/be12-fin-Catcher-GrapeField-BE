@@ -101,9 +101,9 @@ public class NotificationService {
    */
   private LocalDateTime calculateNotificationTime(LocalDateTime eventStart, NotificationType type) {
     return switch (type) {
-      case START_REMINDER -> eventStart.toLocalDate().atTime(9, 0);
-      case HOUR_REMINDER -> eventStart.minusHours(1);
-      case CUSTOM_MESSAGE -> LocalDateTime.now();
+      case START_REMINDER -> eventStart.toLocalDate().atTime(9, 0); // 당일 오전 9시
+      case HOUR_REMINDER -> eventStart.minusHours(1); // 1시간 전
+      case CUSTOM_MESSAGE -> LocalDateTime.now(); // 지금 즉시
       default -> eventStart;
     };
   }
