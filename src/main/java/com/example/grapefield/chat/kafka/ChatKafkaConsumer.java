@@ -20,14 +20,14 @@ public class ChatKafkaConsumer {
     private final SimpMessagingTemplate simpMessagingTemplate; //추가
 
 
-    @KafkaListener(topicPattern = "chat-.*",
+    @KafkaListener(topicPattern = "^chat-\\d+$",
             groupId = "chat-group",
             containerFactory = "chatKafkaListenerContainerFactory")
     public void consume(ChatMessageKafkaReq chatMessageKafkaReq) { //매개변수 리팩터링
         log.info("✅ Kafka 메시지 수신: roomIdx={}, userIdx={}, content={}",
                 chatMessageKafkaReq.getRoomIdx(), chatMessageKafkaReq.getSendUserIdx(), chatMessageKafkaReq.getContent());
 
-        chatRoomService.ensureRoomExists(chatMessageKafkaReq.getRoomIdx(), "기본 채팅방");
+        chatRoomService.createKafkaTopicIfNotExists(chatMessageKafkaReq.getRoomIdx());
 
         ChatMessageResp resp = chatMessageService.saveMessage(chatMessageKafkaReq); //DB 저장 로직 추가
 

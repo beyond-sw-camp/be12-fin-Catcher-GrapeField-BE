@@ -29,6 +29,8 @@ public class ChatRoomService {
     private final ChatRoomMemberRepository memberRepository;
     private final ChatMessageCurrentRepository currentRepository;
 
+    /*
+    // 초기 개발 테스트용
     // 채팅방(ChatRoom)이 DB에 없으면 새로 만들고, Kafka 토픽도 같이 보장
     public ChatRoom ensureRoomExists(Long roomIdx, String roomName) {
         return chatRoomRepository.findById(roomIdx).orElseGet(() -> {
@@ -47,10 +49,10 @@ public class ChatRoomService {
 
             return room;
         });
-    }
+    } */
 
     // Kafka에 해당 채팅방 토픽이 없으면 새로 생성
-    private void createKafkaTopicIfNotExists(Long roomIdx) {
+    public void createKafkaTopicIfNotExists(Long roomIdx) {
         String topicName = "chat-" + roomIdx;
         try {
             var existingTopics = adminClient.listTopics().names().get();

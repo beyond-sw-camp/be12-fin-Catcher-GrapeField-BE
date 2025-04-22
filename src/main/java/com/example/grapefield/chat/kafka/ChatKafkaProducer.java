@@ -1,5 +1,6 @@
 package com.example.grapefield.chat.kafka;
 
+import com.example.grapefield.chat.model.request.ChatHeartKafkaReq;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.model.response.ChatMessageResp;
 import lombok.RequiredArgsConstructor;
@@ -17,5 +18,11 @@ public class ChatKafkaProducer {
         String topic = "chat-" + chatMessageKafkaReq.getRoomIdx();
         log.info("✅ KafkaProducer 발행: send message'{}' to topic'{}'", topic, chatMessageKafkaReq);
         kafkaTemplate.send(topic, chatMessageKafkaReq);
+    }
+
+    public void likeRoom(ChatHeartKafkaReq chatHeartKafkaReq) {
+        String topic = "chat-like-" + chatHeartKafkaReq.getRoomIdx();
+        log.info("✅ KafkaProducer 발행: send heart ♥️ message'{}' to topic'{}'", chatHeartKafkaReq, topic);
+        kafkaTemplate.send(topic, chatHeartKafkaReq);
     }
 }

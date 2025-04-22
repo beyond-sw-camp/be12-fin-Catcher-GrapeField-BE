@@ -81,13 +81,13 @@ public class ChatWebSocketController {
                          Principal principal) {
         CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         Long userIdx = userDetails.getUser().getIdx();
-        log.info("❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, userIdx);
-
-        // 1. DB 하트 수 증가
-        chatRoomService.increaseHeartCount(roomIdx);
-
-        // 2. WebSocket 브로커로 브로드캐스트 (프론트에서 애니메이션 띄우게)
-        messagingTemplate.convertAndSend("/topic/chat.room.likes." + heartReq.getRoomIdx(), heartReq);
+        log.info("📡 WebSocket ❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, userIdx);
+        chatKafkaProducer.likeRoom(heartReq);
+//        // 1. DB 하트 수 증가
+//        chatRoomService.increaseHeartCount(roomIdx);
+//
+//        // 2. WebSocket 브로커로 브로드캐스트 (프론트에서 애니메이션 띄우게)
+//        messagingTemplate.convertAndSend("/topic/chat.room.likes." + heartReq.getRoomIdx(), heartReq);
 
     }
 
