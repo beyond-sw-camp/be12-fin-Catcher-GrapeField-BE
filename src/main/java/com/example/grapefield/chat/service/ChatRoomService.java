@@ -49,7 +49,7 @@ public class ChatRoomService {
 
             return room;
         });
-    } */
+    }
 
     // Kafka에 해당 채팅방 토픽이 없으면 새로 생성
     public void createKafkaTopicIfNotExists(Long roomIdx) {
@@ -66,6 +66,8 @@ public class ChatRoomService {
             log.warn("⚠️ Kafka 토픽 생성 중 에러: {}", e.getMessage());
         }
     }
+
+    */
 
     public ChatRoom findByIdx(Long roomIdx) {
         return chatRoomRepository.findById(roomIdx)
