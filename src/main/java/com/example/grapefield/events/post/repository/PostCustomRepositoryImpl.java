@@ -1,8 +1,11 @@
 package com.example.grapefield.events.post.repository;
 
+import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.events.model.entity.Events;
+import com.example.grapefield.events.model.entity.QEvents;
 import com.example.grapefield.events.model.response.EventsListResp;
 import com.example.grapefield.events.post.model.entity.*;
+import com.example.grapefield.events.post.model.response.CommunityPostListResp;
 import com.example.grapefield.events.post.model.response.PostDetailResp;
 import com.example.grapefield.events.post.model.response.PostListResp;
 import com.example.grapefield.events.post.model.response.PostSearchListResp;
@@ -11,6 +14,7 @@ import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.model.entity.UserRole;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -28,6 +32,77 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PostCustomRepositoryImpl implements PostCustomRepository {
   private final JPAQueryFactory queryFactory;
+
+  @Override
+  public Page<CommunityPostListResp> findPostLists(User user, Pageable pageable, String type, String orderBy) {
+    QPost post = QPost.post;
+    QUser qUser = QUser.user;
+    QPostRecommend recommend = QPostRecommend.postRecommend;
+    QEvents events = QEvents.events;
+
+    boolean isAdmin = user != null && user.getRole().name().equals("ROLE_ADMIN");
+
+    BooleanBuilder builder = new BooleanBuilder();
+
+    // 문자열 type을 EventCategory로 변환
+    if (type != null && !type.equals("ALL")) {
+      try {
+        EventCategory category = EventCategory.valueOf(type);
+        builder.and(events.category.eq(category));
+      } catch (IllegalArgumentException e) {
+        // 잘못된 카테고리 값 처리
+        System.out.println("Invalid category: " + type);
+      }
+    }
+
+    if (!isAdmin) {
+      builder.and(post.isVisible.isTrue());
+    }
+
+    List<CommunityPostListResp> results = queryFactory
+            .select(Projections.constructor(CommunityPostListResp.class,
+                    post.idx,
+                    qUser.username,
+                    post.title,
+                    post.content,
+                    post.viewCnt,
+                    post.postType,
+                    post.createdAt,
+                    post.isVisible,
+                    recommend.idx.count().intValue(),
+                    events.idx,
+                    events.title,
+                    events.category
+            ))
+            .from(post)
+            .join(post.user, qUser)
+            .join(events).on(events.idx.eq(post.board.idx))
+            .leftJoin(recommend).on(recommend.post.eq(post))
+            .where(builder)
+            .groupBy(post.idx, qUser.username, post.title, post.content, post.viewCnt, post.postType,
+                    post.createdAt, post.isVisible, events.idx, events.title, events.category)
+            .orderBy(getOrderSpecifier(orderBy, post))
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+    JPAQuery<Long> countQuery = queryFactory
+            .select(post.count())
+            .from(post)
+            .join(events).on(events.idx.eq(post.board.idx))
+            .where(builder);
+
+    return PageableExecutionUtils.getPage(results, pageable, countQuery::fetchOne);
+  }
+
+  // 정렬 기준에 따른 OrderSpecifier 반환 메서드
+  private OrderSpecifier<?> getOrderSpecifier(String orderBy, QPost post) {
+    if ("popular".equals(orderBy)) {
+      return post.viewCnt.desc();
+    } else {
+      return post.createdAt.desc(); // 기본값: 최신순
+    }
+  }
 
   @Override
   public Page<PostListResp> findPostList(Long boardIdx, Pageable pageable, PostType postType, User user) {
