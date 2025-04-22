@@ -4,6 +4,7 @@ import com.example.grapefield.base.ApiErrorResponses;
 import com.example.grapefield.base.ApiSuccessResponses;
 import com.example.grapefield.common.PageResponse;
 import com.example.grapefield.events.post.model.request.PostRegisterReq;
+import com.example.grapefield.events.post.model.response.CommunityPostListResp;
 import com.example.grapefield.events.post.model.response.PostDetailResp;
 import com.example.grapefield.events.post.model.response.PostListResp;
 import com.example.grapefield.user.CustomUserDetails;
@@ -50,6 +51,22 @@ public class PostController {
     if (principal == null) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); }
     Long postIdx = postService.registerPost(request, images, principal.getUser());
     return ResponseEntity.ok(postIdx);
+  }
+
+  @Operation(summary = "인기, 최신 게시글 목록 조회", description = "커뮤니티에서 인기, 최신 게시글을 리스트 형식으로 반환하여 조회")
+  @ApiSuccessResponses
+  @ApiErrorResponses
+  @GetMapping("/list")
+  public ResponseEntity<PageResponse<CommunityPostListResp>> getPostList(
+          @AuthenticationPrincipal CustomUserDetails principal,
+          @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+          String type,
+          String orderBy
+  ) {
+    User user = (principal != null) ? principal.getUser() : null;
+    Page<CommunityPostListResp> postPage = postService.getPostLists(user, pageable, type, orderBy);
+    PageResponse<CommunityPostListResp> response = PageResponse.from(postPage, postPage.getContent());
+    return ResponseEntity.ok(response);
   }
 
 

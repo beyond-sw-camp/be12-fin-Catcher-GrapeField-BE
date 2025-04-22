@@ -6,6 +6,7 @@ import com.example.grapefield.events.post.model.entity.Post;
 import com.example.grapefield.events.post.model.entity.PostAttachment;
 import com.example.grapefield.events.post.model.entity.PostType;
 import com.example.grapefield.events.post.model.request.PostRegisterReq;
+import com.example.grapefield.events.post.model.response.CommunityPostListResp;
 import com.example.grapefield.events.post.model.response.PostDetailResp;
 import com.example.grapefield.events.post.model.response.PostListResp;
 import com.example.grapefield.events.post.repository.BoardRepository;
@@ -35,6 +36,11 @@ public class PostService {
   public Page<PostListResp> getPostList(User user, Long boardIdx, Pageable pageable, String type) {
     PostType postType = PostType.valueOf(type);
       return postRepository.findPostList(boardIdx, pageable, postType, user);
+  }
+
+  public Page<CommunityPostListResp> getPostLists(User user, Pageable pageable, String type, String orderBy) {
+
+    return postRepository.findPostLists(user, pageable, type, orderBy);
   }
 
   public PostDetailResp getPostDetail(Long idx, User user) {
