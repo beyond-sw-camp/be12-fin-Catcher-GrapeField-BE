@@ -1,5 +1,6 @@
 package com.example.grapefield.chat.model.response;
 
+import com.example.grapefield.chat.model.entity.ChatHighlight;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,5 +27,17 @@ public class ChatHighlightResp {
     private String description;
     @Schema(description = "구간 메세지 개수", example = "333")
     private Long messageCnt;
+
+
+    public static ChatHighlightResp fromEntity(ChatHighlight entity) {
+        return ChatHighlightResp.builder()
+                .idx(entity.getIdx())
+                .messageIdx(entity.getMessage().getMessageIdx())
+                .startTime(entity.getStartTime())
+                .endTime(entity.getEndTime())
+                .description(entity.getDescription())
+                .messageCnt(entity.getMessageCnt())
+                .build();
+    }
 
 }
