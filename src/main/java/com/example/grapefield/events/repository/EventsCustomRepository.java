@@ -44,7 +44,7 @@ public interface EventsCustomRepository {
   Slice<EventsTicketScheduleListResp> findEventsWithUpcomingTicketClosures(LocalDateTime now, Pageable pageable);
 
   //공연/전시 상세 페이지 정보
-  EventsDetailResp getEventDetail(Long eventsIdx);
+  EventsDetailResp getEventDetail(Long eventsIdx, User user);
 
   Map<String, Object> getParticipantDetail(Long eventsIdx);
 

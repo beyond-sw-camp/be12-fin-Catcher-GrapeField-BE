@@ -19,7 +19,6 @@ import lombok.*;
 public class NotificationResp {
   private Long idx;                    // 알림 ID
   private Long userIdx;                // 사용자 ID
-  private String message;             // 알림 메시지
   private String title;               // 알림 제목
   private LocalDateTime notificationTime;  // 알림 예정 시간
   private Boolean isRead;             // 읽음 여부
@@ -28,7 +27,7 @@ public class NotificationResp {
 
   // 알림 관련 추가 정보
   private EventSummaryResp event;      // 관련 이벤트 정보
-  private PersonalScheduleSummaryResp personalSchedule;  // 관련 개인 일정 정보
+  private PersonalScheduleResp personalSchedule;  // 관련 개인 일정 정보
 
   // 사용자 친화적 시간 표시
   private String formattedTime;       // "10분 전", "1시간 전" 등
@@ -43,10 +42,6 @@ public class NotificationResp {
         .notificationTime(notification.getNotificationTime())
         .isRead(notification.getIsRead())
         .build();
-
-    // 메시지 생성
-    String message = buildMessage(notification);
-    dto.setMessage(message);
 
     // 시간 포맷팅
     dto.setFormattedTime(formatTimeAgo(notification.getNotificationTime()));
@@ -69,7 +64,7 @@ public class NotificationResp {
       PersonalSchedule schedule = notification.getPersonalSchedule();
       if (schedule != null) {
         dto.setTitle(schedule.getTitle());
-        dto.setPersonalSchedule(PersonalScheduleSummaryResp.fromEntity(schedule));
+        dto.setPersonalSchedule(PersonalScheduleResp.fromEntity(schedule));
       }
     }
 

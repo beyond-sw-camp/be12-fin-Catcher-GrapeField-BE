@@ -23,8 +23,6 @@ public class NotificationSender {
     String message = buildNotificationMessage(notification);
     // 엔티티를 응답용 DTO로 변환
     NotificationResp notificationResp = NotificationResp.fromEntity(notification);
-    // 생성된 메시지를 DTO에 설정
-    notificationResp.setMessage(message);
 
     // WebSocket으로 알림 발송
     simpMessagingTemplate.convertAndSendToUser(

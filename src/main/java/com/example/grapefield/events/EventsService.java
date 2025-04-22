@@ -9,6 +9,7 @@ import com.example.grapefield.events.post.repository.BoardRepository;
 import com.example.grapefield.events.post.model.entity.Board;
 import com.example.grapefield.events.repository.EventsImgRepository;
 import com.example.grapefield.events.repository.EventsRepository;
+import com.example.grapefield.user.model.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -133,8 +134,8 @@ public class EventsService {
     };
   }
 
-  public EventsDetailResp getEventDetail(Long idx) {
-    return eventsRepository.getEventDetail(idx);
+  public EventsDetailResp getEventDetail(Long idx, User user) {
+    return eventsRepository.getEventDetail(idx, user);
   }
 
   public List<EventsImgDetailResp> getEventDetailImages(Long idx) {

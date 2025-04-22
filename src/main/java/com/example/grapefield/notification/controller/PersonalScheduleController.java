@@ -3,15 +3,18 @@ package com.example.grapefield.notification.controller;
 import com.example.grapefield.events.review.model.request.ReviewRegisterReq;
 import com.example.grapefield.notification.model.entity.PersonalSchedule;
 import com.example.grapefield.notification.model.request.PersonalScheduleReq;
+import com.example.grapefield.notification.model.response.PersonalScheduleResp;
 import com.example.grapefield.notification.service.PersonalScheduleService;
 import com.example.grapefield.user.CustomUserDetails;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -30,12 +33,11 @@ public class PersonalScheduleController {
   }
 
   //TODO : 개인 일정 불러오기
-//  @GetMapping("/list")
-//  public  ResponseEntity<List<PersonalSchedule>> getSchedules(@AuthenticationPrincipal CustomUserDetails principal) {
-//    if (principal == null) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); }
-//
-//  }
-
-
+  @GetMapping("/list")
+  public  ResponseEntity<List<PersonalScheduleResp>> getSchedules(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime date, @AuthenticationPrincipal CustomUserDetails principal) {
+    if (principal == null) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); }
+    List<PersonalScheduleResp> schedules = personalScheduleService.getSchedules(date, principal.getUser());
+    return  ResponseEntity.ok(schedules);
+  }
 
 }

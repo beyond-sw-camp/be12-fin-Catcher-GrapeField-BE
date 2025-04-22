@@ -24,46 +24,24 @@ public class EventsInterestService {
   private final EventsRepository eventsRepository;
 
   @Transactional
-  public EventsInterestResp registerEventInterest(EventsInterestReq dto) {
-    // User와 Events 엔티티 조회
-    User user = userRepository.findById(dto.getUserIdx())
-        .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다: " + dto.getUserIdx()));
+  public Boolean toggleEventInterest(Long idx, User user) {
+    Events event = eventsRepository.findById(idx)
+        .orElseThrow(() -> new EntityNotFoundException("이벤트를 찾을 수 없습니다"));
 
-    Events event = eventsRepository.findById(dto.getEventIdx())
-        .orElseThrow(() -> new EntityNotFoundException("이벤트를 찾을 수 없습니다: " + dto.getEventIdx()));
+    EventsInterest interest = eventsInterestRepository.findByUserAndEvents(user, event)
+        .orElse(EventsInterest.builder()
+            .user(user)
+            .events(event)
+            .isFavorite(false)
+            .isNotify(false)
+            .isCalendar(false)
+            .build());
 
-    // 이미 같은 사용자-이벤트 조합의 관심 정보가 있는지 확인
-    Optional<EventsInterest> existingInterest = eventsInterestRepository.findByUserAndEvents(user, event);
+    // 즐겨찾기 상태 토글
+    interest.setIsFavorite(!Boolean.TRUE.equals(interest.getIsFavorite()));
+    eventsInterestRepository.save(interest);
 
-    EventsInterest eventsInterest;
-
-    if (existingInterest.isPresent()) {
-      // 이미 존재하면 업데이트
-      eventsInterest = existingInterest.get();
-      eventsInterest.setIsFavorite(dto.getIsFavorite());
-      eventsInterest.setIsNotify(dto.getIsNotify());
-      eventsInterest.setNotificationType(dto.getNotificationType());
-    } else {
-      // 새로 생성
-      eventsInterest = EventsInterest.builder()
-          .user(user)
-          .events(event)
-          .isFavorite(dto.getIsFavorite())
-          .isNotify(dto.getIsNotify())
-          .notificationType(dto.getNotificationType())
-          .build();
-    }
-
-    // 저장
-    eventsInterest = eventsInterestRepository.save(eventsInterest);
-
-    // 알림 설정이 있으면 알림 생성
-    if (eventsInterest.getIsNotify()) {
-      notificationService.createEventNotification(eventsInterest);
-    }
-
-    // 엔티티를 응답 DTO로 변환하여 반환
-    return EventsInterestResp.fromEntity(eventsInterest);
+    return true;
   }
 
 //  @Transactional

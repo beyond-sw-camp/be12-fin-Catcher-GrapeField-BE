@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -22,9 +23,9 @@ public class PersonalSchedule {
   private String title;
   private String description;
   private Boolean isNotify;
-  private LocalDate startDate;
-  private LocalDate createdAt;
-  private LocalDate updatedAt;
+  private LocalDateTime startDate;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 
   @ManyToOne
   @JoinColumn(name = "user_idx")

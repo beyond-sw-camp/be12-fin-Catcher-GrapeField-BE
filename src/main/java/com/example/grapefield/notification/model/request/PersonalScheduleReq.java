@@ -2,7 +2,7 @@ package com.example.grapefield.notification.model.request;
 
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -12,6 +12,6 @@ public class PersonalScheduleReq {
   private Long userIdx;
   private String title;
   private String description;
-  private LocalDate startDate;
+  private LocalDateTime startDate;
   private Boolean isNotify;
 }

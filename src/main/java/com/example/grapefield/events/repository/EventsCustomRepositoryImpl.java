@@ -5,6 +5,7 @@ import com.example.grapefield.events.model.response.*;
 import com.example.grapefield.events.participant.model.entity.*;
 import com.example.grapefield.events.participant.model.response.OrganizationListResp;
 import com.example.grapefield.events.participant.model.response.PerformerListResp;
+import com.example.grapefield.notification.model.entity.EventsInterest;
 import com.example.grapefield.notification.model.entity.QEventsInterest;
 import com.example.grapefield.user.model.entity.User;
 import com.querydsl.core.BooleanBuilder;
@@ -279,10 +280,11 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
   }
 
   @Override
-  public EventsDetailResp getEventDetail(Long eventsIdx) {
+  public EventsDetailResp getEventDetail(Long eventsIdx, User user) {
     QEvents e = QEvents.events;
     QTicketInfo ti = QTicketInfo.ticketInfo;
     QSeatPrice sp = QSeatPrice.seatPrice;
+    QEventsInterest ei = QEventsInterest.eventsInterest;
 
     // 이벤트 기본 정보 조회
     Events event = queryFactory
@@ -292,6 +294,21 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
 
     if (event == null) {
       return null; // 또는 예외 처리
+    }
+
+    // 사용자 맞춤 정보 조회 (isFavorite, isNotify), user가 null이어도 에러 방지
+    boolean isFavorite = false;
+    boolean isNotify = false;
+    
+    if (user != null) {
+      EventsInterest interest = queryFactory
+          .selectFrom(ei)
+          .where(ei.user.eq(user)
+              .and(ei.events.eq(event)))
+          .fetchOne();
+
+      isFavorite = interest != null && Boolean.TRUE.equals(interest.getIsFavorite());
+      isNotify = interest != null && Boolean.TRUE.equals(interest.getIsNotify());
     }
 
     // 별도 쿼리로 티켓 정보 조회 (N+1 방지를 위해 in 절 사용)
@@ -308,6 +325,7 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
 
     // DTO 변환 및 반환
     return EventsDetailResp.builder()
+        .idx(eventsIdx)
         .title(event.getTitle())
         .category(event.getCategory())
         .startDate(event.getStartDate())
@@ -324,6 +342,8 @@ public class EventsCustomRepositoryImpl implements EventsCustomRepository {
         .seatPriceList(seatPrices.stream()
             .map(this::convertToSeatPriceDetailResp)
             .toList())
+        .isFavorite(isFavorite)
+        .isNotify(isNotify)
         .build();
   }
 
