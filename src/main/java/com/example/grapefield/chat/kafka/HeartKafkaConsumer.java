@@ -15,7 +15,7 @@ public class HeartKafkaConsumer {
     private final ChatRoomService chatRoomService;
     private final SimpMessagingTemplate messagingTemplate;
     @KafkaListener(
-            topicPattern="^chat-like-\\\\d+$",
+            topicPattern="^chat-like-\\d+$",
             groupId="chat-heart-group",
             containerFactory="heartKafkaListenerContainerFactory"
     )
