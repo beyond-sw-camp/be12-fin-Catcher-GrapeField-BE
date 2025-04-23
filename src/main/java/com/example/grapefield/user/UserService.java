@@ -1,6 +1,8 @@
 package com.example.grapefield.user;
 
 import com.example.grapefield.common.ImageService;
+import com.example.grapefield.events.post.model.response.UserPostListResp;
+import com.example.grapefield.events.post.repository.PostRepository;
 import com.example.grapefield.user.model.entity.AccountStatus;
 import com.example.grapefield.user.model.entity.EmailVerify;
 import com.example.grapefield.user.model.entity.User;
@@ -11,6 +13,8 @@ import com.example.grapefield.user.repository.EmailVerifyRepository;
 import com.example.grapefield.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,11 +32,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailVerifyRepository emailVerifyRepository;
     private final JavaMailSender mailSender;
     private final ImageService imageService;
     private final PasswordEncoder encoder = new BCryptPasswordEncoder();
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -137,7 +143,9 @@ public class UserService implements UserDetailsService {
         return true;
     }
 
-    public void saveProfileImg(User user) {
-
+    public Page<UserPostListResp> getUserPosts(Long userIdx, Pageable pageable) {
+        return postRepository.postsFindByUserIdx(userIdx, pageable);
     }
+
+
 }

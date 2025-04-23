@@ -5,10 +5,7 @@ import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.model.entity.QEvents;
 import com.example.grapefield.events.model.response.EventsListResp;
 import com.example.grapefield.events.post.model.entity.*;
-import com.example.grapefield.events.post.model.response.CommunityPostListResp;
-import com.example.grapefield.events.post.model.response.PostDetailResp;
-import com.example.grapefield.events.post.model.response.PostListResp;
-import com.example.grapefield.events.post.model.response.PostSearchListResp;
+import com.example.grapefield.events.post.model.response.*;
 import com.example.grapefield.user.model.entity.QUser;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.model.entity.UserRole;
@@ -17,6 +14,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -220,6 +218,47 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
     }
 
     return result;
+  }
+
+  // 구현체
+  @Override
+  public Page<UserPostListResp> postsFindByUserIdx(Long userIdx, Pageable pageable) {
+    QPost post = QPost.post;
+    QUser qUser = QUser.user;
+    QEvents events = QEvents.events;
+    QPostComment postComment = QPostComment.postComment;
+
+    // 전체 게시물 수를 조회
+    long total = queryFactory
+            .select(post.count())
+            .from(post)
+            .join(post.user, qUser)
+            .join(events).on(events.idx.eq(post.board.idx))
+            .where(post.user.idx.eq(userIdx))
+            .fetchOne();
+
+    // 페이지네이션을 적용하여 게시물 목록을 조회
+    List<UserPostListResp> content = queryFactory
+            .select(Projections.constructor(UserPostListResp.class,
+                    post.idx,
+                    post.title,
+                    post.createdAt,
+                    events.idx,
+                    events.title,
+                    events.category,
+                    JPAExpressions.select(postComment.count())
+                            .from(postComment)
+                            .where(postComment.post.eq(post))))
+            .from(post)
+            .join(post.user, qUser)
+            .join(events).on(events.idx.eq(post.board.idx))
+            .where(post.user.idx.eq(userIdx))
+            .orderBy(post.createdAt.desc()) // 최신순 정렬
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+    return new PageImpl<>(content, pageable, total);
   }
 
   private Page<PostSearchListResp> toPagePostListResp(List<Tuple> tuples, Pageable pageable, long total) {

@@ -2,10 +2,7 @@ package com.example.grapefield.events.post.repository;
 
 import com.example.grapefield.events.model.response.EventsListResp;
 import com.example.grapefield.events.post.model.entity.PostType;
-import com.example.grapefield.events.post.model.response.CommunityPostListResp;
-import com.example.grapefield.events.post.model.response.PostDetailResp;
-import com.example.grapefield.events.post.model.response.PostListResp;
-import com.example.grapefield.events.post.model.response.PostSearchListResp;
+import com.example.grapefield.events.post.model.response.*;
 import com.example.grapefield.user.model.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,4 +19,6 @@ public interface PostCustomRepository {
   //검색 관련
   Page<PostSearchListResp> findPostsByKeyword(String keyword, Pageable pageable, User user);
   Page<PostSearchListResp> findPostsByKeywordAnd(List<String> keywords, Pageable pageable, User user);
+
+  Page<UserPostListResp> postsFindByUserIdx(Long userIdx, Pageable pageable);
 }
