@@ -74,4 +74,17 @@ public class NotificationController {
     notificationService.hideNotification(notificationIdx);
     return ResponseEntity.ok().build();
   }
+
+  //알림 전체 삭제
+  @DeleteMapping("/delete-all")
+  public ResponseEntity<Void> hideAllNotification(@AuthenticationPrincipal CustomUserDetails principal) {
+    notificationService.hideAllNotification(principal.getUser().getIdx());
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/personal/{scheduleIdx}/toggle")
+  public ResponseEntity<?> togglePersonalNotify(@PathVariable Long scheduleIdx, @AuthenticationPrincipal CustomUserDetails user) {
+    notificationService.togglePersonalScheduleNotify(scheduleIdx, user.getUser());
+    return ResponseEntity.ok().build();
+  }
 }

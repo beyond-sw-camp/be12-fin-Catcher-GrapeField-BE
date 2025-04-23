@@ -6,6 +6,7 @@ import com.example.grapefield.notification.infrastructure.scheduler.Notification
 import com.example.grapefield.notification.model.entity.*;
 import com.example.grapefield.notification.model.response.NotificationResp;
 import com.example.grapefield.notification.reposistory.EventsInterestRepository;
+import com.example.grapefield.notification.reposistory.PersonalScheduleRepository;
 import com.example.grapefield.notification.reposistory.ScheduleNotificationRepository;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.utils.JwtUtil;
@@ -14,11 +15,13 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +32,7 @@ public class NotificationService {
   private final NotificationScheduler notificationScheduler;
   private final EventsRepository eventsRepository;
   private final EventsInterestRepository eventsInterestRepository;
+  private final PersonalScheduleRepository personalScheduleRepository;
 
   /**
    * 공연/전시 알림 토글
@@ -215,6 +219,13 @@ public class NotificationService {
     });
   }
 
+  //모든 알림 숨김 처리(UI에서 제거)
+  @Transactional
+  public void hideAllNotification(Long userIdx) {
+    scheduleNotificationRepository.hideAllNotification(userIdx);
+  }
+
+
   public List<NotificationResp> getAvailableNotifications(Long userIdx) {
     return scheduleNotificationRepository.findAvailableNotifications(userIdx);
   }
@@ -230,6 +241,51 @@ public class NotificationService {
     } catch (Exception e) {
       log.error("알림 스케줄링 중 오류 발생", e);
       // 필요하다면 애플리케이션 재시작 없이 재시도 로직 추가
+    }
+  }
+
+  @Transactional
+  public void togglePersonalScheduleNotify(Long scheduleIdx, User user) {
+    PersonalSchedule ps = personalScheduleRepository.findById(scheduleIdx)
+        .orElseThrow(() -> new EntityNotFoundException("스케줄을 찾을 수 없습니다."));
+
+    if (!ps.getUser().getIdx().equals(user.getIdx())) {
+      throw new AccessDeniedException("본인의 일정만 변경할 수 있습니다.");
+    }
+
+    boolean newState = !Boolean.TRUE.equals(ps.getIsNotify());
+    ps.setIsNotify(newState);
+    ps.setUpdatedAt(LocalDateTime.now());
+    personalScheduleRepository.save(ps);
+
+    List<ScheduleNotification> notifications =
+        scheduleNotificationRepository.findByPersonalSchedule(ps);
+
+    if (newState) {
+      // isNotify가 true로 바뀐 경우
+      if (!notifications.isEmpty()) {
+        // 이미 알림이 존재하면 활성화
+        for (ScheduleNotification notification : notifications) {
+          notification.setIsVisible(true);
+          notification.setIsRead(false);
+          scheduleNotificationRepository.save(notification);
+
+          // 스케줄러에 알림 업데이트 요청
+          notificationScheduler.updateNotification(notification);
+        }
+      } else {
+        // 개인 알림이 존재하지 않으면 새로 생성
+        createPersonalScheduleNotification(ps);
+      }
+    } else {
+      // isNotify가 false로 바뀐 경우 → 스케줄링 취소 및 숨김 처리
+      for (ScheduleNotification notification : notifications) {
+        notification.setIsVisible(false);
+        scheduleNotificationRepository.save(notification);
+
+        // 중요: 스케줄러에 취소 요청 추가
+        notificationScheduler.cancelNotification(notification.getIdx());
+      }
     }
   }
 

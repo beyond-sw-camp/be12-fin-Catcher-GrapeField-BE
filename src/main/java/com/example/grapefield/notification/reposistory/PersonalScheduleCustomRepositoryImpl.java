@@ -1,6 +1,8 @@
 package com.example.grapefield.notification.reposistory;
 
+import com.example.grapefield.notification.model.entity.PersonalSchedule;
 import com.example.grapefield.notification.model.entity.QPersonalSchedule;
+import com.example.grapefield.notification.model.entity.ScheduleNotification;
 import com.example.grapefield.notification.model.response.PersonalScheduleResp;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;

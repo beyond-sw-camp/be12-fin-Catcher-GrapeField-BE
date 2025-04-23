@@ -43,7 +43,9 @@ public class EventsInterestCustomRepositoryImpl implements EventsInterestCustomR
             events.startDate,
             events.endDate,
             ticketInfo.ticketLink,
-            interest.idx))
+            interest.idx,
+            interest.isNotify
+        ))
         .from(interest)
         .join(interest.events, events)
         .join(ticketInfo).on(ticketInfo.events.eq(events))
