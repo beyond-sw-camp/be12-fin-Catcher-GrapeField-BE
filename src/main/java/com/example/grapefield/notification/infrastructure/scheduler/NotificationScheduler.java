@@ -8,10 +8,13 @@ import com.example.grapefield.notification.model.entity.ScheduleType;
 import com.example.grapefield.notification.reposistory.EventsInterestRepository;
 import com.example.grapefield.notification.reposistory.PersonalScheduleRepository;
 import com.example.grapefield.notification.reposistory.ScheduleNotificationRepository;
+import com.example.grapefield.notification.service.NotificationService;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +23,9 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledFuture;
 
 @Component
@@ -31,15 +36,10 @@ public class NotificationScheduler {
   private final ScheduleNotificationRepository notificationRepository; // 추가: 알림 조회를 위한 리포지토리
   private final PersonalScheduleRepository personalScheduleRepository;
   private final EventsInterestRepository eventsInterestRepository;
+
   private static final Logger log = LoggerFactory.getLogger(NotificationScheduler.class);
 
   private final Map<Long, ScheduledFuture<?>> scheduledTasks = new ConcurrentHashMap<>();
-
-  // 애플리케이션 시작 시 실행되는 메서드
-  @PostConstruct
-  public void init() {
-    scheduleAllFutureNotifications();
-  }
 
   // 미래의 모든 알림 스케줄링 (애플리케이션 재시작 시 필요)
   private void scheduleAllFutureNotifications() {
@@ -58,94 +58,72 @@ public class NotificationScheduler {
 
   // 새 알림 스케줄링
   public void scheduleNotification(ScheduleNotification notification) {
-    // 스케줄 타입에 따라 isNotify 상태 확인
-    boolean shouldSchedule = true;
+    // 현재 시간 기준으로 알림 날짜 변환
+    Date notificationDate = Date.from(notification.getNotificationTime().atZone(ZoneId.systemDefault()).toInstant());
+    Date currentDate = new Date();
 
-    if (notification.getScheduleType() == ScheduleType.PERSONAL_SCHEDULE
-            && notification.getPersonalSchedule() != null) {
-      // 개인 일정인 경우 isNotify 확인
-      shouldSchedule = Boolean.TRUE.equals(notification.getPersonalSchedule().getIsNotify());
-    } else if (notification.getScheduleType() == ScheduleType.EVENTS_INTEREST
-            && notification.getEventsInterest() != null) {
-      // 이벤트 관심 알림인 경우 isNotify 확인
-      shouldSchedule = Boolean.TRUE.equals(notification.getEventsInterest().getIsNotify());
+    // 1. 초기 알림 상태 확인
+    boolean shouldSchedule = checkNotifyStatus(notification);
+
+    // 스케줄링 조건을 만족하지 않으면 로깅 후 종료
+    if (!shouldSchedule) {
+      log.debug("알림 ID: {}의 isNotify 상태가 false여서 스케줄링하지 않습니다.", notification.getIdx());
+      return;
     }
 
-    // isNotify가 true인 경우에만 알림 스케줄링
-    if (shouldSchedule) {
-      Date notificationDate = Date.from(notification.getNotificationTime().atZone(ZoneId.systemDefault()).toInstant());
+    // 2. 시간에 따른 처리 분기
+    if (notificationDate.after(currentDate)) {
+      // 미래 시간인 경우 스케줄링
+      scheduleNotificationTask(notification, notificationDate);
+    } else {
+      // 지난 시간인 경우 즉시 처리 (단, 재확인 후)
+      log.debug("알림 ID: {}의 시간({})이 이미 지났습니다. isNotify 확인 후 즉시 발송합니다.",
+          notification.getIdx(), notification.getNotificationTime());
 
-      // 현재 시간보다 미래인 경우에만 스케줄링
-      if (notificationDate.after(new Date())) {
-        // NotificationTask에 isNotify 확인 로직 추가
-        NotificationTask task = new NotificationTask(notification, notificationSender) {
-          @Override
-          public void run() {
-            // 발송 직전에 다시 isNotify 상태 확인
-            boolean shouldSend = true;
-
-            if (notification.getScheduleType() == ScheduleType.PERSONAL_SCHEDULE
-                    && notification.getPersonalSchedule() != null) {
-              // 데이터베이스에서 최신 상태 조회
-              PersonalSchedule latestSchedule = personalScheduleRepository
-                      .findById(notification.getPersonalSchedule().getIdx())
-                      .orElse(null);
-              shouldSend = latestSchedule != null && Boolean.TRUE.equals(latestSchedule.getIsNotify());
-            } else if (notification.getScheduleType() == ScheduleType.EVENTS_INTEREST
-                    && notification.getEventsInterest() != null) {
-              // 데이터베이스에서 최신 상태 조회
-              EventsInterest latestInterest = eventsInterestRepository
-                      .findById(notification.getEventsInterest().getIdx())
-                      .orElse(null);
-              shouldSend = latestInterest != null && Boolean.TRUE.equals(latestInterest.getIsNotify());
-            }
-
-            // isNotify가 true인 경우에만 알림 발송
-            if (shouldSend) {
-              super.run();
-            } else {
-              log.debug("알림 ID: {}의 isNotify 상태가 false로 변경되어 발송하지 않습니다.", notification.getIdx());
-            }
-          }
-        };
-
-        ScheduledFuture<?> scheduledTask = taskScheduler.schedule(task, notificationDate);
-        scheduledTasks.put(notification.getIdx(), scheduledTask);
-        log.debug("알림 ID: {}, 시간: {}에 스케줄링 되었습니다.", notification.getIdx(), notification.getNotificationTime());
+      // 발송 전 다시 상태 확인
+      if (checkNotifyStatus(notification)) {
+        notificationSender.sendNotification(notification);
       } else {
-        // 이미 지난 시간의 알림은 즉시 처리 (단, isNotify 확인 후)
-        log.debug("알림 ID: {}의 시간({})이 이미 지났습니다. isNotify 확인 후 즉시 발송합니다.",
-                notification.getIdx(), notification.getNotificationTime());
+        log.debug("알림 ID: {}의 isNotify 상태가 false여서 발송하지 않습니다.", notification.getIdx());
+      }
+    }
+  }
 
-        // 발송 전 다시 한번 isNotify 상태 확인
-        boolean shouldSendNow = true;
-
-        if (notification.getScheduleType() == ScheduleType.PERSONAL_SCHEDULE
-                && notification.getPersonalSchedule() != null) {
-          // 데이터베이스에서 최신 상태 조회
-          PersonalSchedule latestSchedule = personalScheduleRepository
-                  .findById(notification.getPersonalSchedule().getIdx())
-                  .orElse(null);
-          shouldSendNow = latestSchedule != null && Boolean.TRUE.equals(latestSchedule.getIsNotify());
-        } else if (notification.getScheduleType() == ScheduleType.EVENTS_INTEREST
-                && notification.getEventsInterest() != null) {
-          // 데이터베이스에서 최신 상태 조회
-          EventsInterest latestInterest = eventsInterestRepository
-                  .findById(notification.getEventsInterest().getIdx())
-                  .orElse(null);
-          shouldSendNow = latestInterest != null && Boolean.TRUE.equals(latestInterest.getIsNotify());
-        }
-
-        // isNotify가 true인 경우에만 알림 즉시 발송
-        if (shouldSendNow) {
-          notificationSender.sendNotification(notification);
+  // 알림 스케줄링 작업 생성 메서드
+  private void scheduleNotificationTask(ScheduleNotification notification, Date notificationDate) {
+    NotificationTask task = new NotificationTask(notification, notificationSender) {
+      @Override
+      public void run() {
+        // 발송 직전에 다시 isNotify 상태 확인
+        if (checkNotifyStatus(notification)) {
+          super.run(); // 알림 발송
         } else {
-          log.debug("알림 ID: {}의 isNotify 상태가 false여서 발송하지 않습니다.", notification.getIdx());
+          log.debug("알림 ID: {}의 isNotify 상태가 false로 변경되어 발송하지 않습니다.", notification.getIdx());
         }
       }
-    } else {
-      log.debug("알림 ID: {}의 isNotify 상태가 false여서 스케줄링하지 않습니다.", notification.getIdx());
+    };
+
+    ScheduledFuture<?> scheduledTask = taskScheduler.schedule(task, notificationDate);
+    scheduledTasks.put(notification.getIdx(), scheduledTask);
+    log.debug("알림 ID: {}, 시간: {}에 스케줄링 되었습니다.", notification.getIdx(), notification.getNotificationTime());
+  }
+
+  // 알림 상태 확인 메서드
+  private boolean checkNotifyStatus(ScheduleNotification notification) {
+    if (notification.getScheduleType() == ScheduleType.PERSONAL_SCHEDULE
+        && notification.getPersonalSchedule() != null) {
+      PersonalSchedule schedule = personalScheduleRepository
+          .findById(notification.getPersonalSchedule().getIdx())
+          .orElse(null);
+      return schedule != null && Boolean.TRUE.equals(schedule.getIsNotify());
+    } else if (notification.getScheduleType() == ScheduleType.EVENTS_INTEREST
+        && notification.getEventsInterest() != null) {
+      EventsInterest interest = eventsInterestRepository
+          .findById(notification.getEventsInterest().getIdx())
+          .orElse(null);
+      return interest != null && Boolean.TRUE.equals(interest.getIsNotify());
     }
+    return false;
   }
 
   // 알림 취소

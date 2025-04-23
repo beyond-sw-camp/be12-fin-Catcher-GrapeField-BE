@@ -8,9 +8,12 @@ import com.example.grapefield.notification.model.response.NotificationResp;
 import com.example.grapefield.notification.reposistory.EventsInterestRepository;
 import com.example.grapefield.notification.reposistory.ScheduleNotificationRepository;
 import com.example.grapefield.user.model.entity.User;
+import com.example.grapefield.utils.JwtUtil;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,6 +23,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
+  private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
   private final ScheduleNotificationRepository scheduleNotificationRepository;
   private final NotificationScheduler notificationScheduler;
@@ -210,4 +214,23 @@ public class NotificationService {
       scheduleNotificationRepository.save(notification);
     });
   }
+
+  public List<NotificationResp> getAvailableNotifications(Long userIdx) {
+    return scheduleNotificationRepository.findAvailableNotifications(userIdx);
+  }
+
+  //트랜잭션 프록시가 생성된 시점에 @Transactional이 정상 동작하도록 필요한 메서드 분리
+  @Transactional
+  public void scheduleAllPendingNotifications() {
+    try {
+      LocalDateTime now = LocalDateTime.now();
+      List<ScheduleNotification> notifications = scheduleNotificationRepository.findByNotificationTimeAfterAndIsReadFalse(now);
+      notifications.forEach(notificationScheduler::scheduleNotification);
+      log.info("총 {}개의 알림이 스케줄링되었습니다.", notifications.size());
+    } catch (Exception e) {
+      log.error("알림 스케줄링 중 오류 발생", e);
+      // 필요하다면 애플리케이션 재시작 없이 재시도 로직 추가
+    }
+  }
+
 }
