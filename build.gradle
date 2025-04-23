@@ -69,6 +69,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis:3.4.3")
     //lettuce
     implementation("io.lettuce:lettuce-core:6.3.2.RELEASE")
+
+    //Jackson JSR310 모듈
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 }
 
 tasks.named('test') {

@@ -3,15 +3,14 @@ package com.example.grapefield.notification.model.entity;
 import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.user.model.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,10 +21,9 @@ public class PersonalSchedule {
   private String title;
   private String description;
   private Boolean isNotify;
-  private LocalDate startDate;
-  private LocalDate endDate;
-  private LocalDate createdAt;
-  private LocalDate updatedAt;
+  private LocalDateTime startDate;
+  private LocalDateTime createdAt;
+  private LocalDateTime updatedAt;
 
   @ManyToOne
   @JoinColumn(name = "user_idx")

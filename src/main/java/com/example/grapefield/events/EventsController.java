@@ -8,6 +8,7 @@ import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.model.request.EventsRegisterReq;
 import com.example.grapefield.events.model.response.*;
 import com.example.grapefield.events.post.model.request.PostRegisterReq;
+import com.example.grapefield.user.CustomUserDetails;
 import com.example.grapefield.user.model.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -160,8 +162,9 @@ public class EventsController {
   @ApiSuccessResponses
   @ApiErrorResponses
   @GetMapping("/{idx}")
-  public ResponseEntity<EventsDetailResp> getEventDetail(@PathVariable Long idx) {
-    EventsDetailResp response = eventsService.getEventDetail(idx);
+  public ResponseEntity<EventsDetailResp> getEventDetail(@PathVariable Long idx, @Nullable @AuthenticationPrincipal CustomUserDetails principal) {
+    User user = (principal != null) ? principal.getUser() : null;
+    EventsDetailResp response = eventsService.getEventDetail(idx, user);
     return ResponseEntity.ok(response);
   }
 
@@ -186,7 +189,7 @@ public class EventsController {
   })
   @ApiErrorResponses
   @PutMapping("/update/{idx}")
-  public ResponseEntity<String> updateComment(@PathVariable Long idx, @RequestBody EventsRegisterReq request, @AuthenticationPrincipal User user) {
+  public ResponseEntity<String> updateComment(@PathVariable Long idx, @RequestBody EventsRegisterReq request, @AuthenticationPrincipal CustomUserDetails user) {
     return ResponseEntity.ok("수정 성공");
   }
 
@@ -202,7 +205,7 @@ public class EventsController {
   })
   @ApiErrorResponses
   @PutMapping("/delete/{idx}")
-  public ResponseEntity<String> updateComment(@PathVariable Long idx, @AuthenticationPrincipal User user) {
+  public ResponseEntity<String> updateComment(@PathVariable Long idx, @AuthenticationPrincipal CustomUserDetails user) {
     return ResponseEntity.ok("게시글 삭제 성공");
   }
 }

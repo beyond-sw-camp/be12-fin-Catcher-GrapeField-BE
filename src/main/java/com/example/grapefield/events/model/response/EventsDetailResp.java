@@ -18,6 +18,7 @@ import java.util.List;
 @Schema(description="공연/전시 상세 정보 응답")
 @Builder
 public class EventsDetailResp {
+  private Long idx;
   @Schema(description="공연 제목", example = "웃는 남자")
   private String title;
   @Schema(description="공연/전시 카테고리", example="뮤지컬")
@@ -39,10 +40,16 @@ public class EventsDetailResp {
   private Integer runningTime;
   @Schema(description="관람 연령", example="12세 이상")
   private AgeLimit ageLimit;
-//TODO : 한줄평 별점 합산
+
   @Schema(description = "티켓 정보 목록")
   private List<TicketInfoDetailResp> ticketInfoList;
 
   @Schema(description = "좌석별 가격 정보 목록")
   private List<SeatPriceDetailResp> seatPriceList;
+
+  //사용자 맞춤 정보(즐겨찾기 여부, 알림 여부)
+  private Boolean isFavorite;
+  private Boolean isNotify;
+
+  //TODO : 한줄평 별점 합산
 }
