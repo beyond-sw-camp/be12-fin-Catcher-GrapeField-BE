@@ -314,4 +314,50 @@ public class ScheduleNotificationCustomRepositoryImpl implements ScheduleNotific
                         .and(notification.isRead.eq(false)))
                 .execute();
     }
+
+  @Override
+  public List<NotificationResp> findAvailableNotifications(Long userIdx) {
+    QScheduleNotification notification = QScheduleNotification.scheduleNotification;
+    QUser user = QUser.user;
+    QEventsInterest eventsInterest = QEventsInterest.eventsInterest;
+    QEvents events = QEvents.events;
+    QPersonalSchedule personalSchedule = QPersonalSchedule.personalSchedule;
+
+    return queryFactory
+        .select(
+            Projections.constructor(
+                NotificationResp.class,
+                notification.idx,
+                notification.user.idx,
+                // 알림 유형에 따라 제목 생성
+                new CaseBuilder()
+                    .when(notification.scheduleType.eq(ScheduleType.EVENTS_INTEREST))
+                    .then("공연/전시 알림")
+                    .when(notification.scheduleType.eq(ScheduleType.PERSONAL_SCHEDULE))
+                    .then("개인 일정 알림")
+                    .otherwise("알림"),
+                // 메시지 필드는 애플리케이션 레벨에서 처리(복잡한 로직)
+                Expressions.asString("알림이 도착했습니다."), // 기본값, 후처리에서 수정
+                notification.notificationTime,
+                notification.isRead,
+                notification.notificationType.stringValue(),
+                notification.scheduleType.stringValue(),
+                // formattedTime 필드는 후처리에서 계산
+                Expressions.asString("")
+            )
+        )
+        .from(notification)
+        .leftJoin(notification.user, user)
+        .leftJoin(notification.eventsInterest, eventsInterest)
+        .leftJoin(eventsInterest.events, events)
+        .leftJoin(notification.personalSchedule, personalSchedule)
+        .where(notification.user.idx.eq(userIdx)
+            .and(notification.isVisible.eq(true))
+            .and(notification.notificationTime.loe(LocalDateTime.now())))
+        .orderBy(notification.notificationTime.desc())
+        .fetch()
+        .stream()
+        .map(this::enrichNotification) // 후처리로 메시지와 formattedTime 설정
+        .collect(Collectors.toList());
+  }
 }

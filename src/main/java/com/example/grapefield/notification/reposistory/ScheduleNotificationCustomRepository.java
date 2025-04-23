@@ -14,4 +14,6 @@ public interface ScheduleNotificationCustomRepository {
     List<NotificationResp> findUnreadNotificationsByUserIdx(Long userIdx);
     //모든 알림 읽음 처리(벌크 업데이트)
     void markAllAsReadByUserId(Long userId);
+
+  List<NotificationResp> findAvailableNotifications(Long userIdx);
 }

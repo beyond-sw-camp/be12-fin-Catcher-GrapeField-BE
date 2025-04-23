@@ -29,11 +29,19 @@ public class NotificationController {
     return ResponseEntity.ok(result);
   }
 
-  //사용자 개인 일정 알림 목록 - DTO로 변환하여 반환
+  //사용자의 모든 알림 목록 - DTO로 변환하여 반환
   @GetMapping("/all")
   public ResponseEntity<List<NotificationResp>> getUserNotifications(@AuthenticationPrincipal CustomUserDetails principal) {
     Long userIdx = principal.getUser().getIdx();
     List<NotificationResp> notifications = notificationService.getUserNotifications(userIdx);
+    return ResponseEntity.ok(notifications);
+  }
+
+  //"지금 보여줄 알림"만 조회
+  @GetMapping("/noti")
+  public ResponseEntity<List<NotificationResp>> getAvailableNotifications(@AuthenticationPrincipal CustomUserDetails principal) {
+    Long userIdx = principal.getUser().getIdx();
+    List<NotificationResp> notifications = notificationService.getAvailableNotifications(userIdx);
     return ResponseEntity.ok(notifications);
   }
 
@@ -45,6 +53,7 @@ public class NotificationController {
     return ResponseEntity.ok(notifications);
   }
 
+  //읽은 알림 목록
   @PutMapping("/{notificationIdx}/read")
   public ResponseEntity<Void> markAsRead(@PathVariable Long notificationIdx) {
     notificationService.markAsRead(notificationIdx);
@@ -59,7 +68,7 @@ public class NotificationController {
     return ResponseEntity.ok().build();
   }
 
-  //알림을 스와이프해서 삭제(소프트)
+  //알림을 클릭해서 삭제(소프트)
   @DeleteMapping("/delete/{notificationIdx}")
   public ResponseEntity<Void> hideNotification(@PathVariable Long notificationIdx) {
     notificationService.hideNotification(notificationIdx);
