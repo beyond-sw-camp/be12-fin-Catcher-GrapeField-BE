@@ -3,7 +3,9 @@ package com.example.grapefield.user;
 import com.example.grapefield.common.ImageService;
 import com.example.grapefield.events.post.model.response.UserCommentListResp;
 import com.example.grapefield.events.post.model.response.UserPostListResp;
+import com.example.grapefield.events.post.model.response.UserReviewListResp;
 import com.example.grapefield.events.post.repository.PostRepository;
+import com.example.grapefield.events.review.repository.ReviewRepository;
 import com.example.grapefield.user.model.entity.AccountStatus;
 import com.example.grapefield.user.model.entity.EmailVerify;
 import com.example.grapefield.user.model.entity.User;
@@ -39,6 +41,7 @@ public class UserService implements UserDetailsService {
     private final JavaMailSender mailSender;
     private final ImageService imageService;
     private final PasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final ReviewRepository reviewRepository;
 
 
     @Override
@@ -151,5 +154,9 @@ public class UserService implements UserDetailsService {
 
     public Page<UserCommentListResp> getUserComments(Long userIdx, Pageable pageable) {
         return postRepository.commentsFindByUserIdx(userIdx, pageable);
+    }
+
+    public Page<UserReviewListResp> getUserReviews(Long userIdx, Pageable pageable) {
+        return reviewRepository.reviewsFindByUserIdx(userIdx, pageable);
     }
 }
