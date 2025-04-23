@@ -3,6 +3,7 @@ package com.example.grapefield.user;
 import com.example.grapefield.base.ApiErrorResponses;
 import com.example.grapefield.base.ApiSuccessResponses;
 import com.example.grapefield.common.ImageService;
+import com.example.grapefield.events.post.model.response.UserPostListResp;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.model.request.UserSignupOauthReq;
 import com.example.grapefield.user.model.request.UserInfoDetailReq;
@@ -25,6 +26,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -103,6 +106,18 @@ public class UserController {
         UserInfoDetailResp userInfo = userService.getUserInfo(user.getEmail());
         return ResponseEntity.ok().body(userInfo);
     }
+
+    @Operation(summary = "마이페이지 내 작성 글 관리", description = "유저가 작성한 게시글을 조회합니다")
+    @ApiResponse(responseCode = "200", description = "성공적으로 정보를 반환", content = @Content(schema = @Schema(implementation = UserPostListResp.class))
+    )
+    @GetMapping("/mypage/post")
+    public ResponseEntity<Page<UserPostListResp>> getUserPosts(@AuthenticationPrincipal CustomUserDetails principal, Pageable pageable) {
+        User user = (principal != null) ? principal.getUser() : null;
+        Page<UserPostListResp> posts = userService.getUserPosts(user.getIdx(), pageable);
+        return ResponseEntity.ok().body(posts);
+    }
+
+
 
     @PostMapping("/password_verify")
     public ResponseEntity<?> verifyPassword(@RequestBody Map<String, String> request,
