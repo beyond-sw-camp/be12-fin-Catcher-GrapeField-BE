@@ -38,7 +38,7 @@ public class ScheduleNotification {
   private LocalDateTime notificationTime;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @Column(nullable = false, length = 30)
   private NotificationType notificationType;
 
   @Enumerated(EnumType.STRING)
