@@ -16,4 +16,7 @@ public interface ScheduleNotificationCustomRepository {
     void markAllAsReadByUserId(Long userId);
 
   List<NotificationResp> findAvailableNotifications(Long userIdx);
+
+  //모든 알림을 숨김 처리
+  void hideAllNotification(Long userIdx);
 }

@@ -361,4 +361,16 @@ public class ScheduleNotificationCustomRepositoryImpl implements ScheduleNotific
         .map(this::enrichNotification) // 후처리로 메시지와 formattedTime 설정
         .collect(Collectors.toList());
   }
+
+  @Override
+  public void hideAllNotification(Long userIdx) {
+    QScheduleNotification notification = QScheduleNotification.scheduleNotification;
+
+    queryFactory
+        .update(notification)
+        .set(notification.isVisible, false)
+        .where(notification.user.idx.eq(userIdx)
+            .and(notification.notificationTime.loe(LocalDateTime.now())))
+        .execute();
+  }
 }
