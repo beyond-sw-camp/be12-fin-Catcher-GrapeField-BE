@@ -261,6 +261,47 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
     return new PageImpl<>(content, pageable, total);
   }
 
+  @Override
+  public Page<UserCommentListResp> commentsFindByUserIdx(Long userIdx, Pageable pageable) {
+    QPostComment comment = QPostComment.postComment;
+    QUser user = QUser.user;
+    QPost post = QPost.post;
+    QEvents events = QEvents.events;
+
+    // 총 개수 조회
+    long total = queryFactory
+            .select(comment.count())
+            .from(comment)
+            .join(comment.user, user)
+            .join(comment.post, post)
+            .join(events).on(events.idx.eq(post.board.idx))
+            .where(user.idx.eq(userIdx))
+            .fetchOne();
+
+    // 데이터 조회
+    List<UserCommentListResp> content = queryFactory
+            .select(Projections.constructor(UserCommentListResp.class,
+                    comment.idx,
+                    comment.content,
+                    post.idx,
+                    post.title,
+                    comment.createdAt,
+                    events.idx,
+                    events.title,
+                    events.category))
+            .from(comment)
+            .join(comment.user, user)
+            .join(comment.post, post)
+            .join(events).on(events.idx.eq(post.board.idx))
+            .where(user.idx.eq(userIdx))
+            .orderBy(comment.createdAt.desc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+    return new PageImpl<>(content, pageable, total);
+  }
+
   private Page<PostSearchListResp> toPagePostListResp(List<Tuple> tuples, Pageable pageable, long total) {
     List<PostSearchListResp> result = tuples.stream()
             .map(tuple -> PostSearchListResp.builder()

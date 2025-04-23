@@ -3,6 +3,7 @@ package com.example.grapefield.user;
 import com.example.grapefield.base.ApiErrorResponses;
 import com.example.grapefield.base.ApiSuccessResponses;
 import com.example.grapefield.common.ImageService;
+import com.example.grapefield.events.post.model.response.UserCommentListResp;
 import com.example.grapefield.events.post.model.response.UserPostListResp;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.model.request.UserSignupOauthReq;
@@ -114,6 +115,16 @@ public class UserController {
     public ResponseEntity<Page<UserPostListResp>> getUserPosts(@AuthenticationPrincipal CustomUserDetails principal, Pageable pageable) {
         User user = (principal != null) ? principal.getUser() : null;
         Page<UserPostListResp> posts = userService.getUserPosts(user.getIdx(), pageable);
+        return ResponseEntity.ok().body(posts);
+    }
+
+    @Operation(summary = "마이페이지 내 작성 글 관리", description = "유저가 작성한 게시글을 조회합니다")
+    @ApiResponse(responseCode = "200", description = "성공적으로 정보를 반환", content = @Content(schema = @Schema(implementation = UserPostListResp.class))
+    )
+    @GetMapping("/mypage/comment")
+    public ResponseEntity<Page<UserCommentListResp>> getUserComments(@AuthenticationPrincipal CustomUserDetails principal, Pageable pageable) {
+        User user = (principal != null) ? principal.getUser() : null;
+        Page<UserCommentListResp> posts = userService.getUserComments(user.getIdx(), pageable);
         return ResponseEntity.ok().body(posts);
     }
 
