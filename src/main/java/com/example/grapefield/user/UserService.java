@@ -1,6 +1,7 @@
 package com.example.grapefield.user;
 
 import com.example.grapefield.common.ImageService;
+import com.example.grapefield.events.post.model.response.UserCommentListResp;
 import com.example.grapefield.events.post.model.response.UserPostListResp;
 import com.example.grapefield.events.post.repository.PostRepository;
 import com.example.grapefield.user.model.entity.AccountStatus;
@@ -148,4 +149,7 @@ public class UserService implements UserDetailsService {
     }
 
 
+    public Page<UserCommentListResp> getUserComments(Long userIdx, Pageable pageable) {
+        return postRepository.commentsFindByUserIdx(userIdx, pageable);
+    }
 }

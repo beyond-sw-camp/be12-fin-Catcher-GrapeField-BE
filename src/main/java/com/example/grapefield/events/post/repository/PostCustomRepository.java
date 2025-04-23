@@ -21,4 +21,6 @@ public interface PostCustomRepository {
   Page<PostSearchListResp> findPostsByKeywordAnd(List<String> keywords, Pageable pageable, User user);
 
   Page<UserPostListResp> postsFindByUserIdx(Long userIdx, Pageable pageable);
+
+  Page<UserCommentListResp> commentsFindByUserIdx(Long userIdx, Pageable pageable);
 }
