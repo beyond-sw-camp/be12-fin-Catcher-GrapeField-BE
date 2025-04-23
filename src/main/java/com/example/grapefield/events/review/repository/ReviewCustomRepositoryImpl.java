@@ -2,6 +2,8 @@ package com.example.grapefield.events.review.repository;
 
 import com.example.grapefield.events.model.entity.QEvents;
 import com.example.grapefield.events.post.model.entity.PostType;
+import com.example.grapefield.events.post.model.response.UserCommentListResp;
+import com.example.grapefield.events.post.model.response.UserReviewListResp;
 import com.example.grapefield.events.review.model.entity.QReview;
 import com.example.grapefield.events.review.model.entity.Review;
 import com.example.grapefield.events.review.model.response.ReviewListResp;
@@ -111,6 +113,42 @@ public class ReviewCustomRepositoryImpl implements ReviewCustomRepository{
             .toList();
 
     return new PageImpl<>(results, pageable, total);
+  }
+
+  @Override
+  public Page<UserReviewListResp> reviewsFindByUserIdx(Long userIdx, Pageable pageable) {
+    QReview review = QReview.review;
+    QEvents events = QEvents.events;
+
+    // 총 개수 조회
+    long total = queryFactory
+            .select(review.count())
+            .from(review)
+            .join(events).on(events.idx.eq(review.events.idx))
+            .where(review.user.idx.eq(userIdx))
+            .fetchOne();
+
+    // 데이터 조회
+    List<UserReviewListResp> content = queryFactory
+            .select(Projections.constructor(UserReviewListResp.class,
+                    review.idx,
+                    review.content,
+                    review.createdAt,
+                    review.rating,
+                    events.idx,
+                    events.title,
+                    events.posterImgUrl,
+                    events.category))
+            .from(review)
+            .join(events).on(events.idx.eq(review.events.idx))
+            .where(review.user.idx.eq(userIdx))
+            .orderBy(review.createdAt.desc())
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+    // PageImpl 객체로 반환
+    return new PageImpl<>(content, pageable, total);
   }
 
   @Override
