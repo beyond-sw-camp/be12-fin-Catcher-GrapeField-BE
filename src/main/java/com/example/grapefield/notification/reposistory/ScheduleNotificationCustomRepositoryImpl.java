@@ -311,7 +311,8 @@ public class ScheduleNotificationCustomRepositoryImpl implements ScheduleNotific
                 .update(notification)
                 .set(notification.isRead, true)
                 .where(notification.user.idx.eq(userId)
-                        .and(notification.isRead.eq(false)))
+                        .and(notification.isRead.eq(false))
+                        .and(notification.notificationTime.loe(LocalDateTime.now())))
                 .execute();
     }
 

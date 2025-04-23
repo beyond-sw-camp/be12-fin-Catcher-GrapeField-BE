@@ -53,7 +53,7 @@ public class NotificationController {
     return ResponseEntity.ok(notifications);
   }
 
-  //읽은 알림 목록
+  //알림 읽음 처리
   @PutMapping("/{notificationIdx}/read")
   public ResponseEntity<Void> markAsRead(@PathVariable Long notificationIdx) {
     notificationService.markAsRead(notificationIdx);
@@ -68,7 +68,7 @@ public class NotificationController {
     return ResponseEntity.ok().build();
   }
 
-  //알림을 클릭해서 삭제(소프트)
+  //알림 삭제(소프트)
   @DeleteMapping("/delete/{notificationIdx}")
   public ResponseEntity<Void> hideNotification(@PathVariable Long notificationIdx) {
     notificationService.hideNotification(notificationIdx);
