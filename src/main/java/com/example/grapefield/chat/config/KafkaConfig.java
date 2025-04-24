@@ -23,6 +23,17 @@ public class KafkaConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
+    @Bean
+    public Map<String, Object> commonConsumerProps(@Value("${spring.kafka.bootstrap-servers}") String servers) {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, servers);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        return props;
+    }
+
+
+
     /* DTO를 구분하여 멀티팩토리를 만들어줌*/
 
 

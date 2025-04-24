@@ -15,6 +15,10 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long>, ChatRoomRepositoryCustom {
+
+    @Query("SELECT c.idx from ChatRoom c")
+    List<Long> findAllChatRoomsByIdx();
+
     @EntityGraph(attributePaths = {"events"})
     @Query("SELECT c FROM ChatRoom c")
     Slice<ChatRoom> findAllWithEventsSlice(Pageable pageable);
