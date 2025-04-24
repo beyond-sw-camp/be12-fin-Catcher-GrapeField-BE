@@ -45,6 +45,7 @@ public class ChatWebSocketController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat.send.{roomIdx}")
+    @Operation(summary = "채팅 메시지 전송", description = "클라이언트로부터 채팅 메시지를 수신하고, Kafka로 전달")
     public void sendMessage(Principal principal, @Payload ChatMessageReq chatMessageReq) {
         Authentication auth = (Authentication) principal;
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
@@ -62,12 +63,13 @@ public class ChatWebSocketController {
     }
 
     @MessageMapping("/chat.like.{roomIdx}")
+    @Operation(summary = "채팅방 하트 전송", description = "클라이언트에서 전송한 하트(좋아요) 이벤트를 Kafka로 전달")
     public void likeRoom(@DestinationVariable Long roomIdx,
                          @Payload ChatHeartKafkaReq heartReq,
                          Principal principal) {
         CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         Long userIdx = userDetails.getUser().getIdx();
-        log.info("📡 WebSocket ❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, userIdx);
+        log.info("WebSocket ❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, userIdx);
         chatKafkaProducer.likeRoom(heartReq);
     }
 

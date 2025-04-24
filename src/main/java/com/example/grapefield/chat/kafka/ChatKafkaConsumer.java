@@ -24,7 +24,7 @@ public class ChatKafkaConsumer {
             groupId = "chat-group",
             containerFactory = "chatKafkaListenerContainerFactory")
     public void consume(ChatMessageKafkaReq chatMessageKafkaReq) { //매개변수 리팩터링
-        log.info("✅ Kafka 메시지 수신: roomIdx={}, userIdx={}, content={}",
+        log.info("Kafka 메시지 수신: roomIdx={}, userIdx={}, content={}",
                 chatMessageKafkaReq.getRoomIdx(), chatMessageKafkaReq.getSendUserIdx(), chatMessageKafkaReq.getContent());
 
 
@@ -32,7 +32,7 @@ public class ChatKafkaConsumer {
 
         simpMessagingTemplate.convertAndSend("/topic/chat.room." + resp.getRoomIdx(), resp); // WebSocket broadcast 로직 추가
 
-        log.info("✅ 📡 WebSocket Broadcast -> roomIdx: {}, sendUserIdx: {}, content: {} ", resp.getRoomIdx(), resp.getUserIdx(), resp.getContent()); //로그 추가
+        log.info("WebSocket Broadcast -> roomIdx: {}, sendUserIdx: {}, content: {} ", resp.getRoomIdx(), resp.getUserIdx(), resp.getContent()); //로그 추가
 
     }
 }
