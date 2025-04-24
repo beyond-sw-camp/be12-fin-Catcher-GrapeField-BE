@@ -61,7 +61,7 @@ public class ChatMessageService {
             boolean isSaved = currentRepository.findById(current.getBase().getMessageIdx()).isPresent();
 
             if (isSaved) {
-                log.info("🎉 최종 저장 확인 완료! ✅ messageIdx={}", current.getBase().getMessageIdx());
+                log.info("최종 저장 확인 완료 ✅ messageIdx={}", current.getBase().getMessageIdx());
             } else {
                 log.warn("⚠️ current 메시지가 저장되지 않은 것 같습니다... messageIdx={}", current.getBase().getMessageIdx());
             }
@@ -80,7 +80,7 @@ public class ChatMessageService {
 
         } catch (Exception e) {
             log.error("💥 메시지 저장 중 예외 발생: {}", e.getMessage(), e);
-            throw e; // rollback 유도
+            throw e;
         }
 
     }
