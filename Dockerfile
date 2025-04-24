@@ -1,20 +1,25 @@
 # 1단계: 빌드
-FROM gradle:7.6.0-jdk17 AS builder
+FROM openjdk:17-slim AS builder
 WORKDIR /app
 
-# Gradle 캐시 최적화를 위해 먼저 복사
+# Gradle Wrapper 관련 파일 복사
+COPY gradlew gradlew.bat ./
+COPY gradle/wrapper ./gradle/wrapper
+
+# 프로젝트 설정 파일 복사
 COPY build.gradle settings.gradle ./
+
+# 소스 복사
 COPY src ./src
 
-# bootJar 빌드
-RUN gradle bootJar --no-daemon
+# 실행 권한 부여 및 빌드
+RUN chmod +x gradlew
+RUN ./gradlew bootJar --no-daemon
 
 # 2단계: 실행
 FROM openjdk:17-slim
+WORKDIR /app
 EXPOSE 8080
 
-# 빌드된 jar 파일을 복사 (jar 파일명 자동 대응)
 COPY --from=builder /app/build/libs/*.jar /app/app.jar
-
-# 실행
 CMD ["java", "-jar", "/app/app.jar"]
