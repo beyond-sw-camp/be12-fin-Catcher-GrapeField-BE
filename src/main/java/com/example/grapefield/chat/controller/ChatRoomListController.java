@@ -6,6 +6,7 @@ import com.example.grapefield.chat.model.response.ChatListPageResp;
 import com.example.grapefield.chat.model.response.ChatListResp;
 import com.example.grapefield.chat.model.response.PopularChatRoomListResp;
 import com.example.grapefield.chat.service.ChatRoomListService;
+import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.user.CustomUserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -53,24 +54,25 @@ public class ChatRoomListController {
         return ResponseEntity.ok(chatRoomListService.getAllRooms(pageable));
     }
 
-    // 전체 공연 채팅방 리스트 (뮤지컬, 연극, 콘서트)
-    @Operation(summary = "공연 전체 채팅방 목록 조회(chatroom_Idx 오름차순)",
-            description = "뮤지컬, 연극, 콘서트를 합친 이벤트 포스터 이미지, 채팅방 이름, 참여자수, 이벤트 시작일, 종료일을 리스트 형식으로 반환하여 조회")
-    @ApiSuccessResponses
-    @ApiErrorResponses
-    @GetMapping("/performance")
-    public ResponseEntity<Slice<ChatListPageResp>> getPerformanceRooms(@PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(chatRoomListService.getRoomsByType("performance", pageable));
+
+    @GetMapping("/concert")
+    public ResponseEntity<Slice<ChatListPageResp>> getConcertRooms(@PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(chatRoomListService.getRoomsByCategory(EventCategory.CONCERT, pageable));
     }
 
-    // 전체 전시 채팅방 리스트 (전시회, 클래식)
-    @Operation(summary = "공연 전체 채팅방 목록 조회(chatroom_Idx 오름차순)",
-            description = "전시회, 클래식을 합친 이벤트 포스터 이미지, 채팅방 이름, 참여자수, 이벤트 시작일, 종료일을 리스트 형식으로 반환하여 조회")
-    @ApiSuccessResponses
-    @ApiErrorResponses
+    @GetMapping("/play")
+    public ResponseEntity<Slice<ChatListPageResp>> getPlayRooms(@PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(chatRoomListService.getRoomsByCategory(EventCategory.PLAY, pageable));
+    }
+
     @GetMapping("/exhibition")
     public ResponseEntity<Slice<ChatListPageResp>> getExhibitionRooms(@PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(chatRoomListService.getRoomsByType("exhibition", pageable));
+        return ResponseEntity.ok(chatRoomListService.getRoomsByCategory(EventCategory.EXHIBITION, pageable));
+    }
+
+    @GetMapping("/classic")
+    public ResponseEntity<Slice<ChatListPageResp>> getClassicRooms(@PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(chatRoomListService.getRoomsByCategory(EventCategory.CLASSIC, pageable));
     }
 
     // 사용자가 참여한 채팅방 리스트 (전체화면)

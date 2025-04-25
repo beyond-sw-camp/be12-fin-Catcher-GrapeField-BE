@@ -38,6 +38,4 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long>, ChatR
     """)
     List<ChatRoom> findTop10ByRecentEventsAndHeartCnt(Pageable pageable);
 
-
-
 }

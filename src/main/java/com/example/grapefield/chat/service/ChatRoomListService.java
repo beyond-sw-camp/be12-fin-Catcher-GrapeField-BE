@@ -63,15 +63,10 @@ public class ChatRoomListService {
         ));
     }
 
-    // 공연 / 전시 각각 채팅방 목록
-    public Slice<ChatListPageResp> getRoomsByType(String type, Pageable pageable) {
-        List<EventCategory> typeList = switch (type) {
-            case "performance" -> List.of(EventCategory.MUSICAL, EventCategory.PLAY, EventCategory.CONCERT);
-            case "exhibition" -> List.of(EventCategory.EXHIBITION, EventCategory.CLASSIC);
-            default -> throw new IllegalArgumentException("유효하지 않은 type: " + type);
-        };
 
-        Slice<ChatRoom> rooms = chatRoomRepository.findChatRoomsByCategoryInSlice(typeList, pageable);
+    // 이벤트 카테고리 필터링
+    public Slice<ChatListPageResp> getRoomsByCategory(EventCategory category, Pageable pageable) {
+        Slice<ChatRoom> rooms = chatRoomRepository.findChatRoomsByCategory(category, pageable);
         Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountMap();
 
         return rooms.map(room -> ChatListPageResp.from(
