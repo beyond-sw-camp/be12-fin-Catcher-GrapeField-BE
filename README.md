@@ -1,7 +1,3 @@
-
-
-![image]()
-
 # "GrapeField" 공연/전시 정보 통합 제공 및 커뮤니티 플랫폼
 <p align="middle" style="margin: 0; padding: 0;">
   <img width="360px" src="https://github.com/user-attachments/assets/dc348de4-aecb-4ce0-816e-08062ab7ed74">
