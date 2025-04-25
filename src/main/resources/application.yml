@@ -48,7 +48,6 @@ spring:
       hibernate:
         format_sql: false
     database-platform: org.hibernate.dialect.MariaDBDialect
-    show-sql: true # 디버깅용
   mail:
     host: smtp.gmail.com
     port: 587
@@ -106,6 +105,6 @@ logging:
     org.springframework.web.socket: DEBUG
     org.springframework.web.socket.sockjs: DEBUG
     com.example.grapefield.config.filter.JwtHandshakeInterceptor: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
