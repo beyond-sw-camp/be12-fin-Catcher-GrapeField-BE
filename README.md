@@ -112,9 +112,34 @@
 │   ├── UserController.java  
 │   ├── UserService.java  
 │   └── UserRepository.java  
-</pre>
-과 같이 user하위의 userblock이라는 별개의 패키지를 만들어 관리하는 것도 가능하므로    
-패키지를 어디까지 쪼갤지는 기능을 구현하면서 담당자가 알아서 정하기
+└── 📁 chat
+│   ├── 📁 config
+│   │   ├── KafkaConfig.java
+│   │   ├── KafkaTopicConfig.java
+│   │   └── TopicInitializer.java
+│   ├── 📁 model 
+│   │   ├── 📁 entity
+│   │   │   ├── ChatRoom.java  
+│   │   │   ├── ChatroomMember.java  
+│   │   │   ├── ChatMessageBase.java  
+│   │   │   ├── ChatMessageCurrent.java  
+│   │   │   ├── ChatMessageArchive.java  
+│   │   │   └── ChatHighlight.java  	
+│   │   ├── 📁 request  
+│   │   │   └── ChatSendMessageReq.java  
+│   │   ├── 📁 response  
+│   │   │   ├── ChatRoomListResp.java  
+│   │   │   ├── ChatRoomDetailResp.java  
+│   │   │   ├── ChatMessageResp.java  
+│   │   │   └── ChatHighlightResp.java  
+│   ├── 📁 controller
+│   │   └── ChatController.java
+│   ├── 📁 service
+│   │   └── ChatService.java
+│   ├── 📁 service
+│   │   ├── ChatRoomRepository.java  
+│   │   ├── ChatMessageRepository.java  
+│   │   └── ChatHighlightRepository.java  
 
 <pre>
 📁 src  
@@ -174,30 +199,7 @@
 │   │   ├── PostRepository.java  
 │   │   ├── PostCommentRepository.java  
 │   │   ├── PostAttachmentRepository.java  
-│   │   └── PostRecommendRepository.java  
-│  
-│   └── 📁 chat  
-│       ├── 📁 model  
-│       │   ├── 📁 entity  
-│       │   │   ├── ChatRoom.java  
-│       │   │   ├── ChatroomMember.java  
-│       │   │   ├── ChatMessageBase.java  
-│       │   │   ├── ChatMessageCurrent.java  
-│       │   │   ├── ChatMessageArchive.java  
-│       │   │   └── ChatHighlight.java  
-│       │   ├── 📁 request  
-│       │   │   └── ChatSendMessageReq.java  
-│       │   └── 📁 response  
-│       │       ├── ChatRoomListResp.java  
-│       │       ├── ChatRoomDetailResp.java  
-│       │       ├── ChatMessageResp.java  
-│       │       └── ChatHighlightResp.java  
-│       ├── ChatController.java  
-│       ├── ChatService.java  
-│       ├── ChatRoomRepository.java  
-│       ├── ChatMessageRepository.java  
-│       └── ChatHighlightRepository.java  
-│  
+│   │   └── PostRecommendRepository.java  │  
 ├── 📁 config  
 │   ├── JwtProperties.java  
 │   ├── RedisConfig.java  
