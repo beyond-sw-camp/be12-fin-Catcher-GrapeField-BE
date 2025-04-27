@@ -40,8 +40,10 @@ public class EventsService {
       Board board = Board.builder().events(events).title(events.getTitle()).build();
       boardRepository.save(board);
     }
-    ChatRoom chatRoom = ChatRoom.builder().events(events).roomName(events.getTitle()).build();
-    chatRoomRepository.save(chatRoom);
+    if(!chatRoomRepository.existsById(events.getIdx())) {
+      ChatRoom chatRoom = ChatRoom.builder().events(events).roomName(events.getTitle()).build();
+      chatRoomRepository.save(chatRoom);
+    }
     return events.getIdx();
   }
 
