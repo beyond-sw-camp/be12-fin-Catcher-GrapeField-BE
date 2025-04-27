@@ -1,5 +1,7 @@
 package com.example.grapefield.events;
 
+import com.example.grapefield.chat.model.entity.ChatRoom;
+import com.example.grapefield.chat.repository.ChatRoomRepository;
 import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.model.entity.EventsImg;
@@ -10,6 +12,7 @@ import com.example.grapefield.events.post.model.entity.Board;
 import com.example.grapefield.events.repository.EventsImgRepository;
 import com.example.grapefield.events.repository.EventsRepository;
 import com.example.grapefield.user.model.entity.User;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +30,9 @@ public class EventsService {
   private final EventsRepository eventsRepository;
   private final BoardRepository boardRepository;
   private final EventsImgRepository eventsImgRepository;
+  private final ChatRoomRepository chatRoomRepository;
 
+  @Transactional
   public Long eventsRegister(EventsRegisterReq request) {
     Events events = eventsRepository.save(request.toEntity());
     //events의 idx를 받아서 board 추가
@@ -35,7 +40,8 @@ public class EventsService {
       Board board = Board.builder().events(events).title(events.getTitle()).build();
       boardRepository.save(board);
     }
-  //TODO : 채팅방 추가
+    ChatRoom chatRoom = ChatRoom.builder().events(events).roomName(events.getTitle()).build();
+    chatRoomRepository.save(chatRoom);
     return events.getIdx();
   }
 
