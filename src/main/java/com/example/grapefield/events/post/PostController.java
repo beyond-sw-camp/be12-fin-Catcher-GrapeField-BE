@@ -10,6 +10,7 @@ import com.example.grapefield.events.post.model.response.PostListResp;
 import com.example.grapefield.user.CustomUserDetails;
 import com.example.grapefield.user.model.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -26,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.HandlerMapping;
 
 import java.util.List;
 
@@ -35,6 +37,7 @@ import java.util.List;
 @Tag(name="4. 게시판 기능 ", description = "각 공연/전시마다 사람들이 의견을 나누고 정보를 공유할 수 있는 게시판")
 public class PostController {
   private final PostService postService;
+  private final HandlerMapping resourceHandlerMapping;
 
   @Operation(summary="게시글 등록", description = "공연 및 전시 게시판에서 게시글을 등록")
   @ApiResponses(
@@ -123,6 +126,12 @@ public class PostController {
   @PutMapping("/delete/{postIdx}")
   public ResponseEntity<String> updateComment(@PathVariable Long postIdx, @AuthenticationPrincipal User user) {
     return ResponseEntity.ok("게시글 삭제 성공");
+  }
+
+  @GetMapping("/view")
+  public ResponseEntity<Integer> updateViewCount(@RequestParam Long postIdx){
+    int viewCnt = postService.updateViewCount(postIdx);
+    return ResponseEntity.ok(viewCnt);
   }
   
   //TODO : 게시글 상단 고정(최대 5개)

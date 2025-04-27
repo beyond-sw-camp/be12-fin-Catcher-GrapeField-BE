@@ -14,6 +14,7 @@ import com.example.grapefield.events.post.repository.PostAttachmentRepository;
 import com.example.grapefield.events.post.repository.PostRepository;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.model.entity.UserRole;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -44,8 +45,17 @@ public class PostService {
   }
 
   public PostDetailResp getPostDetail(Long idx, User user) {
-    //TODO: 조회수 증가 로직 추가
     return postRepository.findPostDetail(idx, user);
+  }
+
+  @Transactional
+  public Integer updateViewCount(Long postIdx) {
+    // 게시글 조회
+    Post post = postRepository.findById(postIdx)
+            .orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다. ID: " + postIdx));
+    post.incrementViewCount();
+    postRepository.save(post);
+    return post.getViewCnt();
   }
 
 
