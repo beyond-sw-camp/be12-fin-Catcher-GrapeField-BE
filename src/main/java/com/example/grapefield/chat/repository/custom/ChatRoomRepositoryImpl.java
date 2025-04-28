@@ -2,6 +2,7 @@ package com.example.grapefield.chat.repository.custom;
 
 import com.example.grapefield.chat.model.entity.ChatRoom;
 import com.example.grapefield.chat.model.entity.QChatRoom;
+import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.events.model.entity.QEvents;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,26 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepositoryCustom {
                 .selectFrom(chatRoom)
                 .leftJoin(chatRoom.events, events).fetchJoin()
                 .orderBy(chatRoom.heartCnt.desc())  // 💖 하트순 정렬
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
+        boolean hasNext = content.size() > pageable.getPageSize();
+        if (hasNext) content.remove(content.size() - 1);
+
+        return new SliceImpl<>(content, pageable, hasNext);
+    }
+
+    @Override
+    public Slice<ChatRoom> findChatRoomsByCategory(EventCategory category, Pageable pageable) {
+        QChatRoom chatRoom = QChatRoom.chatRoom;
+        QEvents events = QEvents.events;
+
+        List<ChatRoom> content = queryFactory
+                .selectFrom(chatRoom)
+                .leftJoin(chatRoom.events, events).fetchJoin()
+                .where(events.category.eq(category))
+                .orderBy(chatRoom.idx.asc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
