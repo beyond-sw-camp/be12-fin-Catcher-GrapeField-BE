@@ -184,11 +184,11 @@ public class PostCustomRepositoryImpl implements PostCustomRepository {
             post.viewCnt,
             post.postType,
             post.createdAt,
-            recommend.idx.count().intValue(),
+            recommend.idx.countDistinct().intValue(),
             Expressions.constant(editable)))
         .from(post)
         .join(post.user, qUser)
-        .leftJoin(recommend).on(recommend.post.eq(post))
+        .leftJoin(recommend).on(recommend.post.eq(post).and(recommend.isRecommended.isTrue()))
         .where(builder)
         .groupBy(post.idx, qUser.idx, qUser.username, post.title, post.content,
             post.viewCnt, post.postType, post.createdAt)

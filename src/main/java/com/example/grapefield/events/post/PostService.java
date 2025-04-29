@@ -1,21 +1,18 @@
 package com.example.grapefield.events.post;
 
 import com.example.grapefield.common.ImageService;
-import com.example.grapefield.events.post.model.entity.Board;
-import com.example.grapefield.events.post.model.entity.Post;
-import com.example.grapefield.events.post.model.entity.PostAttachment;
-import com.example.grapefield.events.post.model.entity.PostType;
+import com.example.grapefield.events.post.model.entity.*;
 import com.example.grapefield.events.post.model.request.PostRegisterReq;
+import com.example.grapefield.events.post.model.request.PostUpdateReq;
 import com.example.grapefield.events.post.model.response.CommunityPostListResp;
 import com.example.grapefield.events.post.model.response.PostDetailResp;
 import com.example.grapefield.events.post.model.response.PostListResp;
-import com.example.grapefield.events.post.repository.BoardRepository;
-import com.example.grapefield.events.post.repository.PostAttachmentRepository;
-import com.example.grapefield.events.post.repository.PostRepository;
+import com.example.grapefield.events.post.repository.*;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.model.entity.UserRole;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +31,8 @@ public class PostService {
   private final PostAttachmentRepository postAttachmentRepository;
   private final BoardRepository boardRepository;
   private final ImageService imageService;
+  private final PostRecommendRepository postRecommendRepository;
+  private final PostScrapRepository postScrapRepository;
 
   public Page<PostListResp> getPostList(User user, Long boardIdx, Pageable pageable, String type) {
     PostType postType = PostType.valueOf(type);
@@ -57,7 +57,6 @@ public class PostService {
     postRepository.save(post);
     return post.getViewCnt();
   }
-
 
   /**
    * 게시글 등록 및 첨부파일 저장
@@ -123,5 +122,143 @@ public class PostService {
     }
     // 모든 첨부파일 정보를 한 번에 저장
     if (!attachments.isEmpty()) { postAttachmentRepository.saveAll(attachments); }
+  }
+
+  private boolean hasPermission(Post post, User user) {
+    if (post == null || user == null) { return false; }
+
+    return Objects.equals(post.getUser().getIdx(), user.getIdx()) || user.getRole() == UserRole.ROLE_ADMIN;
+  }
+
+  public boolean deletePost(Long postIdx, User user) {
+    try {
+      Post post = postRepository.findById(postIdx)
+          .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+      if (!hasPermission(post, user)) { return false; }
+      Post updatedPost = post.toBuilder().isVisible(false).build();
+      postRepository.save(updatedPost);
+      return true;
+    } catch (IllegalArgumentException e) {
+      System.err.println("게시글 삭제 중 오류: " + e.getMessage());
+      return false;
+    }
+  }
+
+  @Transactional
+  public Long updatePost(Long postIdx, PostUpdateReq request, MultipartFile[] files, User user) {
+
+    try {
+      // 게시판 존재 여부 확인
+      Board board = boardRepository.findById(request.getBoardIdx()).orElseThrow(() -> { return new IllegalArgumentException("존재하지 않는 게시판입니다."); });
+
+      // 게시글 존재 여부 확인
+      Post post = postRepository.findById(postIdx).orElseThrow(() -> { return new IllegalArgumentException("존재하지 않는 게시글입니다."); });
+
+      // 권한 확인 (작성자 또는 관리자만 수정 가능)
+      if (!hasPermission(post, user)) {
+        throw new IllegalArgumentException("게시글을 수정할 권한이 없습니다.");
+      }
+      // 게시글 정보 업데이트
+      Post updatedPost = null;
+      try {
+        updatedPost = post.toBuilder()
+            .title(request.getTitle())
+            .content(request.getContent())
+            .postType(request.getPostType())
+            .updatedAt(LocalDateTime.now())
+            .board(board)
+            .build();
+      } catch (Exception e) {
+        e.printStackTrace();
+        throw e;
+      }
+
+      // 게시글 저장
+      Post savedPost = null;
+      try {
+        savedPost = postRepository.save(updatedPost);
+      } catch (Exception e) {
+        e.printStackTrace();
+        throw e;
+      }
+
+      // 삭제할 이미지 처리
+      try {
+        removePostAttachments(savedPost, request.getRemovedImagePaths());
+      } catch (Exception e) {
+        e.printStackTrace();
+        throw e;
+      }
+
+      // 새 이미지 파일 처리
+      try {
+        savePostAttachments(savedPost, board.getTitle(), files);
+      } catch (Exception e) {
+        e.printStackTrace();
+        throw e;
+      }
+      return savedPost.getIdx();
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw e; // 상위로 예외 전파
+    }
+  }
+
+  //게시글 첨부파일 삭제
+  private void removePostAttachments(Post post, List<String> filePaths) {
+    if (filePaths == null || filePaths.isEmpty()) { return; }
+
+    for (String filePath : filePaths) {
+      try {
+        // DB에서 해당 경로의 첨부파일 정보 찾기
+        PostAttachment attachment = postAttachmentRepository.findByPostAndFileUrl(post, filePath);
+
+        if (attachment != null) {
+          // DB에서 먼저 삭제
+          postAttachmentRepository.delete(attachment);
+
+          // 실제 파일 삭제
+          try {
+            imageService.deleteFile(filePath);
+          } catch (Exception e) {
+            // 파일 삭제 실패는 로그만 남기고 진행 (중요하지 않은 오류로 취급)
+            System.err.println("파일 삭제 실패: " + filePath + ", 오류: " + e.getMessage());
+          }
+        } else {
+          System.err.println("삭제할 첨부파일 정보를 찾을 수 없음: " + filePath);
+        }
+      } catch (Exception e) {
+        throw new RuntimeException("첨부파일 삭제 중 오류가 발생했습니다: " + e.getMessage(), e);
+      }
+    }
+  }
+
+  public Integer postRecommend(Long idx, User user) {
+    Post post = postRepository.findById(idx).orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다"));
+    PostRecommend recommend = postRecommendRepository.findByUserAndPost(user, post)
+        .orElse(PostRecommend.builder()
+            .user(user)
+            .post(post)
+            .createdAt(LocalDateTime.now())
+            .build());
+
+    // 추천 여부 토글
+    recommend.toggleRecommendation();
+    postRecommendRepository.save(recommend);
+
+    return postRecommendRepository.countByPostAndIsRecommendedTrue(post);
+  }
+
+  public Boolean postScrap(Long idx, User user) {
+    Post post = postRepository.findById(idx).orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다"));
+    PostScrap scrap = postScrapRepository.findByUserAndPost(user, post)
+        .orElse(PostScrap.builder()
+            .user(user)
+            .post(post)
+            .createdAt(LocalDateTime.now())
+        .build());
+    scrap.toggleScrapped();
+    postScrapRepository.save(scrap);
+    return scrap.getIsScrapped();
   }
 }
