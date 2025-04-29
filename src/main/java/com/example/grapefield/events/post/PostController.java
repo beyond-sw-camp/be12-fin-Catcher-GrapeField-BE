@@ -164,6 +164,13 @@ public class PostController {
     return  ResponseEntity.ok(result);
   }
 
+  @PatchMapping("/scrap")
+  public ResponseEntity<Boolean> postScrap(@RequestParam Long idx, @AuthenticationPrincipal CustomUserDetails principal) {
+    if (principal == null) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); }
+    boolean result = postService.postScrap(idx, principal.getUser());
+    return  ResponseEntity.ok(result);
+  }
+
   //TODO : 게시글 상단 고정(최대 5개)
 
   //TODO : 상단에 고정된 게시글 목록 불러오기

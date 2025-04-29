@@ -7,10 +7,7 @@ import com.example.grapefield.events.post.model.request.PostUpdateReq;
 import com.example.grapefield.events.post.model.response.CommunityPostListResp;
 import com.example.grapefield.events.post.model.response.PostDetailResp;
 import com.example.grapefield.events.post.model.response.PostListResp;
-import com.example.grapefield.events.post.repository.BoardRepository;
-import com.example.grapefield.events.post.repository.PostAttachmentRepository;
-import com.example.grapefield.events.post.repository.PostRecommendRepository;
-import com.example.grapefield.events.post.repository.PostRepository;
+import com.example.grapefield.events.post.repository.*;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.model.entity.UserRole;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +32,7 @@ public class PostService {
   private final BoardRepository boardRepository;
   private final ImageService imageService;
   private final PostRecommendRepository postRecommendRepository;
+  private final PostScrapRepository postScrapRepository;
 
   public Page<PostListResp> getPostList(User user, Long boardIdx, Pageable pageable, String type) {
     PostType postType = PostType.valueOf(type);
@@ -249,5 +247,18 @@ public class PostService {
     postRecommendRepository.save(recommend);
 
     return postRecommendRepository.countByPostAndIsRecommendedTrue(post);
+  }
+
+  public Boolean postScrap(Long idx, User user) {
+    Post post = postRepository.findById(idx).orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다"));
+    PostScrap scrap = postScrapRepository.findByUserAndPost(user, post)
+        .orElse(PostScrap.builder()
+            .user(user)
+            .post(post)
+            .createdAt(LocalDateTime.now())
+        .build());
+    scrap.toggleScrapped();
+    postScrapRepository.save(scrap);
+    return scrap.getIsScrapped();
   }
 }
