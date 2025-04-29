@@ -36,6 +36,10 @@ spring:
 
   application:
     name: grapefield
+
+  jackson:
+    time-zone: Asia/Seoul
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
