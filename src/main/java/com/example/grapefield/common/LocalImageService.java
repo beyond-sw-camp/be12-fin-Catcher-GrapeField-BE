@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Service
+//@Service
 public class LocalImageService implements ImageService {
   @Value("${file.upload.path}")
   private String defaultUploadPath;

@@ -92,7 +92,7 @@ spring:
         access-key: ${AWS_ACCESS_KEY}
         secret-key: ${AWS_SECRET_KEY}
       s3:
-        bucket: a0109407-s3
+        bucket: grapefield-image
       region:
         static: ${SEOUL}
   data:
