@@ -3,8 +3,6 @@ package com.example.grapefield.chat.kafka;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.model.response.ChatMessageResp;
 import com.example.grapefield.chat.service.ChatMessageService;
-import com.example.grapefield.chat.service.ChatRoomService;
-import com.example.grapefield.chat.service.KafkaTopicService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;

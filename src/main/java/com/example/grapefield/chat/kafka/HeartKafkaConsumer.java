@@ -2,16 +2,11 @@ package com.example.grapefield.chat.kafka;
 
 import com.example.grapefield.chat.model.request.ChatHeartKafkaReq;
 import com.example.grapefield.chat.service.ChatRoomService;
-import com.example.grapefield.chat.service.KafkaTopicService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
