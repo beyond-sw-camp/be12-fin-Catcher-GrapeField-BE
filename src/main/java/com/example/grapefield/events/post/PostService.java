@@ -1,10 +1,7 @@
 package com.example.grapefield.events.post;
 
 import com.example.grapefield.common.ImageService;
-import com.example.grapefield.events.post.model.entity.Board;
-import com.example.grapefield.events.post.model.entity.Post;
-import com.example.grapefield.events.post.model.entity.PostAttachment;
-import com.example.grapefield.events.post.model.entity.PostType;
+import com.example.grapefield.events.post.model.entity.*;
 import com.example.grapefield.events.post.model.request.PostRegisterReq;
 import com.example.grapefield.events.post.model.request.PostUpdateReq;
 import com.example.grapefield.events.post.model.response.CommunityPostListResp;
@@ -12,6 +9,7 @@ import com.example.grapefield.events.post.model.response.PostDetailResp;
 import com.example.grapefield.events.post.model.response.PostListResp;
 import com.example.grapefield.events.post.repository.BoardRepository;
 import com.example.grapefield.events.post.repository.PostAttachmentRepository;
+import com.example.grapefield.events.post.repository.PostRecommendRepository;
 import com.example.grapefield.events.post.repository.PostRepository;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.model.entity.UserRole;
@@ -36,6 +34,7 @@ public class PostService {
   private final PostAttachmentRepository postAttachmentRepository;
   private final BoardRepository boardRepository;
   private final ImageService imageService;
+  private final PostRecommendRepository postRecommendRepository;
 
   public Page<PostListResp> getPostList(User user, Long boardIdx, Pageable pageable, String type) {
     PostType postType = PostType.valueOf(type);
@@ -236,4 +235,19 @@ public class PostService {
     }
   }
 
+  public Integer postRecommend(Long idx, User user) {
+    Post post = postRepository.findById(idx).orElseThrow(() -> new EntityNotFoundException("게시글을 찾을 수 없습니다"));
+    PostRecommend recommend = postRecommendRepository.findByUserAndPost(user, post)
+        .orElse(PostRecommend.builder()
+            .user(user)
+            .post(post)
+            .createdAt(LocalDateTime.now())
+            .build());
+
+    // 추천 여부 토글
+    recommend.toggleRecommendation();
+    postRecommendRepository.save(recommend);
+
+    return postRecommendRepository.countByPostAndIsRecommendedTrue(post);
+  }
 }

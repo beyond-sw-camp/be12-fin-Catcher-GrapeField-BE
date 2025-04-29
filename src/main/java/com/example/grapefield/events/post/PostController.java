@@ -156,7 +156,14 @@ public class PostController {
     int viewCnt = postService.updateViewCount(postIdx);
     return ResponseEntity.ok(viewCnt);
   }
-  
+
+  @PatchMapping("/recommend")
+  public ResponseEntity<Integer> postRecommend(@RequestParam Long idx, @AuthenticationPrincipal CustomUserDetails principal) {
+    if (principal == null) { return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); }
+    int result = postService.postRecommend(idx, principal.getUser());
+    return  ResponseEntity.ok(result);
+  }
+
   //TODO : 게시글 상단 고정(최대 5개)
 
   //TODO : 상단에 고정된 게시글 목록 불러오기
