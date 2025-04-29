@@ -1,4 +1,3 @@
-# 젠킨스 테스트
 pipeline {
     agent none
     environment {
