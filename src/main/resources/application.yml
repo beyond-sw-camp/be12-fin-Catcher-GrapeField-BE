@@ -1,0 +1,119 @@
+spring:
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    admin:
+      auto-create: false # 토픽 자동생성은 비활성화 (운영중 불필요한 토픽 생성을 막음)
+      properties:
+        request.timeout.ms: 15000
+        retry.backoff.ms: 1000
+        retries: 3
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 10                                 # 전송 실패 시 최대 재시도 횟수
+      properties:
+        retry.backoff.ms: 500                    # 재시도 간 대기 시간(ms)
+        metadata.max.age.ms: 30000               # 메타데이터 재조회 주기(ms)
+        request.timeout.ms: 15000                # 브로커 응답 타임아웃(ms)
+        delivery.timeout.ms: 120000              # 전송 전체 허용 시간(ms)
+      acks: all # 메시지를 브로커에 안전하게 커밋하려면 acks='all' 로 설정 .. 브로커의 ISR(In-Sync Replica)에 안전하게 기록된 후에야 응답
+      enable-idempotence: true # 재시도 상황에서 중복 방지를 위해 idempotence 활성화
+      batch-size: 16384 # 한 번에 배치로 보낼 메시지 크기 (기본 16KB)
+      linger-ms: 5 # 배치 대기 시간(ms). 짧게 설정하면 지연 감소, 길게 설정하면 스루풋 증가
+      max-in-flight-requests-per-connection: 1 # 요청 동시성 제어(1로 설정 시 순서 보장)
+      compression-type: gzip # 압축으로 네트워크 비용 절감
+    consumer:
+      auto-offset-reset: earliest
+      group-id: chat-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      enable-auto-commit: false # 처리 중 팩 오프셋 커밋을 안전하게 관리  #직접 커밋 시점 제어로 중복·유실을 방지함
+      auto-commit-interval: 100 # 커밋 주기(ms)
+      max-poll-records: 500 # 한 번에 폴링할 최대 레코드 수 # 한 배치당 처리량을 조절해서 GC 문제나 처리 지연을 방지함
+      properties:
+        spring.json.trusted.packages: '*'
+      concurrency: 3 # 컨슈머 쓰레드 수 조절 시 활용 # @KafkaListener(containerFactory="...") 에서도 설정 가능
+
+  application:
+    name: grapefield
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: false
+    database-platform: org.hibernate.dialect.MariaDBDialect
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_ADDR}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+            required: true
+          auth: true
+          timeout: 5000
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      s3:
+        bucket: a0109407-s3
+      region:
+        static: ${SEOUL}
+  data:
+    redis:
+      host: ${REDIS}
+      port: 6379
+
+jwtData:
+  secret: ${JWT_SECRET}
+  access-expiration: ${ACCESS_EXPIRATION}
+  refresh-expiration: ${REFRESH_EXPIRATION}
+
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha   # 태그를 알파벳 기준으로 정렬 (숫자 포함 가능)
+
+file:
+  upload:
+    path: ${FILEPATH}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+  health:
+    db:
+      enabled: true
+    mail:
+      enabled: false
+    diskspace:
+      enabled: false
+    ping:
+      enabled: false
+    ssl:
+      enabled: false
+
+logging:
+  level:
+    org.springframework.web.socket: DEBUG
+    org.springframework.web.socket.sockjs: DEBUG
+    com.example.grapefield.config.filter.JwtHandshakeInterceptor: DEBUG
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
