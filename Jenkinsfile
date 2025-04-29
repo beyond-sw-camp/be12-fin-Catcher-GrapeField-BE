@@ -2,7 +2,7 @@ pipeline {
     agent none
     environment {
         DOCKER_USER = 'rekvv'
-        IMAGE_NAME = 'grapefield_backend'
+        IMAGE_NAME = 'grapefield_backend'  // Docker 이미지 이름
         IMAGE_TAG = "${new Date().format('yyyyMMdd')}-${BUILD_NUMBER}"
     }
     stages {
@@ -10,7 +10,7 @@ pipeline {
             agent { label 'build' }
             steps {
                 echo "Cloning Repository"
-                git branch: 'develop', url: 'https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-BE.git'
+                git branch: 'main', url: 'https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-BE.git'
             }
         }
         stage('Gradle Build') {
@@ -50,8 +50,8 @@ pipeline {
                 script {
                     withEnv(['KUBECONFIG=/home/test/.kube/config']) {
                         sh """
-                            # 이미지 태그 업데이트
-                            sed -i 's/latest/${IMAGE_TAG}/g' k8s/backend-deployment.yml
+                            # 이미지 태그 업데이트 - 이미지 이름도 올바르게 변경
+                            sed -i 's|rekvv/grapefield_back:.*|rekvv/grapefield_backend:${IMAGE_TAG}|g' k8s/backend-deployment.yml
                             
                             # 배포 전 YAML 확인
                             echo "=== 배포할 YAML 파일 내용 ==="
@@ -60,12 +60,9 @@ pipeline {
                             # 배포
                             kubectl apply -f k8s/backend-deployment.yml -n first
                             
-                            # 리소스 이름 확인 및 상태 확인
-                            DEPLOYMENT_NAME=\$(kubectl get deployment -n first -l app=backend -o jsonpath='{.items[0].metadata.name}')
-                            echo "배포된 Deployment 이름: \$DEPLOYMENT_NAME"
-                            
-                            # 확인된 이름으로 롤아웃 상태 체크
-                            kubectl rollout status deployment/\$DEPLOYMENT_NAME -n first
+                            # 롤아웃 상태 확인 - 배포 이름을 직접 사용
+                            echo "=== 롤아웃 상태 확인 ==="
+                            kubectl rollout status deployment/backend -n first
                         """
                     }
                 }
