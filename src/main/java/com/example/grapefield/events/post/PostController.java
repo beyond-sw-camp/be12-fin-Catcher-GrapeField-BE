@@ -108,8 +108,9 @@ public class PostController {
               examples = @ExampleObject(value = "게시글 수정 권한이 없습니다.")))
   })
   @ApiErrorResponses
-  @PutMapping("/update/{postIdx}")
+  @PatchMapping("/update/{postIdx}")
   public ResponseEntity<String> updateComment(@PathVariable Long postIdx, @RequestBody PostRegisterReq request, @AuthenticationPrincipal User user) {
+    //TODO : 게시글 수정
     return ResponseEntity.ok("게시글 수정 성공");
   }
 
@@ -123,9 +124,11 @@ public class PostController {
               examples = @ExampleObject(value = "게시글 삭제 권한이 없습니다.")))
   })
   @ApiErrorResponses
-  @PutMapping("/delete/{postIdx}")
-  public ResponseEntity<String> updateComment(@PathVariable Long postIdx, @AuthenticationPrincipal User user) {
-    return ResponseEntity.ok("게시글 삭제 성공");
+  @PatchMapping("/delete/{postIdx}")
+  public ResponseEntity<Boolean> deletePost(@PathVariable Long postIdx, @AuthenticationPrincipal CustomUserDetails principal) {
+    User user = (principal != null) ? principal.getUser() : null;
+    boolean response = postService.deletePost(postIdx, user);
+    return ResponseEntity.ok(response);
   }
 
   @GetMapping("/view")

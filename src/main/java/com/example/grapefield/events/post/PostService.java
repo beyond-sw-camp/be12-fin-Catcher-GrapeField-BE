@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -123,5 +124,25 @@ public class PostService {
     }
     // 모든 첨부파일 정보를 한 번에 저장
     if (!attachments.isEmpty()) { postAttachmentRepository.saveAll(attachments); }
+  }
+
+  private boolean hasPermission(Post post, User user) {
+    if (post == null || user == null) { return false; }
+
+    return Objects.equals(post.getUser().getIdx(), user.getIdx()) || user.getRole() == UserRole.ROLE_ADMIN;
+  }
+
+  public boolean deletePost(Long postIdx, User user) {
+    try {
+      Post post = postRepository.findById(postIdx)
+          .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+      if (!hasPermission(post, user)) { return false; }
+      Post updatedPost = post.toBuilder().isVisible(false).build();
+      postRepository.save(updatedPost);
+      return true;
+    } catch (IllegalArgumentException e) {
+      System.err.println("게시글 삭제 중 오류: " + e.getMessage());
+      return false;
+    }
   }
 }
