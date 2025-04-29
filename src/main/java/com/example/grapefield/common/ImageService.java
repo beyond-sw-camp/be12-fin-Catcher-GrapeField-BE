@@ -8,4 +8,5 @@ public interface ImageService {
   String userProfileUpload(MultipartFile file);
   List<String> upload(MultipartFile[] files);
   List<String> postAttachmentsUpload(String boardTitle, MultipartFile[] files);
+  boolean deleteFile(String filePath);
 }
