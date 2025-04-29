@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Git clone') {
             agent {
-                label 'slave1'
+                label 'build'
             }
             steps {
                 echo "Cloning Repository"
@@ -20,7 +20,7 @@ pipeline {
 
         stage('Gradle Build') {
             agent {
-                label 'slave1'
+                label 'build'
             }
             steps {
                 echo "Add Permission"
@@ -33,7 +33,7 @@ pipeline {
 
         stage('Docker Build') {
             agent {
-                label 'slave1'
+                label 'build'
             }
             steps {
                 script {
@@ -47,7 +47,7 @@ pipeline {
 
         stage('Docker Push') {
             agent {
-                label 'slave1'
+                label 'build'
             }
             steps {
                 script {
@@ -63,7 +63,7 @@ pipeline {
 
         stage('K8s Deploy via SSH') {
             agent {
-                label 'slave2'
+                label 'deploy'
             }
             steps {
                 script {
