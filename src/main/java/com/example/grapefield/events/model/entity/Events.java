@@ -30,6 +30,7 @@ public class Events {
     private LocalDateTime endDate;
     private String posterImgUrl;
     private String description;
+    @Column(length = 4000)
     private String notification; // 관람시 안내 사항
     private String venue;
     private Integer runningTime; // 분 단위

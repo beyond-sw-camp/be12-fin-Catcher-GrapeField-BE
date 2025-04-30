@@ -25,49 +25,6 @@ import java.util.NoSuchElementException;
 public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
-    private final AdminClient adminClient;
-    private final ChatRoomMemberRepository memberRepository;
-    private final ChatMessageCurrentRepository currentRepository;
-
-    /*
-    // 초기 개발 테스트용
-    // 채팅방(ChatRoom)이 DB에 없으면 새로 만들고, Kafka 토픽도 같이 보장
-    public ChatRoom ensureRoomExists(Long roomIdx, String roomName) {
-        return chatRoomRepository.findById(roomIdx).orElseGet(() -> {
-            ChatRoom room = ChatRoom.builder()
-                    .idx(roomIdx)
-                    .roomName(roomName)
-                    .createdAt(LocalDateTime.now())
-                    .heartCnt(0L)
-                    .build();
-
-            chatRoomRepository.save(room);
-            log.info("✅ 채팅방 DB 저장 완료: {}", roomIdx);
-
-            // Kafka 토픽도 보장
-            createKafkaTopicIfNotExists(roomIdx);
-
-            return room;
-        });
-    }
-
-    // Kafka에 해당 채팅방 토픽이 없으면 새로 생성
-    public void createKafkaTopicIfNotExists(Long roomIdx) {
-        String topicName = "chat-" + roomIdx;
-        try {
-            var existingTopics = adminClient.listTopics().names().get();
-            if (!existingTopics.contains(topicName)) {
-                adminClient.createTopics(List.of(new NewTopic(topicName, 1, (short) 1)));
-                log.info("✅ Kafka 토픽 생성 완료: {}", topicName);
-            } else {
-                log.info("ℹ️ Kafka 토픽 이미 존재: {}", topicName);
-            }
-        } catch (Exception e) {
-            log.warn("⚠️ Kafka 토픽 생성 중 에러: {}", e.getMessage());
-        }
-    }
-
-    */
 
     public ChatRoom findByIdx(Long roomIdx) {
         return chatRoomRepository.findById(roomIdx)

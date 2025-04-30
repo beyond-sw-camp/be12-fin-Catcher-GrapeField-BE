@@ -54,6 +54,10 @@ public class ChatRoomListController {
         return ResponseEntity.ok(chatRoomListService.getAllRooms(pageable));
     }
 
+    @GetMapping("/musical")
+    public ResponseEntity<Slice<ChatListPageResp>> getMusicalRooms(@PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(chatRoomListService.getRoomsByCategory(EventCategory.MUSICAL, pageable));
+    }
 
     @GetMapping("/concert")
     public ResponseEntity<Slice<ChatListPageResp>> getConcertRooms(@PageableDefault(size = 20) Pageable pageable) {
