@@ -2,15 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
-  namespace: first
+  namespace: kafkatest
 spec:
   replicas: 2
-  # 롤링 업데이트 전략 명시적으로 추가
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 25%
-      maxSurge: 25%
   selector:
     matchLabels:
       app: backend
@@ -21,18 +15,24 @@ spec:
     spec:
       containers:
         - name: backend
-          # Jenkins 파이프라인에서 sed 명령어로 실제 버전으로 대체됨
-          image: rekvv/grapefield_back:latest
+          image: alpaka1111/gf_back_test:1.0
           ports:
             - containerPort: 8080
           envFrom:
             - configMapRef:
                 name: backend-config
+          # [start] 5월 7일에 새롭게 추가된 코드
+          env:
+	          - name: POD_NAME
+		          valueFrom:
+			          fieldRef:
+				          fieldPath: metadata.name
+          # [end] 5월 7일에 새롭게 추가된 코드
           volumeMounts:
             - name: shared-storage
               mountPath: /app/uploads
             - name: backend-tls
-              mountPath: /app/ssl
+              mountPath: /app/ssl  # Spring Boot가 참조하는 키스토어 경로
               readOnly: true
       volumes:
         - name: shared-storage
@@ -40,4 +40,4 @@ spec:
             claimName: shared-image-vol
         - name: backend-tls
           secret:
-            secretName: backend-tls-secret
+            secretName: backend-tls-secret  # 백엔드용 TLS secret
