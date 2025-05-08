@@ -29,8 +29,6 @@ spec:
             - configMapRef:
                 name: backend-config
           volumeMounts:
-            - name: shared-storage
-              mountPath: /app/uploads
             - name: backend-tls
               mountPath: /app/ssl
               readOnly: true
