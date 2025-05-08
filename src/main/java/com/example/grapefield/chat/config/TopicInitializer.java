@@ -24,37 +24,6 @@ import java.util.stream.Collectors;
 public class TopicInitializer {
     private final AdminClient adminClient;
     private final ChatRoomRepository chatRoomRepository;
-
-//    @Bean
-//    public ApplicationRunner createChatTopicsAtStartup() {
-//        return args -> {
-//            List<Long> chatRoomIdxs = chatRoomRepository.findAllChatRoomsByIdx();
-//
-//            List<NewTopic> topics = chatRoomIdxs.stream()
-//                    .map(id -> new NewTopic("chat-" + id, 1, (short)1))
-//                    .collect(Collectors.toList());
-//            List<NewTopic> likeTopics = chatRoomIdxs.stream()
-//                    .map(id -> new NewTopic("chat-like-" + id, 1, (short)1))
-//                    .toList();
-//            topics.addAll(likeTopics);
-//
-////            CreateTopicsOptions options = new CreateTopicsOptions().validateOnly(true);
-////
-////            adminClient.createTopics(topics, options).all().get();
-//
-//            try {
-//                adminClient.createTopics(topics).all().get();
-//            } catch (ExecutionException e) {
-//                if (e.getCause() instanceof TopicExistsException) {
-//                    log.warn("이미 존재하는 토픽이 있어 무시합니다.", e.getCause());
-//                } else {
-//                    throw e;  // 다른 예외면 그대로 던짐
-//                }
-//            }
-//            log.info("✅ 애플리케이션 기동 시점 토픽 일괄 생성 완료: {} 개", topics.size());
-//        };
-//    }
-
     @Bean
     public ApplicationRunner createChatTopicsAtStartup() {
       return args -> {

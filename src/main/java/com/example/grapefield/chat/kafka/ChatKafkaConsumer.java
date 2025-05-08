@@ -19,7 +19,7 @@ public class ChatKafkaConsumer {
 
 
     @KafkaListener(topicPattern = "^chat-\\d+$",
-            groupId = "chat-group",
+            groupId = "${spring.kafka.consumer.chat.group-id}",
             containerFactory = "chatKafkaListenerContainerFactory")
     public void consume(ChatMessageKafkaReq chatMessageKafkaReq) { //매개변수 리팩터링
         log.info("Kafka 메시지 수신: roomIdx={}, userIdx={}, content={}",
