@@ -36,7 +36,13 @@
 
 spring:
   kafka:
-    bootstrap-servers: ${KAFKA}:9092
+    # bootstrap-servers: ${KAFKA}:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    topic:
+      partitions: 3  #${KAFKA_TOPIC_PARTITIONS:3}
+      replication-factor: 2 # ${KAFKA_TOPIC_REPLICATION_FACTOR:2}
+    admin:
+      auto-create: false # 토픽 자동생성은 비활성화 (운영중 불필요한 토픽 생성을 막음)
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -47,8 +53,13 @@ spring:
         reconnect.backoff.ms: 1000       # 재연결 백오프 설정
         reconnect.backoff.max.ms: 10000  # 최대 재연결 간격
     consumer:
-      auto-offset-reset: latest
-      group-id: chat-group
+      auto-offset-reset: earliest
+      chat:
+        group-id: "chat-${POD_NAME:0}"
+      heart:
+        group-id: "chat-like-${POD_NAME:0}"
+      highlight:
+        group-id: "chat-highlight-${POD_NAME:0}"
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
