@@ -9,6 +9,8 @@ import com.example.grapefield.chat.service.ChatRoomMemberService;
 import com.example.grapefield.chat.service.ChatRoomService;
 import com.example.grapefield.user.CustomUserDetails;
 import com.example.grapefield.user.model.entity.User;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.stream.Collectors;
 
+@Tag(name = "7-1. 채팅방 기능", description = "채팅방 컨트롤러")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/chat")
@@ -26,6 +29,7 @@ public class ChatRoomDetailController {
     private final ChatRoomMemberService chatRoomMemberService;
 
     @GetMapping("/{roomIdx}")
+    @Operation(summary = "특정 채팅방 메시지 조회", description = "채팅방 Idx를 통해 특정 채팅방의 채팅 내용 확인")
     public ChatRoomDetailResp chatRoomDetail(@PathVariable("roomIdx") Long roomIdx,
                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
 

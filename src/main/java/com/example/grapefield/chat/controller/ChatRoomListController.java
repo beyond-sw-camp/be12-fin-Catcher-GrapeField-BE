@@ -23,7 +23,7 @@ import java.util.Locale;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/chat/list")
-@Tag(name="채팅방 리스트 ", description = "메인의 사이드바와 채팅 리스트 페이지에서 채팅방 리스트 조회 기능")
+@Tag(name="7-2. 채팅방 목록 기능", description = "메인의 사이드바와 채팅 리스트 페이지에서 채팅방 리스트 조회 기능")
 public class ChatRoomListController {
 
     private final ChatRoomListService chatRoomListService;
