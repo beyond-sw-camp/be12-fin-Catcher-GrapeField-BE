@@ -5,6 +5,12 @@ metadata:
   namespace: first
 spec:
   replicas: 2
+  # 롤링 업데이트 전략 명시적으로 추가
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
   selector:
     matchLabels:
       app: backend
@@ -32,7 +38,7 @@ spec:
             - name: shared-storage
               mountPath: /app/uploads
             - name: backend-tls
-              mountPath: /app/ssl  # Spring Boot가 참조하는 키스토어 경로
+              mountPath: /app/ssl
               readOnly: true
       volumes:
         - name: shared-storage
