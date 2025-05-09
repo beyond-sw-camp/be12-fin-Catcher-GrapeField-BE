@@ -33,9 +33,6 @@ public class ChatRoomDetailController {
     public ChatRoomDetailResp chatRoomDetail(@PathVariable("roomIdx") Long roomIdx,
                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        Long userIdx =  userDetails.getUser().getIdx();
-        chatRoomMemberService.joinRoom(userIdx, roomIdx);
-
         ChatRoom room = chatRoomService.findByIdx(roomIdx);
         return ChatRoomDetailResp.builder()
                 .roomIdx(roomIdx)
