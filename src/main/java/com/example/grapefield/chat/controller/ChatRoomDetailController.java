@@ -32,7 +32,6 @@ public class ChatRoomDetailController {
     @Operation(summary = "특정 채팅방 메시지 조회", description = "채팅방 Idx를 통해 특정 채팅방의 채팅 내용 확인")
     public ChatRoomDetailResp chatRoomDetail(@PathVariable("roomIdx") Long roomIdx,
                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
-
         ChatRoom room = chatRoomService.findByIdx(roomIdx);
         return ChatRoomDetailResp.builder()
                 .roomIdx(roomIdx)

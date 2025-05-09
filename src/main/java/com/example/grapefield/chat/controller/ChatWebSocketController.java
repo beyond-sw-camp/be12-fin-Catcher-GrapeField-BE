@@ -57,8 +57,11 @@ public class ChatWebSocketController {
                 chatMessageReq.getRoomIdx(), chatMessageReq.getContent(), user.getIdx());
 
         ChatMessageKafkaReq chatMessageKafkaReq =
-                new ChatMessageKafkaReq(chatMessageReq.getRoomIdx(), user.getIdx(), chatMessageReq.getContent());
-
+                ChatMessageKafkaReq.builder()
+                        .roomIdx(chatMessageReq.getRoomIdx())
+                        .sendUserIdx(user.getIdx())
+                        .content(chatMessageReq.getContent()).build();
+        log.debug("웹소켓 컨트롤러 sendMessage 메소드 chatMessageKafkaReq={}", chatMessageReq.toString());
         chatKafkaProducer.sendMessage(chatMessageKafkaReq);//  클라이언트로부터의 메시지를 kafka로 전송
     }
 
