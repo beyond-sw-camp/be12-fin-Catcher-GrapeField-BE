@@ -2,6 +2,7 @@ package com.example.grapefield.events;
 
 import com.example.grapefield.chat.model.entity.ChatRoom;
 import com.example.grapefield.chat.repository.ChatRoomRepository;
+import com.example.grapefield.elasticsearch.EventSearchService;
 import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.model.entity.EventsImg;
@@ -31,6 +32,34 @@ public class EventsService {
   private final BoardRepository boardRepository;
   private final EventsImgRepository eventsImgRepository;
   private final ChatRoomRepository chatRoomRepository;
+
+  private final EventSearchService searchService;
+
+  @Transactional
+  public Events save(Events event) {
+    Events savedEvent = eventsRepository.save(event);
+    // Elasticsearch에 인덱싱
+    try {
+      searchService.indexEvent(savedEvent);
+    } catch (Exception e) {
+      // 로깅만 하고 트랜잭션은 계속 진행
+      System.err.println("Error indexing event: " + e.getMessage());
+    }
+    return savedEvent;
+  }
+
+  // 삭제 메서드
+  @Transactional
+  public void delete(Long id) {
+    eventsRepository.deleteById(id);
+    // Elasticsearch에서 문서 삭제
+    try {
+      searchService.deleteEventDocument(id);
+    } catch (Exception e) {
+      // 로깅만 하고 트랜잭션은 계속 진행
+      System.err.println("Error deleting event from index: " + e.getMessage());
+    }
+  }
 
   @Transactional
   public Long eventsRegister(EventsRegisterReq request) {

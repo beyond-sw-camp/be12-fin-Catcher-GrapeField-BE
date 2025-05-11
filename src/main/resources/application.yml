@@ -33,6 +33,9 @@ spring:
         max.poll.interval.ms: 300000     # 폴링 간격 최대값 증가
         reconnect.backoff.ms: 1000       # 재연결 백오프 설정
         reconnect.backoff.max.ms: 10000  # 최대 재연결 간격
+  elasticsearch:
+    host: localhost
+    port: 9200
 
   application:
     name: grapefield
@@ -79,6 +82,14 @@ spring:
       host: ${REDIS}
       port: 6379
 
+    elasticsearch:
+      repositories:
+        enabled: true
+#      cluster-name: docker-cluster
+#      cluster-nodes: ${spring.elasticsearch.host}:${spring.elasticsearch.port}
+      # Spring Boot 3.4.x 설정
+      auto-index-creation: false  # 인덱스 자동 생성 비활성화
+
 jwtData:
   secret: ${JWT_SECRET}
   access-expiration: ${ACCESS_EXPIRATION}
@@ -118,5 +129,9 @@ logging:
     org.springframework.web.socket: DEBUG
     org.springframework.web.socket.sockjs: DEBUG
     com.example.grapefield.config.filter.JwtHandshakeInterceptor: DEBUG
+    # Elasticsearch 디버깅 추가
+    org.springframework.data.elasticsearch: DEBUG
+    org.elasticsearch: DEBUG
+    com.example.grapefield.elasticsearch: DEBUG
 #    org.hibernate.SQL: DEBUG
 #    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

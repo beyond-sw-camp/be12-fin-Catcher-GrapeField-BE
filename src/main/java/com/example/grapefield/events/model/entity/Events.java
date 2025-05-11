@@ -1,6 +1,7 @@
 package com.example.grapefield.events.model.entity;
 
 import com.example.grapefield.chat.model.entity.ChatRoom;
+import com.example.grapefield.elasticsearch.EventEntityListener;
 import com.example.grapefield.events.participant.model.entity.EventsCast;
 import com.example.grapefield.events.participant.model.entity.EventsParticipation;
 import com.example.grapefield.events.post.model.entity.Board;
@@ -19,6 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Entity
+@EntityListeners(EventEntityListener.class)
 public class Events {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
