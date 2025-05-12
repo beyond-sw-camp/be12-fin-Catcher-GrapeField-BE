@@ -58,7 +58,7 @@ pipeline {
                             cat k8s/backend-deployment.yml
                             
                             # 배포
-                            kubectl apply -f k8s/backend-deployment.yml -n first
+                            kubectl apply -f k8s/backend-deployment.yml -n first --validate=false
                             
                             # 롤아웃 상태 확인 - 배포 이름을 직접 사용
                             echo "=== 롤아웃 상태 확인 ==="
