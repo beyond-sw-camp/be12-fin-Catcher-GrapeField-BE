@@ -3,12 +3,11 @@ package com.example.grapefield.chat.service;
 import com.example.grapefield.chat.model.entity.ChatMessageBase;
 import com.example.grapefield.chat.model.entity.ChatMessageCurrent;
 import com.example.grapefield.chat.model.entity.ChatRoom;
+import com.example.grapefield.chat.model.entity.ProcessedMessage;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
+import com.example.grapefield.chat.model.request.ChatMessageReq;
 import com.example.grapefield.chat.model.response.ChatMessageResp;
-import com.example.grapefield.chat.repository.ChatMessageBaseRepository;
-import com.example.grapefield.chat.repository.ChatMessageCurrentRepository;
-import com.example.grapefield.chat.repository.ChatRoomMemberRepository;
-import com.example.grapefield.chat.repository.ChatRoomRepository;
+import com.example.grapefield.chat.repository.*;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -27,6 +26,18 @@ public class ChatMessageService {
     private final ChatMessageCurrentRepository currentRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final ProcessedMessageRepository processedMessageRepository;
+
+    @Transactional
+    public ChatMessageResp saveMessageIfNotProcessed(ChatMessageKafkaReq req) {
+        String messageUuid = req.getMessageUuid();
+        if (processedMessageRepository.existsById(messageUuid)) {
+            return null;   // 이미 처리된 메시지라면 저장 로직 스킵 :contentReference
+        }
+        ChatMessageResp resp = saveMessage(req);
+        processedMessageRepository.save(new ProcessedMessage(messageUuid, LocalDateTime.now()));
+        return resp;
+    }
 
     @Transactional
     public ChatMessageResp saveMessage(ChatMessageKafkaReq req) {
