@@ -17,72 +17,72 @@ repositories {
     mavenCentral()
 }
 
-    dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter-web'
-        implementation 'org.springframework.boot:spring-boot-starter-websocket'
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-        //lombok
-        compileOnly 'org.projectlombok:lombok'
-        annotationProcessor 'org.projectlombok:lombok'
+    //lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
-        // DataBase 연결관련 Spring jpa, mariadb
-        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-        runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    // DataBase 연결관련 Spring jpa, mariadb
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 
-        //Swagger-ui
-        implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+    //Swagger-ui
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 
-        // 인증, 인가관련 Spring Security, jjwt, validation
-        implementation 'org.springframework.boot:spring-boot-starter-security'
-        implementation 'org.springframework.security:spring-security-oauth2-client'
-        implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-        implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
-        implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-        implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // 인증, 인가관련 Spring Security, jjwt, validation
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.security:spring-security-oauth2-client'
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-        //회원가입 시 이메일 인증 전송
-        implementation 'org.springframework.boot:spring-boot-starter-mail'
+    //회원가입 시 이메일 인증 전송
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-        //소셜 로그인 관련
-        implementation 'org.springframework.security:spring-security-oauth2-client'
+    //소셜 로그인 관련
+    implementation 'org.springframework.security:spring-security-oauth2-client'
 
-        //Kafka
-        implementation 'org.springframework.kafka:spring-kafka'
+    //Kafka
+    implementation 'org.springframework.kafka:spring-kafka'
 
-        //이미지를 aws s3에 저장
-        implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.3.0'
+    //이미지를 aws s3에 저장
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.3.0'
 
-        // QueryDSL 핵심 모듈
-        implementation 'com.querydsl:querydsl-core:5.0.0'
-        // JPA 연동
-        implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-        // GroupBy 등 컬렉션 기능
-        implementation 'com.querydsl:querydsl-collections:5.0.0'
-        // Q타입 생성용 annotation processor
-        annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
-        annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
-        annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
+    // QueryDSL 핵심 모듈
+    implementation 'com.querydsl:querydsl-core:5.0.0'
+    // JPA 연동
+    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    // GroupBy 등 컬렉션 기능
+    implementation 'com.querydsl:querydsl-collections:5.0.0'
+    // Q타입 생성용 annotation processor
+    annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
+    annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
+    annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
 
-        //Redis
-        implementation("org.springframework.boot:spring-boot-starter-data-redis:3.4.3")
-        //lettuce
-        implementation("io.lettuce:lettuce-core:6.3.2.RELEASE")
+    //Redis
+    implementation("org.springframework.boot:spring-boot-starter-data-redis:3.4.3")
+    //lettuce
+    implementation("io.lettuce:lettuce-core:6.3.2.RELEASE")
 
-        //Jackson JSR310 모듈
-        implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    //Jackson JSR310 모듈
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
 
-        // actuator (health check)
-        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // actuator (health check)
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
-        // Elastic Search
-        implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
-        implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.9'
-        implementation 'org.elasticsearch:elasticsearch:7.17.9'
-        implementation 'org.springframework.boot:spring-boot-starter-data-rest'
-        implementation 'com.fasterxml.jackson.core:jackson-databind'
-    }
+    // Elastic Search
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.9'
+    implementation 'org.elasticsearch:elasticsearch:7.17.9'
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+}
 
 tasks.named('test') {
     useJUnitPlatform()

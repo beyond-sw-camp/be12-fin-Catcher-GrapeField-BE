@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+  namespace: first
+spec:
+  serviceName: elasticsearch
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      initContainers:
+        - name: fix-permissions
+          image: busybox
+          command: ["sh", "-c", "chown -R 1000:1000 /usr/share/elasticsearch/data"]
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: elasticsearch-storage
+              mountPath: /usr/share/elasticsearch/data
+      containers:
+        - name: elasticsearch
+          image: docker.elastic.co/elasticsearch/elasticsearch:7.17.2
+          ports:
+            - containerPort: 9200
+            - containerPort: 9300
+          env:
+            - name: discovery.type
+              value: single-node
+            - name: ELASTIC_PASSWORD
+              value: qwer1234
+            - name: xpack.security.enabled
+              value: "true"
+            - name: ES_JAVA_OPTS
+              value: "-Xms1g -Xmx1g"
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "3Gi"
+              cpu: "1000m"
+          volumeMounts:
+            - name: elasticsearch-storage
+              mountPath: /usr/share/elasticsearch/data
+            - name: tz-seoul
+              mountPath: /etc/localtime
+      volumes:
+        - name: tz-seoul
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Seoul
+  volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: fast
+        resources:
+          requests:
+            storage: 5Gi

@@ -66,18 +66,23 @@ public class EventSearchService {
                     .from((int) pageable.getOffset())
                     .size(pageable.getPageSize())
                     .query(q -> q
-                            .matchPhrase(m -> m
-                                    .field("title")
-                                    .query(keyword)
+                            .bool(b -> b
+                                    .must(m -> m
+                                            .matchPhrase(mp -> mp
+                                                    .field("title")
+                                                    .query(keyword)
+                                            )
+                                    )
+
+                                    .should(s -> s
+                                            .matchPhrase(m -> m
+                                                    .field("title")
+                                                    .query(keyword)
+                                                    .boost(50.0f)
+                                            )
+                                    )
                             )
-                    )
-                    .query(q -> q
-                            .multiMatch(m -> m
-                                    .fields("postTitle", "postContent", "review")
-                                    .query(keyword)
-                            )
-                    )
-                    .build();
+                    ).build();
 
             var response = client.search(searchRequest, EventDocument.class);
 
@@ -88,7 +93,7 @@ public class EventSearchService {
                     .map(hit -> {
                         EventDocument doc = hit.source();
                         if (doc != null) {
-                            System.out.println("Found document: " + doc.getTitle() + " (ID: " + doc.getIdx() + ")");
+                            System.out.println("Found document: " + doc.getTitle() + " (ID: " + doc.getIdx() + ")     score:   " + hit.score());
                             return documentMapper.toEntity(doc);
                         }
                         return null;

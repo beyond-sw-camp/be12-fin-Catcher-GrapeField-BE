@@ -1,11 +1,10 @@
 package com.example.grapefield.events;
 
-import com.example.grapefield.elasticsearch.EventDocument;
 import com.example.grapefield.elasticsearch.EventSearchService;
+import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.model.response.EventsListResp;
-import com.example.grapefield.events.post.model.response.PostListResp;
 import com.example.grapefield.events.post.model.response.PostSearchListResp;
-import com.example.grapefield.events.review.model.response.ReviewListResp;
+import com.example.grapefield.events.repository.EventsRepository;
 import com.example.grapefield.events.review.model.response.ReviewSearchList;
 import com.example.grapefield.user.CustomUserDetails;
 import com.example.grapefield.user.model.entity.User;
@@ -21,6 +20,7 @@ import org.elasticsearch.client.Request;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -28,9 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -39,24 +37,47 @@ import java.util.stream.Collectors;
 @Tag(name = "검색 API", description = "통합 검색 및 엘라스틱서치 기반 고급 검색 API")
 public class EventsSearchController {
   private final EventsSearchService searchService;
-
+  private final EventsRepository eventsRepository;
+  @Lazy
   private final EventSearchService eventSearchService;
 
   //Header를 이용한 통합 검색(검색 결과를 Map형식으로 한꺼번에 반환)
   @Operation(summary = "통합 검색", description = "이벤트, 게시글, 후기를 한 번에 검색합니다")
   @GetMapping("/all")
   public ResponseEntity<Map<String,Object>> searchAll(
-          @Parameter(description = "검색 키워드 (일반 텍스트 또는 초성)") @RequestParam String keyword,
+          @RequestParam String keyword,
           @AuthenticationPrincipal CustomUserDetails principal,
           @PageableDefault Pageable pageable) {
     User user = (principal != null) ? principal.getUser() : null;
-
     Map<String, Object> result = new HashMap<>();
 
-    // Elasticsearch 서비스 사용하여 이벤트 검색
-    result.put("events", eventSearchService.searchByKeyword(keyword, pageable));
+    // ES 검색 결과 - ID만 추출
+    List<Events> esResults = eventSearchService.searchByKeyword(keyword, pageable);
+    List<Long> eventIds = esResults.stream()
+            .map(Events::getIdx)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
 
-    // 기존 서비스로 게시글 및 후기 검색
+    // DB에서 완전한 Events 객체 조회
+    if (!eventIds.isEmpty()) {
+      // DB에서 정확한 데이터 조회
+      List<Events> completedEvents = eventsRepository.findAllByIdxIn(eventIds);
+
+      // ES 결과 순서 유지
+      Map<Long, Events> eventsMap = completedEvents.stream()
+              .collect(Collectors.toMap(Events::getIdx, e -> e));
+
+      List<EventsListResp> sortedEvents = eventIds.stream()
+              .map(id -> eventsMap.get(id))
+              .filter(Objects::nonNull)
+              .map(EventsListResp::from)  // 엔티티를 DTO로 변환
+              .collect(Collectors.toList());
+
+      result.put("events", sortedEvents);
+    } else {
+      result.put("events", Collections.emptyList());
+    }
+
     result.put("posts", searchService.searchPosts(keyword, user));
     result.put("reviews", searchService.searchReviews(keyword, user));
 

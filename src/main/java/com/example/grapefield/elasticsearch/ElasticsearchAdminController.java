@@ -94,8 +94,9 @@ public class ElasticsearchAdminController {
     }
 
     @PostMapping("/reindex")
-    @PreAuthorize("hasRole('ADMIN')") // 시큐리티 설정에 따라 조정
+//    @PreAuthorize("hasRole('ADMIN')") // 시큐리티 설정에 따라 조정
     public ResponseEntity<Map<String, Object>> reindexAll() {
+
         try {
             migrator.migrateAllData();
 

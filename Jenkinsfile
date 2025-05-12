@@ -22,6 +22,19 @@ pipeline {
                 sh './gradlew bootJar'
             }
         }
+        stage('ElasticSearch Nori Build') {
+            agent { label 'build' }
+            steps {
+                script {
+                    def esImageName = "${DOCKER_USER}/elasticsearch-nori:7.17.2"
+                    sh "docker build -t ${esImageName} -f Dockerfile.elasticsearch ."
+
+                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKER_HUB') {
+                        docker.image(esImageName).push()
+                    }
+                }
+            }
+        }
         stage('Docker Build') {
             agent { label 'build' }
             steps {
@@ -52,6 +65,9 @@ pipeline {
                         sh """
                             # 이미지 태그 업데이트 - 이미지 이름도 올바르게 변경
                             sed -i 's|rekvv/grapefield_back:.*|rekvv/grapefield_backend:${IMAGE_TAG}|g' k8s/backend-deployment.yml
+
+                            # 엘라스틱서치 이미지 업데이트
+                            sed -i 's|docker.elastic.co/elasticsearch/elasticsearch:.*|rekvv/elasticsearch-nori:7.17.2|g' k8s/elasticsearch-statefulset.yml
                             
                             # 배포 전 YAML 확인
                             echo "=== 배포할 YAML 파일 내용 ==="
