@@ -17,7 +17,7 @@ public class HeartKafkaConsumer {
 
     @KafkaListener(
             topicPattern="^chat-like-\\d+$",
-            groupId="${spring.kafka.consumer.heart.group-id}",
+            groupId="chat-like-group",
             containerFactory="heartKafkaListenerContainerFactory"
     )
     public void consumeHeart(ChatHeartKafkaReq chatHeartKafkaReq) {
