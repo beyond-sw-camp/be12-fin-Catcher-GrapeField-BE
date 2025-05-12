@@ -1,5 +1,6 @@
 package com.example.grapefield.elasticsearch;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,22 +15,23 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EventDocument {
     @Id
     private String idx;
 
-    @Field(type = FieldType.Text)  // analyzer 설정 제거
+    @Field(type = FieldType.Text)
     private String title;
 
     @Field(type = FieldType.Keyword)
     private String category;
 
-    @Field(type = FieldType.Text)  // analyzer 설정 제거
+    @Field(type = FieldType.Text)
     private String postTitle;
 
-    @Field(type = FieldType.Text)  // analyzer 설정 제거
+    @Field(type = FieldType.Text)
     private String postContent;
 
-    @Field(type = FieldType.Text)  // analyzer 설정 제거
+    @Field(type = FieldType.Text)
     private String review;
 }

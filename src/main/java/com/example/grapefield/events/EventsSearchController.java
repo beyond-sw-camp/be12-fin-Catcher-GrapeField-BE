@@ -1,5 +1,6 @@
 package com.example.grapefield.events;
 
+import com.example.grapefield.elasticsearch.EventDocument;
 import com.example.grapefield.elasticsearch.EventSearchService;
 import com.example.grapefield.events.model.response.EventsListResp;
 import com.example.grapefield.events.post.model.response.PostListResp;
@@ -8,10 +9,18 @@ import com.example.grapefield.events.review.model.response.ReviewListResp;
 import com.example.grapefield.events.review.model.response.ReviewSearchList;
 import com.example.grapefield.user.CustomUserDetails;
 import com.example.grapefield.user.model.entity.User;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.apache.http.HttpHost;
+import org.apache.http.util.EntityUtils;
+import org.elasticsearch.client.Request;
+import org.elasticsearch.client.Response;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -22,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -51,6 +61,55 @@ public class EventsSearchController {
     result.put("reviews", searchService.searchReviews(keyword, user));
 
     return ResponseEntity.ok(result);
+  }
+
+  @GetMapping("/autocomplete")
+  public ResponseEntity<List<Map<String, Object>>> autocomplete(@RequestParam String prefix) {
+    try {
+      RestHighLevelClient client = new RestHighLevelClient(
+              RestClient.builder(new HttpHost("localhost", 9200, "http")));
+
+      String query = "{\n" +
+              "  \"size\": 5,\n" +
+              "  \"query\": {\n" +
+              "    \"bool\": {\n" +
+              "      \"should\": [\n" +
+              "        { \"match\": { \"title\": { \"query\": \"" + prefix + "\", \"boost\": 3.0 } } },\n" +
+              "        { \"match_phrase_prefix\": { \"title\": \"" + prefix + "\" } }\n" +
+              "      ]\n" +
+              "    }\n" +
+              "  }\n" +
+              "}";
+
+      Request request = new Request("GET", "/events/_search");
+      request.setJsonEntity(query);
+
+      Response response = client.getLowLevelClient().performRequest(request);
+
+      ObjectMapper mapper = new ObjectMapper();
+      Map<String, Object> responseMap = mapper.readValue(
+              EntityUtils.toString(response.getEntity()),
+              new TypeReference<Map<String, Object>>() {});
+
+      Map<String, Object> hits = (Map<String, Object>) responseMap.get("hits");
+      List<Map<String, Object>> hitList = (List<Map<String, Object>>) hits.get("hits");
+
+      // 스코어와 제목을 함께 반환
+      List<Map<String, Object>> suggestions = hitList.stream()
+              .map(hit -> {
+                Map<String, Object> source = (Map<String, Object>) hit.get("_source");
+                Map<String, Object> result = new HashMap<>();
+                result.put("title", source.get("title"));
+                result.put("score", hit.get("_score"));
+                return result;
+              })
+              .collect(Collectors.toList());
+
+      return ResponseEntity.ok(suggestions);
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.internalServerError().body(List.of());
+    }
   }
 
   // 공연/전시 상세 검색(더보기)

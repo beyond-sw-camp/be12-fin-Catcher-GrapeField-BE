@@ -4,9 +4,11 @@ import com.example.grapefield.events.model.entity.Events;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -19,15 +21,18 @@ public class EventSearchService {
     private final co.elastic.clients.elasticsearch.ElasticsearchClient client;
     private final EventSearchRepository searchRepository;
     private final EventDocumentMapper documentMapper;
+    private final ElasticsearchOperations elasticsearchOperations;
 
     @Autowired
     public EventSearchService(
             EventSearchRepository searchRepository,
             EventDocumentMapper documentMapper,
-            co.elastic.clients.elasticsearch.ElasticsearchClient client) {
+            co.elastic.clients.elasticsearch.ElasticsearchClient client,
+            ElasticsearchOperations elasticsearchOperations) {
         this.searchRepository = searchRepository;
         this.documentMapper = documentMapper;
         this.client = client;
+        this.elasticsearchOperations = elasticsearchOperations;
     }
 
     // 문서 인덱싱 (단일)
@@ -43,6 +48,7 @@ public class EventSearchService {
                 .collect(Collectors.toList());
         searchRepository.saveAll(documents);
     }
+
 
     // 키워드로 검색
     // 키워드로 검색 - 초성 검색과 짧은 단어 정확 매칭 개선
@@ -60,8 +66,14 @@ public class EventSearchService {
                     .from((int) pageable.getOffset())
                     .size(pageable.getPageSize())
                     .query(q -> q
+                            .matchPhrase(m -> m
+                                    .field("title")
+                                    .query(keyword)
+                            )
+                    )
+                    .query(q -> q
                             .multiMatch(m -> m
-                                    .fields("title", "postTitle", "postContent", "review")
+                                    .fields("postTitle", "postContent", "review")
                                     .query(keyword)
                             )
                     )
@@ -119,8 +131,15 @@ public class EventSearchService {
     }
 
     // 문서 수 반환
-    public long getDocumentCount() {
+    public long countDocuments() {
         return searchRepository.count();
+    }
+
+    public List<EventDocument> getSampleDocuments(int size) {
+        Pageable pageable = PageRequest.of(0, size);
+        List<EventDocument> results = new ArrayList<>();
+        searchRepository.findAll(pageable).forEach(results::add);
+        return results;
     }
 
     // 한글 체크 함수
