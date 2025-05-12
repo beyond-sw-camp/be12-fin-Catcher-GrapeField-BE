@@ -1,7 +1,5 @@
-package com.example.grapefield.config;
+package com.example.grapefield.config.websocket;
 
-import com.example.grapefield.config.websocket.CustomHandshakeHandler;
-import com.example.grapefield.config.websocket.JwtHandshakeInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
