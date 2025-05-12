@@ -39,7 +39,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
             for (Cookie cookie : cookies) {
                 if("ATOKEN".equals(cookie.getName())) {
                     jwt = cookie.getValue();
-                    logger.info("✅ ATOKEN 일치");
+                    logger.info("✅ 쿠키에 ATOKEN값이 존재");
                     break;
                 }
             }
