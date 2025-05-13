@@ -75,6 +75,13 @@ dependencies {
 
     // actuator (health check)
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Elastic Search
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'org.elasticsearch.client:elasticsearch-rest-high-level-client:7.17.9'
+    implementation 'org.elasticsearch:elasticsearch:7.17.9'
+    implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
 tasks.named('test') {
