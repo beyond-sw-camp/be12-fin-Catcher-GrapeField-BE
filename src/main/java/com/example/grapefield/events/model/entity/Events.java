@@ -1,10 +1,13 @@
 package com.example.grapefield.events.model.entity;
 
 import com.example.grapefield.chat.model.entity.ChatRoom;
+import com.example.grapefield.elasticsearch.EventEntityListener;
 import com.example.grapefield.events.participant.model.entity.EventsCast;
 import com.example.grapefield.events.participant.model.entity.EventsParticipation;
 import com.example.grapefield.events.post.model.entity.Board;
 import com.example.grapefield.events.review.model.entity.Review;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +22,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Entity
+@EntityListeners(EventEntityListener.class)
 public class Events {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,9 +45,11 @@ public class Events {
 
     private Boolean isVisible;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "events")
     private List<EventsImg> eventsImgList;
 
+    @JsonBackReference
     @OneToMany(mappedBy = "events")
     private List<TicketInfo> ticketInfoList;
 

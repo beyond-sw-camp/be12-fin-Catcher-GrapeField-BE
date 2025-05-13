@@ -26,3 +26,15 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
+
+  elasticsearch:
+    build:
+      context: ./elastic
+      dockerfile: Dockerfile
+    container_name: elasticsearch
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
