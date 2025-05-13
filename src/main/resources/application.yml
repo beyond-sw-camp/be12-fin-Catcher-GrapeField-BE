@@ -27,6 +27,10 @@ spring:
         group-id: "chat-like-${POD_NAME:0}"
       highlight:
         group-id: "chat-highlight-${POD_NAME:0}"
+      participant:
+        group-id: "chat-participant-${POD_NAME:0}"
+      user-event:
+        group-id: "user-event-${POD_NAME:0}"
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
@@ -85,8 +89,8 @@ spring:
         static: ${SEOUL}
   data:
     redis:
-      host: ${REDIS}
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
     elasticsearch:
       repositories:

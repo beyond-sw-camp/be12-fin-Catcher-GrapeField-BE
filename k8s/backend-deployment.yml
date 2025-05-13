@@ -21,7 +21,8 @@ spec:
     spec:
       containers:
         - name: backend
-          image: alpaka1111/gf_back_test:1.0
+          # Jenkins 파이프라인에서 sed 명령어로 실제 버전으로 대체됨
+          image: rekvv/grapefield_back:latest
           ports:
             - containerPort: 8080
           envFrom:
