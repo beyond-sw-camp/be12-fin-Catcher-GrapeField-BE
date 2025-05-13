@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -43,31 +44,27 @@ public class ChatRoomService {
 
 
     @Transactional
-    public void increaseHeartCount(Long roomIdx) {
+    public void increaseHeartDb(Long roomIdx) {
         // DB 갱신
         ChatRoom chatRoom = chatRoomRepository.findById(roomIdx)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방 없음. roomIdx=" + roomIdx));
-        log.info("♥️하트 개수 갱신 전!! 🌟chatRoom.getHeartCnt:"+chatRoom.getHeartCnt());
         chatRoom.increaseHeart(); // heartCnt += 1
-        log.info("✅[DataBase] ChatRoom({}) ♥️하트 개수 갱신 heartCnt updated: {}", roomIdx, chatRoom.getHeartCnt());
-        log.info("♥️하트 개수 갱신 후!! 🌟chatRoom.getHeartCnt:"+chatRoom.getHeartCnt());
-        // Redis 캐시에 동기화
-        log.info("🌟🌟🌟🌟🌟🌟 Redis 코드 시작... ");
+        log.info("✅[DataBase] ChatRoom({}) ♥️하트 개수 갱신 heartCnt", roomIdx);
+    }
+
+    @Transactional
+    public Long increaseHeartRedis(ChatRoom chatRoom) {
+        Long roomIdx = chatRoom.getIdx();
         String redisKey = "chat:"+roomIdx+":likes";
-        log.info("🌟호출 당시 redisKey:"+redisKey);
         Long newCount = redisTemplate.opsForValue().increment(redisKey);
-        log.info("🌟호출 당시 redisKey:"+redisKey);
-        log.info("🌟호출 당시 newCount:"+newCount);
-        if (newCount == null) {
-            log.info("🌟newCount = null");
-            //키가 없을 경우 DB의 값으로 초기값 세팅
-            redisTemplate.opsForValue().set(redisKey, chatRoom.getHeartCnt());
-            log.info("🌟null일 때 chatRoom.getHeartCnt()로 set 하고 나서 redisKey:"+redisKey);
-            log.info("🌟chatRoom.getHeartCnt:"+chatRoom.getHeartCnt());
+
+        if (!Objects.equals(newCount, chatRoom.getHeartCnt()) || newCount == null){
             newCount = chatRoom.getHeartCnt();
-            log.info("🌟null일 때 chatRoom.getHeartCnt()로 할당하고 나서 newCount:"+newCount);
+            newCount++;
         }
-        log.info("✅[Redis] ChatRoom({}) ♥️하트 개수 갱신 heartCnt updated: {}", roomIdx, newCount);
+
+        return newCount;
+
     }
 
 }

@@ -31,14 +31,11 @@ public class HeartKafkaConsumer {
     public void consumeHeart(ChatHeartKafkaReq chatHeartKafkaReq) {
         Long roomIdx = chatHeartKafkaReq.getRoomIdx();
         log.info("✅ KafkaConsumer 좋아요 ♥\uFE0F 하트 수신: roomIdx={}", roomIdx);
+        ChatRoom chatRoom = chatRoomRepository.findById(roomIdx).orElse(null);
+        chatRoomService.increaseHeartDb(roomIdx);
+        Long newCount =
+                chatRoomService.increaseHeartRedis(Objects.requireNonNull(chatRoom));
 
-        ChatRoom room = chatRoomRepository.findById(roomIdx).orElse(null);
-        chatRoomService.increaseHeartCount(roomIdx);
-        String redisKey = "chat:" + roomIdx + ":likes";
-        redisTemplate.opsForValue().increment(redisKey);
-        // Redis INCR
-        // 1. Redis 서버에 실시간 heart count 증가
-        Long newCount = Objects.requireNonNull(room).getHeartCnt();
         // 2. WebSocket 브로커로 브로드캐스트 (프론트에서 애니메이션 띄우게)
         HeartResp resp = new HeartResp(roomIdx, newCount);
         messagingTemplate.convertAndSend("/topic/chat.room.likes." + roomIdx, resp);
