@@ -37,7 +37,7 @@ public class ChatRoomListService {
         List<ChatroomMember> members = memberRepository.findByUser_Idx(userIdx);
         List<ChatRoom> rooms = members.stream().map(ChatroomMember::getChatRoom).toList();
 
-        Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountMap();
+//        Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountMap();
         Map<Long, ChatMessageCurrent> lastMsgMap = currentRepository.findLatestMessagesByRooms(rooms).stream()
                 .collect(Collectors.toMap(msg -> msg.getChatRoom().getIdx(), msg -> msg));
 
@@ -45,7 +45,9 @@ public class ChatRoomListService {
             ChatRoom room = member.getChatRoom();
             ChatMessageCurrent lastMsg = lastMsgMap.get(room.getIdx());
             int unreadCount = currentRepository.countByChatRoomAndCreatedAtAfter(room, member.getLastReadAt());
-            int participantCount = participantCountMap.getOrDefault(room.getIdx(), 0);
+
+            // 개별 채팅방의 참여자 수만 Redis에서 조회
+            int participantCount = chatRoomMemberService.getParticipantCount(room.getIdx());
 
             return ChatListResp.from(room, lastMsg, unreadCount, participantCount);
         }).toList();
