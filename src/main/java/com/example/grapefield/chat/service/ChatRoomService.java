@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
@@ -21,6 +22,8 @@ import java.util.NoSuchElementException;
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageCurrentRepository chatMessageCurrentRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
+
     public ChatRoom findByIdx(Long roomIdx) {
         return chatRoomRepository.findById(roomIdx)
                 .orElseThrow(()->
@@ -28,7 +31,7 @@ public class ChatRoomService {
     }
 
     /**
-     * roomIdx 방의 메시지를 페이징하여 조회합니다.
+     * roomIdx 방의 메시지를 페이징하여 조회한다.
      * @param roomIdx 조회할 채팅방 ID
      * @param page    0부터 시작하는 페이지 번호
      * @param size    한 페이지당 메시지 수
@@ -41,9 +44,21 @@ public class ChatRoomService {
 
     @Transactional
     public void increaseHeartCount(Long roomIdx) {
+        // DB 갱신
         ChatRoom chatRoom = chatRoomRepository.findById(roomIdx)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방 없음"));
+                .orElseThrow(() -> new IllegalArgumentException("채팅방 없음. roomIdx=" + roomIdx));
         chatRoom.increaseHeart(); // heartCnt += 1
+        log.info("✅[DataBase] ChatRoom({}) ♥️하트 개수 갱신 heartCnt updated: {}", roomIdx, chatRoom.getHeartCnt());
+
+        // Redis 캐시에 동기화
+        String redisKey = "chat:"+roomIdx+":likes";
+        Long newCount = redisTemplate.opsForValue().increment(redisKey);
+        if (newCount == null) {
+            //키가 없을 경우 DB의 값으로 초기값 세팅
+            redisTemplate.opsForValue().set(redisKey, chatRoom.getHeartCnt());
+            newCount = chatRoom.getHeartCnt();
+        }
+        log.info("✅[Redis] ChatRoom({}) ♥️하트 개수 갱신 heartCnt updated: {}", roomIdx, newCount);
     }
 
 }

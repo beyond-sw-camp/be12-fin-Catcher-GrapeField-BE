@@ -1,5 +1,6 @@
 package com.example.grapefield.chat.model.response;
 
+import com.example.grapefield.chat.model.entity.ChatMessageCurrent;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,5 +31,19 @@ public class ChatMessageResp {
     private LocalDateTime createdAt;
     @Schema(description = "하이라이브 메세지 여부", example = "false")
     private Boolean isHighlighted;
+
+    public static ChatMessageResp from(ChatMessageCurrent msg) {
+        ChatMessageResp resp = ChatMessageResp.builder()
+                .messageIdx(msg.getMessageIdx())
+                .roomIdx(msg.getChatRoom().getIdx())
+                .userIdx(msg.getUser().getIdx())
+                .username(msg.getUser().getUsername())
+                .profileImageUrl(msg.getUser().getProfileImg())
+                .content(msg.getContent())
+                .createdAt(msg.getCreatedAt())
+                .isHighlighted(msg.getIsHighlighted())
+            .build();
+        return resp;
+    }
 
 }
