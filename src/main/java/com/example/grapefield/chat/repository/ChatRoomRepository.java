@@ -19,7 +19,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long>, ChatR
 
     @EntityGraph(attributePaths = {"events"})
     @Query("SELECT c FROM ChatRoom c")
-    Slice<ChatRoom> findAllWithEventsSlice(Pageable pageable);
+    Slice<ChatRoom> findAllWithEvents(Pageable pageable);
 
     @Query("SELECT c FROM ChatRoom c JOIN FETCH c.events WHERE c.events.category IN :categories")
     Slice<ChatRoom> findChatRoomsByCategoryInSlice(@Param("categories") List<EventCategory> categories, Pageable pageable);
