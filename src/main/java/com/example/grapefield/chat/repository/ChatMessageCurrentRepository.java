@@ -27,4 +27,6 @@ public interface ChatMessageCurrentRepository extends JpaRepository<ChatMessageC
         )
         """)
     List<ChatMessageCurrent> findLatestMessagesByRooms(@Param("rooms") List<ChatRoom> rooms);
+
+    ChatMessageCurrent findByMessageUuid(String messageUuid);
 }
