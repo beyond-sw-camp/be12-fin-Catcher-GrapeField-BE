@@ -30,14 +30,22 @@ public class HeartKafkaConsumer {
     )
     public void consumeHeart(ChatHeartKafkaReq chatHeartKafkaReq) {
         Long roomIdx = chatHeartKafkaReq.getRoomIdx();
-        log.info("✅ KafkaConsumer 좋아요 ♥\uFE0F 하트 수신: roomIdx={}", roomIdx);
-        ChatRoom chatRoom = chatRoomRepository.findById(roomIdx).orElse(null);
-        chatRoomService.increaseHeartDb(roomIdx);
-        Long newCount =
-                chatRoomService.increaseHeartRedis(Objects.requireNonNull(chatRoom));
-
+        String heartIdx = chatHeartKafkaReq.getHeartIdx();
+        log.info("✅ KafkaConsumer 좋아요 ♥\uFE0F 하트 수신: roomIdx={}, heartIdx={}", roomIdx, heartIdx);
+        // 기존에 없는 경우 추가 되지 않기 때문에 때문에 added에 0을 반환한다.
+        Long added = redisTemplate.opsForSet().add("processed:hearts", heartIdx);
+        Long newCount;
+        if(added != null && added > 0) {
+            newCount=chatRoomService.increaseHeart(roomIdx);
+        } else {
+            log.info("이미 처리된 요청이므로 취소");
+            String redisKey = "chat:"+roomIdx+":likes";
+            newCount = Long.parseLong((redisTemplate.opsForValue().get(redisKey)).toString());
+        }
         // 2. WebSocket 브로커로 브로드캐스트 (프론트에서 애니메이션 띄우게)
         HeartResp resp = new HeartResp(roomIdx, newCount);
+        // // Redis 없는 환경에서는 다음으로 바꾸면 된다.⤵️⤵️
+        // HeartResp resp = new HeartResp(roomIdx, chatRoom.getHeartCnt());
         messagingTemplate.convertAndSend("/topic/chat.room.likes." + roomIdx, resp);
         log.info("✅ 📡 WebSocket Broadcast 좋아요 ♥\uFE0F 하트 -> roomIdx={}", roomIdx);
     }
