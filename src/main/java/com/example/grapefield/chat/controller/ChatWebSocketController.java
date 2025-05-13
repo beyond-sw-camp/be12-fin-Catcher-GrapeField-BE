@@ -5,6 +5,7 @@ import com.example.grapefield.chat.model.request.ChatHeartKafkaReq;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.model.request.ChatMessageReq;
 import com.example.grapefield.chat.model.response.ChatMessageResp;
+import com.example.grapefield.chat.model.response.HeartResp;
 import com.example.grapefield.chat.service.ChatMessageService;
 import com.example.grapefield.chat.service.ChatRoomService;
 import com.example.grapefield.user.CustomUserDetails;
@@ -38,11 +39,9 @@ import java.security.Principal;
 @Controller
 public class ChatWebSocketController {
     private final ChatKafkaProducer chatKafkaProducer;
-    private final ChatRoomService chatRoomService;
-    private final ChatMessageService chatMessageService;
 
-    @Autowired
-    private final SimpMessagingTemplate messagingTemplate;
+//    @Autowired
+//    private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat.send.{roomIdx}")
     @Operation(summary = "채팅 메시지 전송", description = "클라이언트로부터 채팅 메시지를 수신하고, Kafka로 전달")
@@ -74,7 +73,7 @@ public class ChatWebSocketController {
         Long userIdx = userDetails.getUser().getIdx();
         log.info("WebSocket ❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, userIdx);
         chatKafkaProducer.likeRoom(heartReq);
-    }
+}
 
 
     //Swagger 노출용으로, 실제로는 아무 기능이 없는 빈 메소드
