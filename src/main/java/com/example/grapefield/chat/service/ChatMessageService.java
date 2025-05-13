@@ -31,7 +31,7 @@ public class ChatMessageService {
     @Transactional
     public ChatMessageResp saveMessageIfNotProcessed(ChatMessageKafkaReq req) {
         String messageUuid = req.getMessageUuid();
-        if (processedMessageRepository.existsById(messageUuid)) {
+        if (processedMessageRepository.existsByMessageUuid(messageUuid)) {
             return null;   // 이미 처리된 메시지라면 저장 로직 스킵 :contentReference
         }
         ChatMessageResp resp = saveMessage(req);
