@@ -28,7 +28,5 @@ public class ChatKafkaProducer {
         String topic = "chat-like-" + chatHeartKafkaReq.getRoomIdx();
         log.info("✅ KafkaProducer 발행: send heart ♥️ message'{}' to topic'{}'", chatHeartKafkaReq, topic);
         kafkaTemplate.send(topic, chatHeartKafkaReq);
-        // ⭐⭐백엔드 파드 부하분산 처리 하기 전 중복 변경을 막기 위해 임시로 컨슈머에서 프로듀서로 보냄⭐⭐
-        chatRoomService.increaseHeartCount(chatHeartKafkaReq.getRoomIdx());
     }
 }

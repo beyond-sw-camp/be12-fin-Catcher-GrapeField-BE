@@ -1,7 +1,9 @@
 package com.example.grapefield.chat.kafka;
 
+import com.example.grapefield.chat.model.entity.ChatRoom;
 import com.example.grapefield.chat.model.request.ChatHeartKafkaReq;
 import com.example.grapefield.chat.model.response.HeartResp;
+import com.example.grapefield.chat.repository.ChatRoomRepository;
 import com.example.grapefield.chat.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +12,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -17,6 +21,7 @@ public class HeartKafkaConsumer {
     private final ChatRoomService chatRoomService;
     private final SimpMessagingTemplate messagingTemplate;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final ChatRoomRepository chatRoomRepository;
 
     @KafkaListener(
             topicPattern="^chat-like-\\d+$",
@@ -25,22 +30,15 @@ public class HeartKafkaConsumer {
     )
     public void consumeHeart(ChatHeartKafkaReq chatHeartKafkaReq) {
         Long roomIdx = chatHeartKafkaReq.getRoomIdx();
-        String redisKey = "chat:" + roomIdx + ":likes";
-        log.info("✅ KafkaConsumer 좋아요 ♥\uFE0F 하트 수신: roomIdx={}", chatHeartKafkaReq.getRoomIdx());
+        log.info("✅ KafkaConsumer 좋아요 ♥\uFE0F 하트 수신: roomIdx={}", roomIdx);
 
+        ChatRoom room = chatRoomRepository.findById(roomIdx).orElse(null);
+        chatRoomService.increaseHeartCount(roomIdx);
+        String redisKey = "chat:" + roomIdx + ":likes";
+        redisTemplate.opsForValue().increment(redisKey);
         // Redis INCR
         // 1. Redis 서버에 실시간 heart count 증가
-        Long newCount = redisTemplate.opsForValue().increment(redisKey);
-        if (newCount == null) {
-            // Redis 미초기화 시 1로 설정
-            redisTemplate.opsForValue().set(redisKey, 1L);
-            newCount = 1L;
-        }
-
-        // DataBase
-        // 1. DB 하트 수 증가
-        // ⭐⭐백엔드 파드 부하분산 처리 하기 전 중복 변경을 막기 위해 임시로 프로듀서로 보냄⭐⭐
-        // chatRoomService.increaseHeartCount(roomIdx);
+        Long newCount = Objects.requireNonNull(room).getHeartCnt();
         // 2. WebSocket 브로커로 브로드캐스트 (프론트에서 애니메이션 띄우게)
         HeartResp resp = new HeartResp(roomIdx, newCount);
         messagingTemplate.convertAndSend("/topic/chat.room.likes." + roomIdx, resp);
