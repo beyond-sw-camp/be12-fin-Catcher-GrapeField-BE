@@ -20,7 +20,7 @@ public class ChatParticipantEventKafkaConsumer {
     // 참여자 수 변경 이벤트 처리
     @KafkaListener(
             topics = "chat-participant-events",
-            groupId = "chat-participant-group",
+            groupId = "${spring.kafka.consumer.participant.group-id:chat-participant-group}",  // 환경변수 사용
             containerFactory = "participantEventKafkaListenerContainerFactory"
     )
     public void handleParticipantEvent(ChatParticipantEventResp event) {
@@ -31,7 +31,7 @@ public class ChatParticipantEventKafkaConsumer {
     // 사용자 채팅방 리스트 이벤트 처리
     @KafkaListener(
             topics = "user-chatlist-events",
-            groupId = "user-event-group",
+            groupId = "${spring.kafka.consumer.user-event.group-id:user-event-group}",  // 환경변수 사용
             containerFactory = "userEventKafkaListenerContainerFactory"
     )
     public void handleUserChatListEvent(UserChatListEventResp event) {
