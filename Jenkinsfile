@@ -80,6 +80,7 @@ pipeline {
                             # 롤아웃 상태 확인 - 배포 이름을 직접 사용
                             echo "=== 롤아웃 상태 확인 ==="
                             kubectl rollout status deployment/backend -n first
+                            kubectl rollout status statefulset/elasticsearch -n first
                         """
                     }
                 }
