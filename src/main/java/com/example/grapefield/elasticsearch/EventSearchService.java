@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
 @Service
 public class EventSearchService {
 
@@ -35,65 +34,77 @@ public class EventSearchService {
         this.elasticsearchOperations = elasticsearchOperations;
     }
 
-    // 문서 인덱싱 (단일)
-    public void indexEvent(Events event) {
-        EventDocument document = documentMapper.toDocument(event);
-        searchRepository.save(document);
-    }
-
-    // 여러 문서 인덱싱
-    public void indexEvents(List<Events> events) {
-        List<EventDocument> documents = events.stream()
-                .map(documentMapper::toDocument)
-                .collect(Collectors.toList());
-        searchRepository.saveAll(documents);
-    }
 
 
-    // 키워드로 검색
     // 키워드로 검색 - 초성 검색과 짧은 단어 정확 매칭 개선
-    public List<Events> searchByKeyword(String keyword, Pageable pageable) {
+    public List<Events> searchByKeywordWithNori(String keyword, Pageable pageable) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return Collections.emptyList();
         }
 
         try {
-            System.out.println("Searching for keyword: " + keyword);
+            System.out.println("Searching with Nori analyzer for keyword: " + keyword);
 
-            // 검색 쿼리 단순화
+            // Nori 분석기를 활용한 고급 검색 쿼리
             var searchRequest = new co.elastic.clients.elasticsearch.core.SearchRequest.Builder()
                     .index("events")
                     .from((int) pageable.getOffset())
                     .size(pageable.getPageSize())
                     .query(q -> q
                             .bool(b -> b
-                                    .must(m -> m
-                                            .matchPhrase(mp -> mp
+                                    // 제목 필드 검색 (높은 가중치)
+                                    .should(s -> s
+                                            .match(m -> m
                                                     .field("title")
                                                     .query(keyword)
+                                                    .boost(10.0f)
+                                                    .analyzer("korean_analyzer")
                                             )
                                     )
-
+                                    // 정확한 매칭에 더 높은 가중치
                                     .should(s -> s
-                                            .matchPhrase(m -> m
-                                                    .field("title")
+                                            .match(m -> m
+                                                    .field("title.exact")
                                                     .query(keyword)
                                                     .boost(50.0f)
                                             )
                                     )
+                                    // 초성 검색 지원
+                                    .should(s -> s
+                                            .match(m -> m
+                                                    .field("title")
+                                                    .query(keyword)
+                                                    .analyzer("korean_analyzer")
+                                            )
+                                    )
+                                    // 다른 필드 검색
+                                    .should(s -> s
+                                            .multiMatch(mm -> mm
+                                                    .fields("postTitle", "postContent", "review")
+                                                    .query(keyword)
+                                                    .analyzer("korean_analyzer")
+                                            )
+                                    )
+                                    // 최소 매치 조건
+                                    .minimumShouldMatch("1")
                             )
-                    ).build();
+                    )
+                    .highlight(h -> h
+                            .fields("title", f -> f
+                                    .preTags("<em>")
+                                    .postTags("</em>")
+                                    .fragmentSize(150)
+                            )
+                    )
+                    .build();
 
             var response = client.search(searchRequest, EventDocument.class);
-
-            System.out.println("Total hits: " + response.hits().total().value());
 
             // 결과 변환
             return response.hits().hits().stream()
                     .map(hit -> {
                         EventDocument doc = hit.source();
                         if (doc != null) {
-                            System.out.println("Found document: " + doc.getTitle() + " (ID: " + doc.getIdx() + ")     score:   " + hit.score());
                             return documentMapper.toEntity(doc);
                         }
                         return null;
@@ -104,9 +115,11 @@ public class EventSearchService {
         } catch (IOException e) {
             System.err.println("Elasticsearch search error: " + e.getMessage());
             e.printStackTrace();
-            return List.of();
+            return Collections.emptyList();
         }
     }
+
+
 
     // 키워드와 카테고리로 검색
     public List<Events> searchByKeywordAndCategory(String keyword, String category) {
@@ -127,13 +140,9 @@ public class EventSearchService {
     // 페이징 처리된 검색
     public List<Events> searchWithPagination(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return searchByKeyword(keyword, pageable);
+        return searchByKeywordWithNori(keyword, pageable);
     }
 
-    // 문서 삭제
-    public void deleteEventDocument(Long eventId) {
-        searchRepository.deleteById(eventId.toString());
-    }
 
     // 문서 수 반환
     public long countDocuments() {

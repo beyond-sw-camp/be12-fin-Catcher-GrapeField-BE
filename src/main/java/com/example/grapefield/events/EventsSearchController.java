@@ -52,7 +52,7 @@ public class EventsSearchController {
     Map<String, Object> result = new HashMap<>();
 
     // ES 검색 결과 - ID만 추출
-    List<Events> esResults = eventSearchService.searchByKeyword(keyword, pageable);
+    List<Events> esResults = eventSearchService.searchByKeywordWithNori(keyword, pageable);
     List<Long> eventIds = esResults.stream()
             .map(Events::getIdx)
             .filter(Objects::nonNull)
@@ -90,13 +90,14 @@ public class EventsSearchController {
       RestHighLevelClient client = new RestHighLevelClient(
               RestClient.builder(new HttpHost("localhost", 9200, "http")));
 
+      // Nori 분석기를 사용하는 쿼리로 변경
       String query = "{\n" +
               "  \"size\": 5,\n" +
               "  \"query\": {\n" +
               "    \"bool\": {\n" +
               "      \"should\": [\n" +
-              "        { \"match\": { \"title\": { \"query\": \"" + prefix + "\", \"boost\": 3.0 } } },\n" +
-              "        { \"match_phrase_prefix\": { \"title\": \"" + prefix + "\" } }\n" +
+              "        { \"match\": { \"title\": { \"query\": \"" + prefix + "\", \"boost\": 3.0, \"analyzer\": \"korean_analyzer\" } } },\n" +
+              "        { \"match_phrase_prefix\": { \"title\": { \"query\": \"" + prefix + "\", \"analyzer\": \"korean_analyzer\" } } }\n" +
               "      ]\n" +
               "    }\n" +
               "  }\n" +

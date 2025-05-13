@@ -24,16 +24,13 @@ import java.util.stream.Collectors;
 @RequestMapping("/admin/elasticsearch")
 public class ElasticsearchAdminController {
 
-    private final DatabaseToElasticsearchMigrator migrator;
     private final EventSearchService searchService;
     private final co.elastic.clients.elasticsearch.ElasticsearchClient client; // 추가된 필드
 
     @Autowired
     public ElasticsearchAdminController(
-            DatabaseToElasticsearchMigrator migrator,
             EventSearchService searchService,
             co.elastic.clients.elasticsearch.ElasticsearchClient client) { // 생성자 매개변수 추가
-        this.migrator = migrator;
         this.searchService = searchService;
         this.client = client; // 초기화
     }
@@ -90,27 +87,6 @@ public class ElasticsearchAdminController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/reindex")
-//    @PreAuthorize("hasRole('ADMIN')") // 시큐리티 설정에 따라 조정
-    public ResponseEntity<Map<String, Object>> reindexAll() {
-
-        try {
-            migrator.migrateAllData();
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("message", "Reindexing completed successfully");
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", "Reindexing failed: " + e.getMessage());
-
-            return ResponseEntity.internalServerError().body(response);
         }
     }
 
