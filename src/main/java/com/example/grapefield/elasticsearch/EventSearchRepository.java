@@ -26,19 +26,19 @@ public interface EventSearchRepository extends ElasticsearchRepository<EventDocu
     // Nori 분석기를 활용한 커스텀 쿼리 추가
 
     // 모든 텍스트 필드에서 검색 (Nori 분석기 활용)
-    @Query("{\"multi_match\": {\"query\": \"?0\", \"fields\": [\"title\", \"postTitle\", \"postContent\", \"review\"], \"analyzer\": \"korean_analyzer\"}}")
+    @Query("{\"multi_match\": {\"query\": \"?0\", \"fields\": [\"title\", \"postTitle\", \"postContent\", \"review\"], \"analyzer\": \"nori_analyzer\"}}")
     Page<EventDocument> search(String keyword, Pageable pageable);
 
     // 제목 필드 검색 (Nori 분석기 활용)
-    @Query("{\"match\": {\"title\": {\"query\": \"?0\", \"analyzer\": \"korean_analyzer\"}}}")
+    @Query("{\"match\": {\"title\": {\"query\": \"?0\", \"analyzer\": \"nori_analyzer\"}}}")
     List<EventDocument> searchByTitle(String keyword);
 
     // 복합 쿼리 - 제목에 높은 가중치, 본문에 낮은 가중치
     @Query("{\"bool\": {\"should\": [" +
-            "{\"match\": {\"title\": {\"query\": \"?0\", \"boost\": 3.0, \"analyzer\": \"korean_analyzer\"}}}," +
-            "{\"match\": {\"postTitle\": {\"query\": \"?0\", \"boost\": 2.0, \"analyzer\": \"korean_analyzer\"}}}," +
-            "{\"match\": {\"postContent\": {\"query\": \"?0\", \"boost\": 1.0, \"analyzer\": \"korean_analyzer\"}}}," +
-            "{\"match\": {\"review\": {\"query\": \"?0\", \"boost\": 1.0, \"analyzer\": \"korean_analyzer\"}}}" +
+            "{\"match\": {\"title\": {\"query\": \"?0\", \"boost\": 3.0, \"analyzer\": \"nori_analyzer\"}}}," +
+            "{\"match\": {\"postTitle\": {\"query\": \"?0\", \"boost\": 2.0, \"analyzer\": \"nori_analyzer\"}}}," +
+            "{\"match\": {\"postContent\": {\"query\": \"?0\", \"boost\": 1.0, \"analyzer\": \"nori_analyzer\"}}}," +
+            "{\"match\": {\"review\": {\"query\": \"?0\", \"boost\": 1.0, \"analyzer\": \"nori_analyzer\"}}}" +
             "]}}")
     Page<EventDocument> searchWithBoost(String keyword, Pageable pageable);
 
@@ -49,7 +49,7 @@ public interface EventSearchRepository extends ElasticsearchRepository<EventDocu
     // 카테고리 필터링 + 키워드 검색
     @Query("{\"bool\": {\"must\": [" +
             "{\"term\": {\"category\": \"?0\"}}," +
-            "{\"multi_match\": {\"query\": \"?1\", \"fields\": [\"title\", \"postTitle\", \"postContent\", \"review\"], \"analyzer\": \"korean_analyzer\"}}" +
+            "{\"multi_match\": {\"query\": \"?1\", \"fields\": [\"title\", \"postTitle\", \"postContent\", \"review\"], \"analyzer\": \"nori_analyzer\"}}" +
             "]}}")
     Page<EventDocument> searchByKeywordAndCategory(String category, String keyword, Pageable pageable);
 }

@@ -36,6 +36,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/search")
 @Tag(name = "검색 API", description = "통합 검색 및 엘라스틱서치 기반 고급 검색 API")
 public class EventsSearchController {
+  private final RestHighLevelClient restHighLevelClient;
+  private final ObjectMapper objectMapper;
   private final EventsSearchService searchService;
   private final EventsRepository eventsRepository;
   @Lazy
@@ -87,29 +89,34 @@ public class EventsSearchController {
   @GetMapping("/autocomplete")
   public ResponseEntity<List<Map<String, Object>>> autocomplete(@RequestParam String prefix) {
     try {
-      RestHighLevelClient client = new RestHighLevelClient(
-              RestClient.builder(new HttpHost("localhost", 9200, "http")));
+      // 메서드 내에서 새로운 클라이언트를 생성하는 대신 주입된 클라이언트 사용
+      // RestHighLevelClient client = new RestHighLevelClient(
+      //         RestClient.builder(new HttpHost("localhost", 9200, "http")));
 
       // Nori 분석기를 사용하는 쿼리로 변경
       String query = "{\n" +
               "  \"size\": 5,\n" +
+              "  \"collapse\": {\n" +
+              "    \"field\": \"title.keyword\"\n" +
+              "  },\n" +
               "  \"query\": {\n" +
               "    \"bool\": {\n" +
               "      \"should\": [\n" +
-              "        { \"match\": { \"title\": { \"query\": \"" + prefix + "\", \"boost\": 3.0, \"analyzer\": \"korean_analyzer\" } } },\n" +
-              "        { \"match_phrase_prefix\": { \"title\": { \"query\": \"" + prefix + "\", \"analyzer\": \"korean_analyzer\" } } }\n" +
+              "        { \"match\": { \"title\": { \"query\": \"" + prefix + "\", \"boost\": 3.0, \"analyzer\": \"nori_analyzer\" } } },\n" +
+              "        { \"match_phrase_prefix\": { \"title\": { \"query\": \"" + prefix + "\", \"analyzer\": \"nori_analyzer\" } } }\n" +
               "      ]\n" +
               "    }\n" +
               "  }\n" +
               "}";
 
-      Request request = new Request("GET", "/events/_search");
+      Request request = new Request("GET", "/events-*/_search");
       request.setJsonEntity(query);
 
-      Response response = client.getLowLevelClient().performRequest(request);
+      // 주입된 클라이언트 사용
+      Response response = this.restHighLevelClient.getLowLevelClient().performRequest(request);
 
-      ObjectMapper mapper = new ObjectMapper();
-      Map<String, Object> responseMap = mapper.readValue(
+      // 주입된 ObjectMapper 사용
+      Map<String, Object> responseMap = this.objectMapper.readValue(
               EntityUtils.toString(response.getEntity()),
               new TypeReference<Map<String, Object>>() {});
 

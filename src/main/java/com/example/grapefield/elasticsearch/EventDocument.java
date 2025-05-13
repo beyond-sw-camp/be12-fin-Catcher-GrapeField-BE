@@ -20,18 +20,18 @@ public class EventDocument {
     @Id
     private String idx;
 
-    @Field(type = FieldType.Text, analyzer = "korean_analyzer")
+    @Field(type = FieldType.Text, analyzer = "nori_analyzer")
     private String title;
 
     @Field(type = FieldType.Keyword)
     private String category;
 
-    @Field(type = FieldType.Text, analyzer = "korean_analyzer")
+    @Field(type = FieldType.Text, analyzer = "nori_analyzer")
     private String postTitle;
 
-    @Field(type = FieldType.Text, analyzer = "korean_analyzer")
+    @Field(type = FieldType.Text, analyzer = "nori_analyzer")
     private String postContent;
 
-    @Field(type = FieldType.Text, analyzer = "korean_analyzer")
+    @Field(type = FieldType.Text, analyzer = "nori_analyzer")
     private String review;
 }

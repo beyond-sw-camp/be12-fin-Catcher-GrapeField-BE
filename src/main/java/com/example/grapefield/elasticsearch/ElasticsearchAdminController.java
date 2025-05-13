@@ -10,10 +10,13 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,14 +28,18 @@ import java.util.stream.Collectors;
 public class ElasticsearchAdminController {
 
     private final EventSearchService searchService;
-    private final co.elastic.clients.elasticsearch.ElasticsearchClient client; // 추가된 필드
+    private final co.elastic.clients.elasticsearch.ElasticsearchClient client;
+    private final RestHighLevelClient restHighLevelClient; // 추가
+    private final ObjectMapper objectMapper = new ObjectMapper(); // 추가
 
     @Autowired
     public ElasticsearchAdminController(
             EventSearchService searchService,
-            co.elastic.clients.elasticsearch.ElasticsearchClient client) { // 생성자 매개변수 추가
+            co.elastic.clients.elasticsearch.ElasticsearchClient client,
+            RestHighLevelClient restHighLevelClient) { // 생성자 매개변수 추가
         this.searchService = searchService;
-        this.client = client; // 초기화
+        this.client = client;
+        this.restHighLevelClient = restHighLevelClient; // 초기화
     }
 
     @GetMapping("/simple-test")
@@ -128,25 +135,115 @@ public class ElasticsearchAdminController {
     // ElasticsearchAdminController.java 수정
     @GetMapping("/analyze")
     public ResponseEntity<Map<String, Object>> analyzeText(
-            @RequestParam String text) {
+            @RequestParam String text,
+            @RequestParam(defaultValue = "nori_analyzer") String analyzer) {
         try {
-            // 인덱스를 지정하여 분석 요청
-            RestHighLevelClient client = new RestHighLevelClient(
-                    RestClient.builder(new HttpHost("localhost", 9200, "http")));
+            Request request = new Request("POST", "/_analyze");
+            String jsonBody = String.format("{\"analyzer\":\"%s\",\"text\":\"%s\"}", analyzer, text);
+            request.setJsonEntity(jsonBody);
 
-            Request request = new Request("GET", "/events/_analyze");
-            request.setJsonEntity("{\"analyzer\":\"korean_analyzer\",\"text\":\"" + text + "\"}");
-
-            Response response = client.getLowLevelClient().performRequest(request);
+            Response response = restHighLevelClient.getLowLevelClient().performRequest(request);
 
             // 결과 파싱
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> responseMap = mapper.readValue(
+            Map<String, Object> responseMap = objectMapper.readValue(
                     EntityUtils.toString(response.getEntity()),
                     new TypeReference<Map<String, Object>>() {});
 
             return ResponseEntity.ok(responseMap);
         } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
+        }
+    }
+
+    @PostMapping("/create-template")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> createTemplate() {
+        try {
+            // nori-settings.json 파일 로드
+            ClassPathResource resource = new ClassPathResource("nori-settings.json");
+            String templateJson = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+
+            // 템플릿 생성 요청
+            Request request = new Request("PUT", "/_template/post_template");
+            request.setJsonEntity(templateJson);
+
+            Response response = restHighLevelClient.getLowLevelClient().performRequest(request);
+
+            // 응답 처리
+            Map<String, Object> responseMap = objectMapper.readValue(
+                    EntityUtils.toString(response.getEntity()),
+                    new TypeReference<Map<String, Object>>() {});
+
+            return ResponseEntity.ok(responseMap);
+        } catch (IOException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
+        }
+    }
+
+    // 기존 인덱스에 nori 설정 추가 메서드
+    @PostMapping("/update-index/{indexName}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> updateIndexSettings(
+            @PathVariable String indexName,
+            @RequestBody(required = false) String settingsJson) {
+        try {
+            // 설정 JSON이 제공되지 않은 경우 기본 nori 설정 사용
+            if (settingsJson == null || settingsJson.isEmpty()) {
+                settingsJson = "{\n" +
+                        "  \"settings\": {\n" +
+                        "    \"analysis\": {\n" +
+                        "      \"analyzer\": {\n" +
+                        "        \"nori_analyzer\": {\n" +
+                        "          \"type\": \"custom\",\n" +
+                        "          \"tokenizer\": \"nori_tokenizer\",\n" +
+                        "          \"filter\": [\"nori_part_of_speech\", \"lowercase\", \"trim\"]\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"tokenizer\": {\n" +
+                        "        \"nori_tokenizer\": {\n" +
+                        "          \"type\": \"nori_tokenizer\",\n" +
+                        "          \"decompound_mode\": \"mixed\",\n" +
+                        "          \"discard_punctuation\": \"true\"\n" +
+                        "        }\n" +
+                        "      },\n" +
+                        "      \"filter\": {\n" +
+                        "        \"nori_part_of_speech\": {\n" +
+                        "          \"type\": \"nori_part_of_speech\",\n" +
+                        "          \"stoptags\": [\n" +
+                        "            \"E\", \"IC\", \"J\", \"MAG\", \"MAJ\", \"MM\", \"SP\", \"SSC\", \"SSO\", \"SC\", \"SE\", \"XPN\", \"XSA\", \"XSN\", \"XSV\", \"UNA\", \"NA\", \"VSV\"\n" +
+                        "          ]\n" +
+                        "        }\n" +
+                        "      }\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "}";
+            }
+
+            // 인덱스 닫기 (설정 변경을 위해)
+            Request closeRequest = new Request("POST", "/" + indexName + "/_close");
+            restHighLevelClient.getLowLevelClient().performRequest(closeRequest);
+
+            // 설정 업데이트
+            Request updateRequest = new Request("PUT", "/" + indexName + "/_settings");
+            updateRequest.setJsonEntity(settingsJson);
+            Response updateResponse = restHighLevelClient.getLowLevelClient().performRequest(updateRequest);
+
+            // 인덱스 다시 열기
+            Request openRequest = new Request("POST", "/" + indexName + "/_open");
+            restHighLevelClient.getLowLevelClient().performRequest(openRequest);
+
+            // 응답 처리
+            Map<String, Object> responseMap = objectMapper.readValue(
+                    EntityUtils.toString(updateResponse.getEntity()),
+                    new TypeReference<Map<String, Object>>() {});
+            responseMap.put("message", "Index settings updated and index reopened");
+
+            return ResponseEntity.ok(responseMap);
+        } catch (IOException e) {
             Map<String, Object> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.internalServerError().body(error);

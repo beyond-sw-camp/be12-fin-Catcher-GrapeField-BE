@@ -1,6 +1,6 @@
 spring:
   main:
-    allow-circular-references=true
+    allow-circular-references: true
 
   kafka:
     # bootstrap-servers: ${KAFKA}:9092
@@ -36,9 +36,12 @@ spring:
         max.poll.interval.ms: 300000     # 폴링 간격 최대값 증가
         reconnect.backoff.ms: 1000       # 재연결 백오프 설정
         reconnect.backoff.max.ms: 10000  # 최대 재연결 간격
+
   elasticsearch:
-    host: localhost
-    port: 9200
+    host: ${ELASTIC_HOST}
+    port: ${ELASTIC_PORT}
+    username: ${ELASTIC_USER}
+    password: ${ELASTIC_PASSWORD}
 
   application:
     name: grapefield

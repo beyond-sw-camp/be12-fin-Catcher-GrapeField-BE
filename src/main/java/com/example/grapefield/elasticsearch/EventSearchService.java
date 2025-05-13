@@ -50,6 +50,10 @@ public class EventSearchService {
                     .index("events")
                     .from((int) pageable.getOffset())
                     .size(pageable.getPageSize())
+                    // 중복 제거를 위한 collapse 추가
+                    .collapse(c -> c
+                            .field("idx")
+                    )
                     .query(q -> q
                             .bool(b -> b
                                     // 제목 필드 검색 (높은 가중치)
@@ -58,13 +62,13 @@ public class EventSearchService {
                                                     .field("title")
                                                     .query(keyword)
                                                     .boost(10.0f)
-                                                    .analyzer("korean_analyzer")
+                                                    .analyzer("nori_analyzer") // korean_analyzer에서 변경
                                             )
                                     )
                                     // 정확한 매칭에 더 높은 가중치
                                     .should(s -> s
                                             .match(m -> m
-                                                    .field("title.exact")
+                                                    .field("title.keyword") // title.exact에서 변경 (없을 경우)
                                                     .query(keyword)
                                                     .boost(50.0f)
                                             )
@@ -74,7 +78,7 @@ public class EventSearchService {
                                             .match(m -> m
                                                     .field("title")
                                                     .query(keyword)
-                                                    .analyzer("korean_analyzer")
+                                                    .analyzer("nori_analyzer") // korean_analyzer에서 변경
                                             )
                                     )
                                     // 다른 필드 검색
@@ -82,7 +86,7 @@ public class EventSearchService {
                                             .multiMatch(mm -> mm
                                                     .fields("postTitle", "postContent", "review")
                                                     .query(keyword)
-                                                    .analyzer("korean_analyzer")
+                                                    .analyzer("nori_analyzer") // korean_analyzer에서 변경
                                             )
                                     )
                                     // 최소 매치 조건
@@ -110,6 +114,13 @@ public class EventSearchService {
                         return null;
                     })
                     .filter(Objects::nonNull)
+                    // 추가적인 중복 제거 (idx 기준)
+                    .collect(Collectors.toMap(
+                            Events::getIdx,  // 키 추출자
+                            event -> event,  // 값 추출자
+                            (existing, replacement) -> existing))  // 중복 시 첫 번째 요소 유지
+                    .values()
+                    .stream()
                     .collect(Collectors.toList());
 
         } catch (IOException e) {
@@ -156,8 +167,42 @@ public class EventSearchService {
         return results;
     }
 
-    // 한글 체크 함수
-    private boolean isKorean(String text) {
-        return text.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*");
+    /**
+     * MariaDB의 Events 엔티티를 Elasticsearch에 인덱싱
+     * @param event 인덱싱할 이벤트 엔티티
+     */
+    public void indexEvent(Events event) {
+        try {
+            // 엔티티를 Elasticsearch 문서로 변환
+            EventDocument document = documentMapper.toDocument(event);
+
+            // Elasticsearch에 저장
+            searchRepository.save(document);
+
+            System.out.println("Event successfully indexed with ID: " + event.getIdx());
+        } catch (Exception e) {
+            System.err.println("Error indexing event: " + e.getMessage());
+            e.printStackTrace();
+            // 예외를 다시 던져서 호출자가 처리할 수 있도록 함
+            throw new RuntimeException("Failed to index event", e);
+        }
+    }
+
+    /**
+     * Elasticsearch에서 이벤트 문서 삭제
+     * @param id 삭제할 이벤트 ID
+     */
+    public void deleteEventDocument(Long id) {
+        try {
+            // Elasticsearch에서 문서 삭제
+            searchRepository.deleteById(id.toString());
+
+            System.out.println("Event document successfully deleted with ID: " + id);
+        } catch (Exception e) {
+            System.err.println("Error deleting event document: " + e.getMessage());
+            e.printStackTrace();
+            // 예외를 다시 던져서 호출자가 처리할 수 있도록 함
+            throw new RuntimeException("Failed to delete event document", e);
+        }
     }
 }
