@@ -122,7 +122,7 @@ public class EventsSearchService {
       List<Long> eventIds = searchHits.stream()
               .map(hit -> {
                 try {
-                  return Long.parseLong(hit.getContent().getIdx());
+                  return hit.getContent().getIdx();
                 } catch (Exception e) {
                   System.err.println("Error parsing ID: " + hit.getContent().getIdx());
                   return null;
