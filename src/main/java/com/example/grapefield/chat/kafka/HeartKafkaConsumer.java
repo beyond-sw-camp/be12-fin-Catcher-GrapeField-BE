@@ -35,7 +35,7 @@ public class HeartKafkaConsumer {
         // 기존에 없는 경우 추가 되지 않기 때문에 때문에 added에 0을 반환한다.
         Long added = redisTemplate.opsForSet().add("processed:hearts", heartIdx);
         Long newCount;
-        if(added != null && added == 0) {
+        if(added != null || added == 0) {
             newCount=chatRoomService.increaseHeart(roomIdx);
         } else {
             log.info("이미 처리된 요청이므로 취소");
