@@ -11,11 +11,13 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import jakarta.annotation.PostConstruct;
 
 @Configuration
 public class ElasticsearchConfig {
@@ -24,6 +26,8 @@ public class ElasticsearchConfig {
     private String host;
 
     @Value("${elasticsearch.port:${ELASTIC_PORT}}")
+    private String portStr;
+
     private int port;
 
     @Value("${elasticsearch.username:${ELASTIC_USER}}")
@@ -31,6 +35,22 @@ public class ElasticsearchConfig {
 
     @Value("${elasticsearch.password:${ELASTIC_PASSWORD}}")
     private String password;
+
+    @PostConstruct
+    public void init() {
+        try {
+            this.port = Integer.parseInt(portStr);
+        } catch (NumberFormatException e) {
+            // URL 형식이면 포트만 추출
+            if (portStr.contains("://")) {
+                String[] parts = portStr.split(":");
+                this.port = Integer.parseInt(parts[parts.length-1]);
+            } else {
+                // 기본값 설정
+                this.port = 9200;
+            }
+        }
+    }
 
     // 레거시 RestHighLevelClient Bean 생성
     @Bean
@@ -58,5 +78,11 @@ public class ElasticsearchConfig {
                 restClient, new JacksonJsonpMapper());
 
         return new ElasticsearchClient(transport);
+    }
+
+    // elasticsearchTemplate 빈 생성 (Spring Data Elasticsearch와 호환)
+    @Bean
+    public ElasticsearchTemplate elasticsearchTemplate(ElasticsearchClient elasticsearchClient) {
+        return new ElasticsearchTemplate(elasticsearchClient);
     }
 }
