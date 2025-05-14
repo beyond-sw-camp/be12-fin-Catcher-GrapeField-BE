@@ -27,21 +27,28 @@ public class ChatMessageService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
     private final ProcessedMessageRepository processedMessageRepository;
+    private final ChatMessageCurrentRepository chatMessageCurrentRepository;
 
     @Transactional
     public ChatMessageResp saveMessageIfNotProcessed(ChatMessageKafkaReq req) {
         String messageUuid = req.getMessageUuid();
-        if (processedMessageRepository.existsById(messageUuid)) {
-            return null;   // 이미 처리된 메시지라면 저장 로직 스킵 :contentReference
+        ChatMessageResp resp = new ChatMessageResp();
+        if (processedMessageRepository.existsByMessageUuid(messageUuid)) {
+            log.info("❌중복된 uuid 존재함.");
+            ChatMessageCurrent newMessage = chatMessageCurrentRepository.findByMessageUuid(messageUuid);
+            resp = ChatMessageResp.from(newMessage);
+        } else {
+            log.info("✅중복 uuid 없음: {}", messageUuid);
+            resp = saveMessage(req, messageUuid);
+            processedMessageRepository.save(new ProcessedMessage(messageUuid, LocalDateTime.now()));
         }
-        ChatMessageResp resp = saveMessage(req);
-        processedMessageRepository.save(new ProcessedMessage(messageUuid, LocalDateTime.now()));
         return resp;
     }
 
     @Transactional
-    public ChatMessageResp saveMessage(ChatMessageKafkaReq req) {
+    public ChatMessageResp saveMessage(ChatMessageKafkaReq req, String messageUuid) {
         try {
+
             // 1. 채팅방 정보 가져오기
             ChatRoom room = chatRoomRepository.findById(req.getRoomIdx())
                     .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));

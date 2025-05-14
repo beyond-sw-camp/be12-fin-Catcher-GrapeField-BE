@@ -25,4 +25,7 @@ public interface ChatRoomMemberRepository extends JpaRepository<ChatroomMember, 
     @Query("SELECT cm.chatRoom.idx, COUNT(cm) FROM ChatroomMember cm GROUP BY cm.chatRoom.idx")
     List<Object[]> countParticipantsGroupedByRoom();
 
+    int countByChatRoom_Idx(Long roomIdx);
+
+
 }
