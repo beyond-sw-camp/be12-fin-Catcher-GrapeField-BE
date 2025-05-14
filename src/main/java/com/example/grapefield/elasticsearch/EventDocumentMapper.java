@@ -13,7 +13,7 @@ public class EventDocumentMapper {
     // JPA 엔티티 → ES 문서
     public EventDocument toDocument(Events event) {
         EventDocument document = new EventDocument();
-        document.setIdx(event.getIdx().toString());
+        document.setIdx(event.getIdx());
         document.setTitle(event.getTitle());
         document.setCategory(event.getCategory().name());  // Enum을 String으로 변환
         document.setPostTitle(event.getTitle());
@@ -47,7 +47,7 @@ public class EventDocumentMapper {
         }
 
         return Events.builder()
-                .idx(document.getIdx() != null ? Long.parseLong(document.getIdx()) : null)
+                .idx(document.getIdx() != null ? document.getIdx() : null)
                 .title(document.getTitle())
                 .category(category)
                 .description(document.getPostContent())
