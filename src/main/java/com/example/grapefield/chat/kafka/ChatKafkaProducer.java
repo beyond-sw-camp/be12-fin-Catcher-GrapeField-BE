@@ -5,8 +5,12 @@ import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Component
@@ -25,10 +29,9 @@ public class ChatKafkaProducer {
 
     public void likeRoom(ChatHeartKafkaReq chatHeartKafkaReq) {
         // kafkaTopicService.createHeartKafkaTopicIfNotExist(chatHeartKafkaReq);
-        String topic = "chat-like-" + chatHeartKafkaReq.getRoomIdx();
-        log.info("✅ KafkaProducer 발행: send heart ♥️ message'{}' to topic'{}'", chatHeartKafkaReq, topic);
+        String topic = "chat-like-" + chatHeartKafkaReq.getRoomIdx(); /*chatHeartKafkaReq.getRoomIdx();*/
+        log.info("✅ KafkaProducer 발행: send heart ♥️{}'", topic);
         kafkaTemplate.send(topic, chatHeartKafkaReq);
-        // ⭐⭐백엔드 파드 부하분산 처리 하기 전 중복 변경을 막기 위해 임시로 컨슈머에서 프로듀서로 보냄⭐⭐
-        chatRoomService.increaseHeartCount(chatHeartKafkaReq.getRoomIdx());
+
     }
 }

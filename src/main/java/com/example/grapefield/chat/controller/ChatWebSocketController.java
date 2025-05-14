@@ -68,12 +68,13 @@ public class ChatWebSocketController {
     @Operation(summary = "채팅방 하트 전송", description = "클라이언트에서 전송한 하트(좋아요) 이벤트를 Kafka로 전달")
     public void likeRoom(@DestinationVariable Long roomIdx,
                          @Payload ChatHeartKafkaReq heartReq,
+                         /*@Payload ChatHeartKafkaReq heartReq,*/
                          Principal principal) {
         CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         Long userIdx = userDetails.getUser().getIdx();
-        log.info("WebSocket ❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, userIdx);
+        log.info("WebSocket ❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, heartReq /* userIdx */);
         chatKafkaProducer.likeRoom(heartReq);
-}
+    }
 
 
     //Swagger 노출용으로, 실제로는 아무 기능이 없는 빈 메소드

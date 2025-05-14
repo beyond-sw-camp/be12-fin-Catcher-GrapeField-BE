@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Schema(description = "카프카 하트 전송용")
 public class ChatHeartKafkaReq {
+    private String heartIdx;
     @NotNull
     @Schema(description = "채팅방 ID", example = "1", required = true)
     private Long roomIdx;
