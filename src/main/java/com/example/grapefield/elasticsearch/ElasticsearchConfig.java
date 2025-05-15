@@ -62,7 +62,11 @@ public class ElasticsearchConfig {
         RestClientBuilder builder = RestClient.builder(
                         new HttpHost(host, port, "http"))
                 .setHttpClientConfigCallback(httpClientBuilder ->
-                        httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+                        httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider))
+                .setRequestConfigCallback(requestConfigBuilder ->
+                        requestConfigBuilder
+                                .setConnectTimeout(5000)
+                                .setSocketTimeout(10000));
 
         return new RestHighLevelClient(builder);
     }
