@@ -2,11 +2,13 @@ package com.example.grapefield.chat.service;
 
 import com.example.grapefield.chat.model.entity.ChatHighlight;
 import com.example.grapefield.chat.model.entity.ChatMessageBase;
+import com.example.grapefield.chat.model.entity.ChatMessageCurrent;
 import com.example.grapefield.chat.model.entity.ChatRoom;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.model.response.ChatHighlightResp;
 import com.example.grapefield.chat.repository.ChatHighlightRepository;
 import com.example.grapefield.chat.repository.ChatMessageBaseRepository;
+import com.example.grapefield.chat.repository.ChatMessageCurrentRepository;
 import com.example.grapefield.chat.repository.ChatRoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +35,8 @@ public class ChatHighlightService {
 
     // roomIdx -> 메시지 타임스탬프 목록
     private final Map<Long, List<Long>> messageTimestamps = new ConcurrentHashMap<>();
+    private final ChatMessageCurrentRepository chatMessageCurrentRepository;
+    private final ChatHighlightRepository chatHighlightRepository;
 
     public void trackMessage(ChatMessageKafkaReq kafkaReq) {
         Long roomIdx = kafkaReq.getRoomIdx();
@@ -51,6 +55,45 @@ public class ChatHighlightService {
     }
 
     private void saveHighlight(Long roomIdx, ChatMessageKafkaReq kafkaReq, int count) {
+        ChatRoom room = chatRoomRepository.findById(roomIdx)
+                .orElseThrow(() -> new IllegalArgumentException("채팅방이 없습니다."));
+
+        // native query로 Base를 직접 조회
+        ChatMessageBase latestBase = baseRepository.findTopByRoomIdx(roomIdx)
+                .orElseThrow(() -> new IllegalStateException("기준 메시지를 찾을 수 없습니다."));
+
+        LocalDateTime endTime = latestBase.getCreatedAt();
+        LocalDateTime startTime = endTime.minusSeconds(10);
+
+        String description = kafkaReq.getContent();
+
+        ChatHighlight highlight = ChatHighlight.builder()
+                .chatRoom(room)
+                .message(latestBase)
+                .startTime(startTime)
+                .endTime(endTime)
+                .messageCnt((long) count)
+                .description(description)
+                .build();
+
+        ChatHighlight saved = highlightRepository.save(highlight);
+        log.info("💾 저장 완료 idx={}, roomIdx={}", saved.getIdx(), roomIdx);
+
+        ChatHighlightResp resp = ChatHighlightResp.fromEntity(saved);
+        messagingTemplate.convertAndSend(
+                "/topic/chat.room.highlight." + roomIdx,
+                resp
+        );
+        log.info("📡 브로드캐스트 완료 roomIdx={}, highlightIdx={}", roomIdx, saved.getIdx());
+    }
+
+    private void saveHighlightIfNotExists(Long roomIdx, ChatMessageKafkaReq kafkaReq, int count) {
+        ChatMessageCurrent msgCurrent = chatMessageCurrentRepository.findByMessageUuid(kafkaReq.getMessageUuid());
+        if (chatHighlightRepository.existsById(msgCurrent.getMessageIdx())){
+            log.info("🔔이미 저장된 하이라이트입니다.. 중복 저장하지 않습니다.. messageUuid={}", msgCurrent.getMessageUuid());
+            return ;
+        }
+
         ChatRoom room = chatRoomRepository.findById(roomIdx)
                 .orElseThrow(() -> new IllegalArgumentException("채팅방이 없습니다."));
 
