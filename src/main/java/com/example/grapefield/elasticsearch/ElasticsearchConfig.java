@@ -22,24 +22,30 @@ import jakarta.annotation.PostConstruct;
 @Configuration
 public class ElasticsearchConfig {
 
-    @Value("${elasticsearch.host:${ELASTIC_HOST}}")
+    @Value("${elasticsearch.host:${ELASTIC_HOST:localhost}}")
     private String host;
 
-    @Value("${elasticsearch.port:${ELASTIC_PORT}}")
+    @Value("${elasticsearch.port:${ELASTIC_PORT:9200}}")
     private String portStr;
 
+    // 여기에 port 변수 추가
     private int port;
 
-    @Value("${elasticsearch.username:${ELASTIC_USER}}")
+    @Value("${elasticsearch.username:${ELASTIC_USER:elastic}}")
     private String username;
 
-    @Value("${elasticsearch.password:${ELASTIC_PASSWORD}}")
+    @Value("${elasticsearch.password:${ELASTIC_PASSWORD:qwer1234}}")
     private String password;
 
     @PostConstruct
     public void init() {
         try {
             this.port = Integer.parseInt(portStr);
+            // 디버깅용 로그 추가
+            System.out.println("Elasticsearch 설정:");
+            System.out.println("Host: " + host);
+            System.out.println("Port: " + port);
+            System.out.println("Username: " + username);
         } catch (NumberFormatException e) {
             // URL 형식이면 포트만 추출
             if (portStr.contains("://")) {
@@ -49,6 +55,7 @@ public class ElasticsearchConfig {
                 // 기본값 설정
                 this.port = 9200;
             }
+            System.out.println("Port 파싱 오류, 기본값 9200 사용: " + e.getMessage());
         }
     }
 
@@ -73,9 +80,9 @@ public class ElasticsearchConfig {
 
     // 최신 ElasticsearchClient Bean 생성
     @Bean
-    public ElasticsearchClient elasticsearchClient() {
-        // 레거시 RestClient 생성
-        RestClient restClient = restHighLevelClient().getLowLevelClient();
+    public ElasticsearchClient elasticsearchClient(RestHighLevelClient restHighLevelClient) {
+        // RestHighLevelClient에서 RestClient 가져오기
+        RestClient restClient = restHighLevelClient.getLowLevelClient();
 
         // ElasticsearchClient 생성
         ElasticsearchTransport transport = new RestClientTransport(

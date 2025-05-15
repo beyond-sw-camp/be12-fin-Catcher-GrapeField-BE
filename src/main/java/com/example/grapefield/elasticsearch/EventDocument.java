@@ -28,7 +28,7 @@ public class EventDocument {
     @Field(type = FieldType.Long)
     private Long idx;
 
-    @Field(type = FieldType.Text, analyzer = "nori_analyzer")
+    @Field(type = FieldType.Text)
     private String title;
 
     @Field(type = FieldType.Keyword)
@@ -50,12 +50,12 @@ public class EventDocument {
     private Boolean isVisible;
 
     // 현재 있는 필드들은 유지
-    @Field(type = FieldType.Text, analyzer = "nori_analyzer")
+    @Field(type = FieldType.Text)
     private String postTitle;
 
-    @Field(type = FieldType.Text, analyzer = "nori_analyzer")
+    @Field(type = FieldType.Text)
     private String postContent;
 
-    @Field(type = FieldType.Text, analyzer = "nori_analyzer")
+    @Field(type = FieldType.Text)
     private String review;
 }
