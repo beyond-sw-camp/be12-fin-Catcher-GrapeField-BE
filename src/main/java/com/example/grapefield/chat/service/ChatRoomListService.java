@@ -10,17 +10,25 @@ import com.example.grapefield.chat.repository.ChatMessageCurrentRepository;
 import com.example.grapefield.chat.repository.ChatRoomMemberRepository;
 import com.example.grapefield.chat.repository.ChatRoomRepository;
 import com.example.grapefield.events.model.entity.EventCategory;
+import com.example.grapefield.events.model.entity.Events;
+import com.example.grapefield.events.repository.EventsRepository;
 import org.springframework.data.domain.Pageable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisAccessor;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -31,6 +39,10 @@ public class ChatRoomListService {
     private final ChatMessageCurrentRepository currentRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatRoomMemberService chatRoomMemberService;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, String> stringRedisTemplate; //⭐ Redis 적용 코드
+    private final EventsRepository eventsRepository;
+
 
     // 사용자가 참여한 채팅방 목록 불러오기(사이드바 채팅)
     public List<ChatListResp> getMyRooms(Long userIdx) {
@@ -144,6 +156,49 @@ public class ChatRoomListService {
                         .build())
                 .toList();
     }
+
+
+    public List<PopularChatRoomListResp> getHotNowRoomsRedis() {
+        Set<ZSetOperations.TypedTuple<Object>> tuples = redisTemplate.opsForZSet().reverseRangeWithScores("hot:hearts", 0, 4);
+
+        if (tuples == null || tuples.isEmpty()) {
+            log.info("🔔 최근 ♥️증감 이벤트 없음: tuples == null || tuples.isEmpty()");
+            Pageable pageable = PageRequest.of(0, 5);
+            List<ChatRoom> chatRooms = chatRoomRepository.findTop10ByRecentEventsAndHeartCnt(pageable);
+
+            return chatRooms.stream()
+                    .map(c -> PopularChatRoomListResp.builder()
+                            .roomIdx(c.getIdx())
+                            .roomName(c.getRoomName())
+                            .venue(c.getEvents().getVenue())
+                            .heartCount(c.getHeartCnt().intValue())
+                            .memberCount(c.getMemberList() == null ? 0 : c.getMemberList().size())
+                            .build())
+                    .toList();
+            // return List.of(); // 최근 이벤트 없음
+        }
+
+        List<Long> roomIdxs = tuples.stream()
+                .map(t -> Long.valueOf(t.getValue().toString()))
+                .collect(Collectors.toList());
+        Map<Long, ChatRoom> roomsMap = chatRoomRepository.findAllById(roomIdxs).stream()
+                .collect(Collectors.toMap(ChatRoom::getIdx, Function.identity()));
+
+        return tuples.stream().map(t -> {
+            Long idx = Long.valueOf(t.getValue().toString());
+            ChatRoom room = roomsMap.get(idx);
+            Events events = eventsRepository.findById(idx).orElse(null);
+            // int heartCount = Objects.requireNonNull(t.getScore()).intValue(); // 최근 윈도우에 있는 방의 heartCnt값으로 가져옴
+            return PopularChatRoomListResp.builder()
+                    .roomIdx(idx)
+                    .roomName(room.getRoomName())
+                    .venue(Objects.requireNonNull(events).getVenue())
+                    .memberCount(room.getMemberList() == null ? 0 : room.getMemberList().size())
+                    .heartCount(room.getHeartCnt().intValue())
+                    .build();
+        }).toList();
+    }
+
 
 }
 
