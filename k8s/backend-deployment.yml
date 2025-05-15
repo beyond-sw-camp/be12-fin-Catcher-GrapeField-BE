@@ -34,6 +34,8 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
+            - name: TZ
+              value: "Asia/Seoul"
           # [end] 5월 7일에 새롭게 추가된 코드
           volumeMounts:
             - name: backend-tls
