@@ -17,7 +17,6 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class ChatKafkaProducer {
     private final KafkaTemplate<String, Object> kafkaTemplate;
-    private final ChatRoomService chatRoomService;
     // private final KafkaTopicService kafkaTopicService;
 
     public void sendMessage(ChatMessageKafkaReq chatMessageKafkaReq) {

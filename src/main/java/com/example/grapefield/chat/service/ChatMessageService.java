@@ -5,7 +5,6 @@ import com.example.grapefield.chat.model.entity.ChatMessageCurrent;
 import com.example.grapefield.chat.model.entity.ChatRoom;
 import com.example.grapefield.chat.model.entity.ProcessedMessage;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
-import com.example.grapefield.chat.model.request.ChatMessageReq;
 import com.example.grapefield.chat.model.response.ChatMessageResp;
 import com.example.grapefield.chat.repository.*;
 import com.example.grapefield.user.model.entity.User;
@@ -32,7 +31,7 @@ public class ChatMessageService {
     @Transactional
     public ChatMessageResp saveMessageIfNotProcessed(ChatMessageKafkaReq req) {
         String messageUuid = req.getMessageUuid();
-        ChatMessageResp resp = new ChatMessageResp();
+        ChatMessageResp resp;
         if (processedMessageRepository.existsByMessageUuid(messageUuid)) {
             log.info("❌중복된 uuid 존재함.");
             ChatMessageCurrent newMessage = chatMessageCurrentRepository.findByMessageUuid(messageUuid);
