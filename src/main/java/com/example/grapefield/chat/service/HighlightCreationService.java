@@ -5,6 +5,7 @@ import com.example.grapefield.chat.model.entity.ChatMessageBase;
 import com.example.grapefield.chat.model.entity.ChatRoom;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.model.response.ChatHighlightResp;
+import com.example.grapefield.chat.model.response.HighlightDetectionResp;
 import com.example.grapefield.chat.repository.ChatHighlightRepository;
 import com.example.grapefield.chat.repository.ChatMessageBaseRepository;
 import com.example.grapefield.chat.repository.ChatRoomRepository;
@@ -30,16 +31,16 @@ public class HighlightCreationService {
      * 키워드 기반 하이라이트 생성
      */
     public ChatHighlight createHighlight(Long roomIdx, ChatMessageKafkaReq kafkaReq,
-                                         HighlightDetectionService.HighlightDetectionResult detectionResult) {
+                                         HighlightDetectionResp detectionResp) {
         // 키워드 추출
-        String keywords = keywordExtractionService.extractKeywords(detectionResult.recentMessages);
+        String keywords = keywordExtractionService.extractKeywords(detectionResp.getRecentMessages());
 
         // 메트릭 정보를 포함한 설명 생성
-        String description = keywordExtractionService.createDescription(keywords, detectionResult.metrics.spikeRatio);
+        String description = keywordExtractionService.createDescription(keywords, detectionResp.getMetrics().getSpikeRatio());
 
         // DB에 저장
         ChatHighlight saved = saveHighlight(roomIdx, kafkaReq,
-                (int) detectionResult.metrics.currentMessageRate, description);
+                (int) detectionResp.getMetrics().getCurrentMessageRate(), description);
 
         // WebSocket 브로드캐스트
         broadcastHighlight(roomIdx, saved);
