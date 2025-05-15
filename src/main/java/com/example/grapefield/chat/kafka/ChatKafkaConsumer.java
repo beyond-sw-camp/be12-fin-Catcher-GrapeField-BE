@@ -18,19 +18,20 @@ public class ChatKafkaConsumer {
     private final SimpMessagingTemplate simpMessagingTemplate; //추가
 
 
-    @KafkaListener(topicPattern = "^chat-\\d+$",
-            groupId = "chat-group",
+    @KafkaListener(
+            topicPattern = "^chat-\\d+$",
+            groupId = "${spring.kafka.consumer.chat.group-id}",
             containerFactory = "chatKafkaListenerContainerFactory")
     public void consume(ChatMessageKafkaReq chatMessageKafkaReq) { //매개변수 리팩터링
-        log.info("✅ Kafka 메시지 수신: roomIdx={}, userIdx={}, content={}",
+        log.info("Kafka 메시지 수신: roomIdx={}, userIdx={}, content={}",
                 chatMessageKafkaReq.getRoomIdx(), chatMessageKafkaReq.getSendUserIdx(), chatMessageKafkaReq.getContent());
 
 
-        ChatMessageResp resp = chatMessageService.saveMessage(chatMessageKafkaReq); //DB 저장 로직 추가
-
-        simpMessagingTemplate.convertAndSend("/topic/chat.room." + resp.getRoomIdx(), resp); // WebSocket broadcast 로직 추가
-
-        log.info("✅ 📡 WebSocket Broadcast -> roomIdx: {}, sendUserIdx: {}, content: {} ", resp.getRoomIdx(), resp.getUserIdx(), resp.getContent()); //로그 추가
-
+        // ChatMessageResp resp = chatMessageService.saveMessage(chatMessageKafkaReq); //DB 저장 로직 추가
+        ChatMessageResp resp = chatMessageService.saveMessageIfNotProcessed(chatMessageKafkaReq);
+        if (resp != null) {
+            simpMessagingTemplate.convertAndSend("/topic/chat.room." + resp.getRoomIdx(), resp); // WebSocket broadcast 로직 추가
+            log.info("WebSocket Broadcast -> roomIdx: {}, sendUserIdx: {}, content: {} ", resp.getRoomIdx(), resp.getUserIdx(), resp.getContent()); //로그 추가
+        }
     }
 }

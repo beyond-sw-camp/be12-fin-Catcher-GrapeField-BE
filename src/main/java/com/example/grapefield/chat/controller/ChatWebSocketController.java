@@ -5,6 +5,7 @@ import com.example.grapefield.chat.model.request.ChatHeartKafkaReq;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.model.request.ChatMessageReq;
 import com.example.grapefield.chat.model.response.ChatMessageResp;
+import com.example.grapefield.chat.model.response.HeartResp;
 import com.example.grapefield.chat.service.ChatMessageService;
 import com.example.grapefield.chat.service.ChatRoomService;
 import com.example.grapefield.user.CustomUserDetails;
@@ -38,13 +39,12 @@ import java.security.Principal;
 @Controller
 public class ChatWebSocketController {
     private final ChatKafkaProducer chatKafkaProducer;
-    private final ChatRoomService chatRoomService;
-    private final ChatMessageService chatMessageService;
 
-    @Autowired
-    private final SimpMessagingTemplate messagingTemplate;
+//    @Autowired
+//    private final SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/chat.send.{roomIdx}")
+    @Operation(summary = "채팅 메시지 전송", description = "클라이언트로부터 채팅 메시지를 수신하고, Kafka로 전달")
     public void sendMessage(Principal principal, @Payload ChatMessageReq chatMessageReq) {
         Authentication auth = (Authentication) principal;
         CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
@@ -56,18 +56,23 @@ public class ChatWebSocketController {
                 chatMessageReq.getRoomIdx(), chatMessageReq.getContent(), user.getIdx());
 
         ChatMessageKafkaReq chatMessageKafkaReq =
-                new ChatMessageKafkaReq(chatMessageReq.getRoomIdx(), user.getIdx(), chatMessageReq.getContent());
-
+                ChatMessageKafkaReq.builder()
+                        .roomIdx(chatMessageReq.getRoomIdx())
+                        .sendUserIdx(user.getIdx())
+                        .content(chatMessageReq.getContent()).build();
+        log.debug("웹소켓 컨트롤러 sendMessage 메소드 chatMessageKafkaReq={}", chatMessageReq.toString());
         chatKafkaProducer.sendMessage(chatMessageKafkaReq);//  클라이언트로부터의 메시지를 kafka로 전송
     }
 
     @MessageMapping("/chat.like.{roomIdx}")
+    @Operation(summary = "채팅방 하트 전송", description = "클라이언트에서 전송한 하트(좋아요) 이벤트를 Kafka로 전달")
     public void likeRoom(@DestinationVariable Long roomIdx,
                          @Payload ChatHeartKafkaReq heartReq,
+                         /*@Payload ChatHeartKafkaReq heartReq,*/
                          Principal principal) {
         CustomUserDetails userDetails = (CustomUserDetails) ((Authentication) principal).getPrincipal();
         Long userIdx = userDetails.getUser().getIdx();
-        log.info("📡 WebSocket ❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, userIdx);
+        log.info("WebSocket ❤️ 하트 수신: roomIdx={}, userIdx={}", roomIdx, heartReq /* userIdx */);
         chatKafkaProducer.likeRoom(heartReq);
     }
 

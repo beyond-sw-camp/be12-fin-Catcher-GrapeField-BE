@@ -27,7 +27,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                                    WebSocketHandler wsHandler,
                                    Map<String, Object> attributes) throws Exception {
         if (!(request instanceof ServletServerHttpRequest)) {
-            logger.warn("핸드셰이크가 요청 오류: Handshake not from HTTP requeest");
+            logger.warn("🔴 핸드셰이크 요청 오류: Handshake not from HTTP requeest");
             return false;
         }
 
@@ -39,7 +39,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
             for (Cookie cookie : cookies) {
                 if("ATOKEN".equals(cookie.getName())) {
                     jwt = cookie.getValue();
-                    logger.info("ATOKEN: {}", cookie.getValue());
+                    logger.info("✅ 쿠키에 ATOKEN값이 존재");
                     break;
                 }
             }
@@ -49,7 +49,7 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
         if (jwt != null && JwtUtil.validate(jwt)) {
             User user = JwtUtil.getUser(jwt);
             if (user == null) {
-                logger.warn("JWT (ATOKEN)에서 사용자 정보 추출 실패");
+                logger.warn("🔴 JWT (ATOKEN)에서 사용자 정보 추출 실패");
                 return false;
             }
 
@@ -58,11 +58,11 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             attributes.put("userIdx", user.getIdx()); // 웹소켓 세션에 식별자 저장
-            logger.info("WebSocket 인증 성공: userIdx={}, principal={}", user.getIdx(), SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+            logger.info("✅ WebSocket 인증 성공: userIdx={}, principal={}", user.getIdx(), SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
             return true;
         }
-        logger.warn("WebSocket 인증 실패: JWT가 없거나 유효하지 않음.");
+        logger.warn("🔴 WebSocket 인증 실패: JWT가 없거나 유효하지 않음.");
         return false;
     }
 

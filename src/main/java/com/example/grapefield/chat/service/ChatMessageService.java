@@ -3,12 +3,11 @@ package com.example.grapefield.chat.service;
 import com.example.grapefield.chat.model.entity.ChatMessageBase;
 import com.example.grapefield.chat.model.entity.ChatMessageCurrent;
 import com.example.grapefield.chat.model.entity.ChatRoom;
+import com.example.grapefield.chat.model.entity.ProcessedMessage;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
+import com.example.grapefield.chat.model.request.ChatMessageReq;
 import com.example.grapefield.chat.model.response.ChatMessageResp;
-import com.example.grapefield.chat.repository.ChatMessageBaseRepository;
-import com.example.grapefield.chat.repository.ChatMessageCurrentRepository;
-import com.example.grapefield.chat.repository.ChatRoomMemberRepository;
-import com.example.grapefield.chat.repository.ChatRoomRepository;
+import com.example.grapefield.chat.repository.*;
 import com.example.grapefield.user.model.entity.User;
 import com.example.grapefield.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -27,10 +26,29 @@ public class ChatMessageService {
     private final ChatMessageCurrentRepository currentRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final ProcessedMessageRepository processedMessageRepository;
+    private final ChatMessageCurrentRepository chatMessageCurrentRepository;
 
     @Transactional
-    public ChatMessageResp saveMessage(ChatMessageKafkaReq req) {
+    public ChatMessageResp saveMessageIfNotProcessed(ChatMessageKafkaReq req) {
+        String messageUuid = req.getMessageUuid();
+        ChatMessageResp resp = new ChatMessageResp();
+        if (processedMessageRepository.existsByMessageUuid(messageUuid)) {
+            log.info("❌중복된 uuid 존재함.");
+            ChatMessageCurrent newMessage = chatMessageCurrentRepository.findByMessageUuid(messageUuid);
+            resp = ChatMessageResp.from(newMessage);
+        } else {
+            log.info("✅중복 uuid 없음: {}", messageUuid);
+            resp = saveMessage(req, messageUuid);
+            processedMessageRepository.save(new ProcessedMessage(messageUuid, LocalDateTime.now()));
+        }
+        return resp;
+    }
+
+    @Transactional
+    public ChatMessageResp saveMessage(ChatMessageKafkaReq req, String messageUuid) {
         try {
+
             // 1. 채팅방 정보 가져오기
             ChatRoom room = chatRoomRepository.findById(req.getRoomIdx())
                     .orElseThrow(() -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
@@ -61,7 +79,7 @@ public class ChatMessageService {
             boolean isSaved = currentRepository.findById(current.getBase().getMessageIdx()).isPresent();
 
             if (isSaved) {
-                log.info("🎉 최종 저장 확인 완료! ✅ messageIdx={}", current.getBase().getMessageIdx());
+                log.info("최종 저장 확인 완료 ✅ messageIdx={}", current.getBase().getMessageIdx());
             } else {
                 log.warn("⚠️ current 메시지가 저장되지 않은 것 같습니다... messageIdx={}", current.getBase().getMessageIdx());
             }
@@ -80,7 +98,7 @@ public class ChatMessageService {
 
         } catch (Exception e) {
             log.error("💥 메시지 저장 중 예외 발생: {}", e.getMessage(), e);
-            throw e; // rollback 유도
+            throw e;
         }
 
     }

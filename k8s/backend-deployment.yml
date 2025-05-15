@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: first
+spec:
+  replicas: 2
+  # 롤링 업데이트 전략 명시적으로 추가
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          # Jenkins 파이프라인에서 sed 명령어로 실제 버전으로 대체됨
+          image: rekvv/grapefield_back:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: backend-config
+          # [start] 5월 7일에 새롭게 추가된 코드
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          # [end] 5월 7일에 새롭게 추가된 코드
+          volumeMounts:
+            - name: backend-tls
+              mountPath: /app/ssl
+              readOnly: true
+      volumes:
+        - name: backend-tls
+          secret:
+            secretName: backend-tls-secret

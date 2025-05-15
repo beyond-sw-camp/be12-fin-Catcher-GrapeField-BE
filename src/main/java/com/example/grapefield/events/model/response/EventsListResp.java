@@ -45,4 +45,8 @@ public class EventsListResp {
             .interestCtn(interestCtn != null ? interestCtn.intValue() : 0)
             .build();
   }
+
+  public static EventsListResp from(Events event) {
+    return from(event, 0L);
+  }
 }

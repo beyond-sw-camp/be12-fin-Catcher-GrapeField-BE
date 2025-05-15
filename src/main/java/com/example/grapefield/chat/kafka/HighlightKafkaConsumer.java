@@ -16,7 +16,7 @@ public class HighlightKafkaConsumer {
 
     @KafkaListener(
             topicPattern = "^chat-\\d+$",
-            groupId = "chat-highlight-group",
+            groupId = "${spring.kafka.consumer.highlight.group-id}",
             containerFactory = "highlightKafkaListenerContainerFactory"
     )
     public void consumeHighlight(ChatMessageKafkaReq message) {

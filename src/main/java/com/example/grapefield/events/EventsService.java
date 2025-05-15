@@ -1,5 +1,8 @@
 package com.example.grapefield.events;
 
+import com.example.grapefield.chat.model.entity.ChatRoom;
+import com.example.grapefield.chat.repository.ChatRoomRepository;
+import com.example.grapefield.elasticsearch.EventSearchService;
 import com.example.grapefield.events.model.entity.EventCategory;
 import com.example.grapefield.events.model.entity.Events;
 import com.example.grapefield.events.model.entity.EventsImg;
@@ -10,6 +13,7 @@ import com.example.grapefield.events.post.model.entity.Board;
 import com.example.grapefield.events.repository.EventsImgRepository;
 import com.example.grapefield.events.repository.EventsRepository;
 import com.example.grapefield.user.model.entity.User;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +31,37 @@ public class EventsService {
   private final EventsRepository eventsRepository;
   private final BoardRepository boardRepository;
   private final EventsImgRepository eventsImgRepository;
+  private final ChatRoomRepository chatRoomRepository;
 
+  private final EventSearchService searchService;
+
+  @Transactional
+  public Events save(Events event) {
+    Events savedEvent = eventsRepository.save(event);
+    // Elasticsearch에 인덱싱
+    try {
+      searchService.indexEvent(savedEvent);
+    } catch (Exception e) {
+      // 로깅만 하고 트랜잭션은 계속 진행
+      System.err.println("Error indexing event: " + e.getMessage());
+    }
+    return savedEvent;
+  }
+
+  // 삭제 메서드
+  @Transactional
+  public void delete(Long id) {
+    eventsRepository.deleteById(id);
+    // Elasticsearch에서 문서 삭제
+    try {
+      searchService.deleteEventDocument(id);
+    } catch (Exception e) {
+      // 로깅만 하고 트랜잭션은 계속 진행
+      System.err.println("Error deleting event from index: " + e.getMessage());
+    }
+  }
+
+  @Transactional
   public Long eventsRegister(EventsRegisterReq request) {
     Events events = eventsRepository.save(request.toEntity());
     //events의 idx를 받아서 board 추가
@@ -35,7 +69,10 @@ public class EventsService {
       Board board = Board.builder().events(events).title(events.getTitle()).build();
       boardRepository.save(board);
     }
-  //TODO : 채팅방 추가
+    if(!chatRoomRepository.existsById(events.getIdx())) {
+      ChatRoom chatRoom = ChatRoom.builder().events(events).roomName(events.getTitle()).build();
+      chatRoomRepository.save(chatRoom);
+    }
     return events.getIdx();
   }
 
