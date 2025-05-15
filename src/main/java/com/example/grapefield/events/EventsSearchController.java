@@ -60,6 +60,8 @@ public class EventsSearchController {
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
 
+    System.out.println("Event IDs from ES: " + eventIds);
+
     // DB에서 완전한 Events 객체 조회
     if (!eventIds.isEmpty()) {
       // DB에서 정확한 데이터 조회
@@ -109,7 +111,7 @@ public class EventsSearchController {
               "  }\n" +
               "}";
 
-      Request request = new Request("GET", "/events-*/_search");
+      Request request = new Request("GET", "/events/_search");
       request.setJsonEntity(query);
 
       // 주입된 클라이언트 사용

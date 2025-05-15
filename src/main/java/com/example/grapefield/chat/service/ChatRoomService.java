@@ -79,16 +79,4 @@ public class ChatRoomService {
 
     }
 
-    @Transactional
-    public Long increaseHeartRedis(ChatRoom chatRoom) {
-        Long roomIdx = chatRoom.getIdx();
-        String redisKey = "chat:"+roomIdx+":likes";
-        Long newCount = redisTemplate.opsForValue().increment(redisKey);
-        log.info("⭐Long newCount = redisTemplate.opsForValue().increment(redisKey); 후 chatRoom.getHearCnt() = " + chatRoom.getHeartCnt());
-        log.info("⭐Long newCount = redisTemplate.opsForValue().increment(redisKey); 후 newCount = " + newCount);
-
-        return newCount;
-
-    }
-
 }

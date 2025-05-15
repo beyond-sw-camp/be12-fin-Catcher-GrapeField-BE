@@ -121,7 +121,7 @@ public class ChatRoomListController {
     @ApiErrorResponses
     @GetMapping("/hot-now")
     public ResponseEntity<List<PopularChatRoomListResp>> getHotNowRooms() {
-        return ResponseEntity.ok(chatRoomListService.getHotNowRooms());
+        return ResponseEntity.ok(chatRoomListService.getHotNowRoomsRedis()); // 🌟 Redis 아닌 버전은 getHotNowRooms()
     }
 
 }

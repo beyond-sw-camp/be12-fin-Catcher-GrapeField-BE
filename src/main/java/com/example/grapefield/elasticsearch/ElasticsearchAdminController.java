@@ -41,6 +41,24 @@ public class ElasticsearchAdminController {
         this.client = client;
         this.restHighLevelClient = restHighLevelClient; // 초기화
     }
+    @GetMapping("/raw-search")
+    public ResponseEntity<?> rawSearch(@RequestParam String keyword) {
+        try {
+            var searchRequest = new co.elastic.clients.elasticsearch.core.SearchRequest.Builder()
+                    .index("events")
+                    .query(q -> q.match(m -> m.field("title").query(keyword)))
+                    .build();
+
+            // 일반 Map으로 응답 받기
+            var response = client.search(searchRequest, Map.class);
+
+            // 응답 전체를 그대로 반환
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
 
     @GetMapping("/simple-test")
     public ResponseEntity<?> simpleTest() {
