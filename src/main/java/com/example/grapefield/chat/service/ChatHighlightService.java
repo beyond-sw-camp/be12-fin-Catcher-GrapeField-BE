@@ -49,7 +49,7 @@ public class ChatHighlightService {
 
         if (ts.size() >= 20) {
             log.info("🔥 하이라이트 감지! roomIdx={}, count={}", roomIdx, ts.size());
-            saveHighlight(roomIdx, kafkaReq, ts.size());
+            saveHighlightIfNotExists(roomIdx, kafkaReq, ts.size());
             ts.clear();
         }
     }
