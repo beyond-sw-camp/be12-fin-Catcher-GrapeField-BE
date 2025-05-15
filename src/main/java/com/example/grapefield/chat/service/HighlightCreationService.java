@@ -5,6 +5,7 @@ import com.example.grapefield.chat.model.entity.ChatMessageBase;
 import com.example.grapefield.chat.model.entity.ChatRoom;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.model.response.ChatHighlightResp;
+import com.example.grapefield.chat.model.response.HighlightDetectionResp;
 import com.example.grapefield.chat.repository.ChatHighlightRepository;
 import com.example.grapefield.chat.repository.ChatMessageBaseRepository;
 import com.example.grapefield.chat.repository.ChatRoomRepository;
@@ -14,6 +15,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -30,16 +32,16 @@ public class HighlightCreationService {
      * 키워드 기반 하이라이트 생성
      */
     public ChatHighlight createHighlight(Long roomIdx, ChatMessageKafkaReq kafkaReq,
-                                         HighlightDetectionService.HighlightDetectionResult detectionResult) {
+                                         HighlightDetectionResp detectionResp) {
         // 키워드 추출
-        String keywords = keywordExtractionService.extractKeywords(detectionResult.recentMessages);
+        String keywords = keywordExtractionService.extractKeywords(detectionResp.getRecentMessages());
 
         // 메트릭 정보를 포함한 설명 생성
-        String description = keywordExtractionService.createDescription(keywords, detectionResult.metrics.spikeRatio);
+        String description = keywordExtractionService.createDescription(keywords, detectionResp.getMetrics().getSpikeRatio());
 
         // DB에 저장
         ChatHighlight saved = saveHighlight(roomIdx, kafkaReq,
-                (int) detectionResult.metrics.currentMessageRate, description);
+                (int) detectionResp.getMetrics().getCurrentMessageRate(), description);
 
         // WebSocket 브로드캐스트
         broadcastHighlight(roomIdx, saved);
@@ -59,8 +61,13 @@ public class HighlightCreationService {
             ChatMessageBase latestBase = baseRepository.findTopByRoomIdx(roomIdx)
                     .orElseThrow(() -> new IllegalStateException("기준 메시지를 찾을 수 없습니다."));
 
-            LocalDateTime endTime = latestBase.getCreatedAt();
-            LocalDateTime startTime = endTime.minusMinutes(2); // 2분간의 하이라이트
+            // 🔧 개선된 시간 설정
+            // 끝시간: 하이라이트 감지된 현재 시점
+            LocalDateTime endTime = LocalDateTime.now();
+
+            // 시작시간: 메시지 수에 따라 동적 계산
+            int durationMinutes = calculateDuration(messageCount);
+            LocalDateTime startTime = endTime.minusMinutes(durationMinutes);
 
             ChatHighlight highlight = ChatHighlight.builder()
                     .chatRoom(room)
@@ -72,8 +79,12 @@ public class HighlightCreationService {
                     .build();
 
             ChatHighlight saved = highlightRepository.save(highlight);
-            log.info("💾 스마트 하이라이트 저장 완료 idx={}, roomIdx={}, description={}",
-                    saved.getIdx(), roomIdx, description);
+            log.info("💾 스마트 하이라이트 저장 완료 idx={}, roomIdx={}, 구간={}~{} ({}분), description={}",
+                    saved.getIdx(), roomIdx,
+                    startTime.format(DateTimeFormatter.ofPattern("HH:mm")),
+                    endTime.format(DateTimeFormatter.ofPattern("HH:mm")),
+                    durationMinutes,
+                    description);
 
             return saved;
         } catch (Exception e) {
@@ -115,6 +126,22 @@ public class HighlightCreationService {
         } catch (Exception e) {
             log.error("💥 하이라이트 브로드캐스트 중 오류 발생: roomIdx={}", roomIdx, e);
             log.error("💥 상세 스택트레이스:", e);
+        }
+    }
+
+    private int calculateDuration(int messageCount) {
+        if (messageCount >= 50) {
+            log.info("📊 매우 활발한 하이라이트: {}개 메시지 → 5분 구간", messageCount);
+            return 5;   // 매우 활발: 5분
+        } else if (messageCount >= 30) {
+            log.info("📊 활발한 하이라이트: {}개 메시지 → 3분 구간", messageCount);
+            return 3;   // 활발: 3분
+        } else if (messageCount >= 15) {
+            log.info("📊 보통 하이라이트: {}개 메시지 → 2분 구간", messageCount);
+            return 2;   // 보통: 2분
+        } else {
+            log.info("📊 기본 하이라이트: {}개 메시지 → 1분 구간", messageCount);
+            return 1;   // 기본: 1분
         }
     }
 }

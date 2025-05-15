@@ -5,6 +5,7 @@ import com.example.grapefield.chat.model.entity.ChatMessageBase;
 import com.example.grapefield.chat.model.entity.ChatRoom;
 import com.example.grapefield.chat.model.request.ChatMessageKafkaReq;
 import com.example.grapefield.chat.model.response.ChatHighlightResp;
+import com.example.grapefield.chat.model.response.HighlightDetectionResp;
 import com.example.grapefield.chat.repository.ChatHighlightRepository;
 import com.example.grapefield.chat.repository.ChatMessageBaseRepository;
 import com.example.grapefield.chat.repository.ChatRoomRepository;
@@ -46,14 +47,14 @@ public class ChatHighlightService {
             messageTrackingService.trackMessage(kafkaReq);
 
             // 2. 하이라이트 감지
-            Optional<HighlightDetectionService.HighlightDetectionResult> detectionResult =
+            Optional<HighlightDetectionResp> detectionResp =
                     highlightDetectionService.detectHighlight(roomIdx, currentTime);
 
             // 3. 감지되면 하이라이트 생성
-            if (detectionResult.isPresent()) {
+            if (detectionResp.isPresent()) {
                 log.info("✨ 하이라이트 생성 시작: roomIdx={}", roomIdx);
                 ChatHighlight highlight = highlightCreationService.createHighlight(
-                        roomIdx, kafkaReq, detectionResult.get());
+                        roomIdx, kafkaReq, detectionResp.get());
 
                 log.info("🎉 하이라이트 생성 완료: roomIdx={}, idx={}, description={}",
                         roomIdx, highlight.getIdx(), highlight.getDescription());
