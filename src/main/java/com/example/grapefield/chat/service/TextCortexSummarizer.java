@@ -58,13 +58,20 @@ public class TextCortexSummarizer {
         TextCortexResponse responseObj = objectMapper.readValue(respBodyJsonString, TextCortexResponse.class);
 
         String outputKeyword;
+
         if (Objects.equals(responseObj.status, "success")){
             if (responseObj != null && responseObj.data != null && responseObj.data.outputs != null && !responseObj.data.outputs.isEmpty()) {
                 outputKeyword = responseObj.data.outputs.get(0).text;
-            } else { log.info("[키워드 저장 API 오류] 요청에 실패했습니다.");  outputKeyword = "status=\"success\"";}
+            } else if (responseObj.data.remaining_credits <= 0) {
+                log.info("⚠️ [키워드 저장 중...] API 사용량 초과 크레딧 충전 필요");
+                outputKeyword = "요약 불가 status=\"success\"";
+            } else {
+                log.info("⚠️[키워드 저장 중 API 오류] 올바르지 않은 응답 status=\"success\"");
+                outputKeyword = "응답오류 status=\"success\"";
+            }
         } else {
-            log.info("[키워드 저장 API 오류] 요청에 실패했습니다.");
-            outputKeyword = "status=\"failure\"";
+            log.info("⚠️[키워드 저장 중 API 오류] 요청에 실패 status=\"failure\"");
+            outputKeyword = "응답 오류 status=\"failure\"";
         }
 
         return outputKeyword;
