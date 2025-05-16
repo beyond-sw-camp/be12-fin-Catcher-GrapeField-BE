@@ -13,16 +13,16 @@
 <figure>
     <table>
       <tr>
-        <td align="center"><img src="" width="180px"/></td>
-        <td align="center"><img src="" width="180px"/></td>
-        <td align="center"><img src="" width="180px"/></td>
-	    <td align="center"><img src="" width="180px"/></td>
+        <td align="center"><img src="https://github.com/user-attachments/assets/fc09670f-0100-4deb-a070-a975200e5b44" width="180px"/></td>
+        <td align="center"><img src="https://github.com/user-attachments/assets/e1378ccf-4afa-48cd-877d-e64b2ac69c19" width="180px"/></td>
+        <td align="center"><img src="https://github.com/user-attachments/assets/e2dc5942-a318-4082-98e9-79a3919b0a07" width="180px"/></td>
+	    <td align="center"><img src="https://github.com/user-attachments/assets/05128582-7e08-4fb5-a911-cf095af55af3" width="180px"/></td>
       </tr>
       <tr>
         <td align="center">팀장: <a href="https://github.com/bdt6246">김혜정</a></td>
         <td align="center">팀원: <a href="https://github.com/daydeiday">곽효림</a></td>
-        <td align="center">팀원: <a href="https://github.com/s00ya" >정지수</a></td>
-        <td align="center">: <a href="https://github.com/J0a0J">김지원</a></a></td>
+        <td align="center">팀원: <a href="https://github.com/s00ya" >김지원</a></td>
+        <td align="center">팀원: <a href="https://github.com/J0a0J">정지수</a></a></td>
       </tr>
     </table>
 </figure>
