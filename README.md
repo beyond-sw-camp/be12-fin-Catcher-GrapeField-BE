@@ -1,11 +1,9 @@
-# "GrapeField" 공연/전시 정보 통합 제공 및 커뮤니티 플랫폼
-
 <p align="middle" style="margin: 0; padding: 0;">
   <img width="360px" src="https://github.com/user-attachments/assets/dc348de4-aecb-4ce0-816e-08062ab7ed74">
 </p>
 
 <p align="middle">
-[플레이 데이터] 한화시스템 BEYOND SW캠프 12기
+> **[한화시스템 BEYOND SW캠프 12기] Final Project** 
 <br>🧑🏻‍🌾 CATCHER 파수꾼 팀 🍇
 </p>
 
