@@ -4,7 +4,7 @@
 
 <p align="middle">
 <b>[한화시스템 BEYOND SW캠프 12기] Final Project</b>
-<b>"GrapeField" 공연/전시 정보 통합 제공 및 커뮤니티 플랫폼</b>b
+<br><b>"GrapeField" 공연/전시 정보 통합 제공 및 커뮤니티 플랫폼</b>
 <br>🧑🏻‍🌾 CATCHER 파수꾼 팀 🍇
 
 ## 😃 팀원 소개
