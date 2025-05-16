@@ -33,7 +33,7 @@ public class HighlightDetectionService {
 //    private static final int COOLDOWN_SECONDS = 30; // 120 → 30초로 단축
 
     // 시간당 제한 추가
-    private static final int MAX_HIGHLIGHTS_PER_HOUR = 100;
+    private static final int MAX_HIGHLIGHTS_PER_HOUR = 3; // 💬🫱🏻(Hyorim K) 더 늘리고 싶습니다
     private static final String HIGHLIGHT_COOLDOWN_KEY = "room:{roomIdx}:highlight_cooldown";
     private static final String HIGHLIGHT_LOCK_KEY = "room:{roomIdx}:highlight_lock";
     private static final int LOCK_EXPIRE_SECONDS = 10;
