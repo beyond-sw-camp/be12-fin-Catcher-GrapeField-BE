@@ -22,18 +22,18 @@ public class HighlightDetectionService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     // 감지 설정
-    private static final double SPIKE_THRESHOLD = 2.5;
-    private static final int MIN_MESSAGES_FOR_HIGHLIGHT = 15;
-    private static final int COOLDOWN_SECONDS = 300;  // 5분, 하이라이트 생성 후 쿨다운
-    private static final int MIN_ACTIVE_USERS = 3;
+//    private static final double SPIKE_THRESHOLD = 2.5;
+//    private static final int MIN_MESSAGES_FOR_HIGHLIGHT = 15;
+//    private static final int COOLDOWN_SECONDS = 300;  // 5분, 하이라이트 생성 후 쿨다운
+    private static final int MIN_ACTIVE_USERS = 1;
 
     // 테스트용으로 임계값 낮춤
-//    private static final double SPIKE_THRESHOLD = 0.5; // 2.5 → 1.2로 낮춤
-//    private static final int MIN_MESSAGES_FOR_HIGHLIGHT = 1; // 10 → 3으로 낮춤
-//    private static final int COOLDOWN_SECONDS = 10; // 120 → 30초로 단축
+    private static final double SPIKE_THRESHOLD = 1; // 2.5 → 1.2로 낮춤
+    private static final int MIN_MESSAGES_FOR_HIGHLIGHT = 10; // 10 → 3으로 낮춤
+    private static final int COOLDOWN_SECONDS = 10; // 120 → 30초로 단축
 
     // 시간당 제한 추가
-    private static final int MAX_HIGHLIGHTS_PER_HOUR = 3;
+    private static final int MAX_HIGHLIGHTS_PER_HOUR = 100;
     private static final String HIGHLIGHT_COOLDOWN_KEY = "room:{roomIdx}:highlight_cooldown";
     private static final String HIGHLIGHT_LOCK_KEY = "room:{roomIdx}:highlight_lock";
     private static final int LOCK_EXPIRE_SECONDS = 10;
