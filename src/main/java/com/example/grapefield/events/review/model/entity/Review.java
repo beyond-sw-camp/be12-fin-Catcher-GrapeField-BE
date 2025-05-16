@@ -27,6 +27,8 @@ public class Review {
     @JoinColumn(name = "events_idx")
     private Events events;
 
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
     private Long rating;
     private LocalDateTime createdAt;
