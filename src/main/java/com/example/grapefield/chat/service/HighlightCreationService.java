@@ -21,20 +21,23 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 @Slf4j
 public class HighlightCreationService {
-
     private final ChatHighlightRepository highlightRepository;
     private final ChatMessageBaseRepository baseRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final KeywordExtractionService keywordExtractionService;
+    private final TextCortexSummarizer summarizer;
 
     /**
      * 키워드 기반 하이라이트 생성
      */
     public ChatHighlight createHighlight(Long roomIdx, ChatMessageKafkaReq kafkaReq,
-                                         HighlightDetectionResp detectionResp) {
+                                         HighlightDetectionResp detectionResp) throws Exception {
         // 키워드 추출
-        String keywords = keywordExtractionService.extractKeywords(detectionResp.getRecentMessages());
+        // String keywords = keywordExtractionService.extractKeywords(detectionResp.getRecentMessages());
+
+        String messagesInOneLine = summarizer.intoOneLine(detectionResp.getRecentMessages());
+        String keywords = summarizer.summarize(messagesInOneLine);
 
         // 메트릭 정보를 포함한 설명 생성
         String description = keywordExtractionService.createDescription(keywords, detectionResp.getMetrics().getSpikeRatio());

@@ -17,6 +17,8 @@ public class PostComment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

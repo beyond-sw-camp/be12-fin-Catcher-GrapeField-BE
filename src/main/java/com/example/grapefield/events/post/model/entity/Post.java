@@ -17,6 +17,8 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
     private String title;
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     private String content;
     private int viewCnt;
     private Boolean isPinned;
