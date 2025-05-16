@@ -42,7 +42,7 @@ spring:
         reconnect.backoff.max.ms: 10000  # 최대 재연결 간격
 
   elasticsearch:
-    uris: ${SPRING_ELASTICSEARCH_URIS}
+    uris: http://${ELASTIC_HOST}:${ELASTIC_PORT}
     username: ${ELASTIC_USER}
     password: ${ELASTIC_PASSWORD}
 
