@@ -1,33 +1,31 @@
+# "GrapeField" 공연/전시 정보 통합 제공 및 커뮤니티 플랫폼
 
+<p align="middle" style="margin: 0; padding: 0;">
+  <img width="360px" src="https://github.com/user-attachments/assets/dc348de4-aecb-4ce0-816e-08062ab7ed74">
+</p>
 
-<br>
-<img src="https://capsule-render.vercel.app/api?type=waving&height=250&color=gradient&text=Enadu&fontSize=60&fontAlignY=30&animation=fadeIn&rotate=0&desc=개발자%20지식%20공유%20플랫폼&descSize=30&reversal=false" style="width: 120%;">
-<!-- <br>
-<div align="center">
-<img src="https://github.com/user-attachments/assets/3f6df515-9e11-4b63-b4e1-c35d22176721" style="width: 60%;">
-</div> -->
+<p align="middle">
+[플레이 데이터] 한화시스템 BEYOND SW캠프 12기
+<br>🧑🏻‍🌾 CATCHER 파수꾼 팀 🍇
+</p>
 
-<br>
-
-## 🎁팀원 소개
-> **[한화시스템 BEYOND SW캠프 O기] Final Project** 
-
-> **OOO팀 OOO 프로젝트**
-
-<table align="center">
- <tr>
-    <td align="center"><a href="https://github.com/dyun23"><img src="https://github.com/user-attachments/assets/99536e16-063c-4785-92d2-44b909ab7c84" width="150px;" alt=""></td>
-    <td align="center"><a href="https://github.com/sue06004"><img src="https://github.com/user-attachments/assets/2dde57cc-aa14-410c-99f7-9d50841fde51" width="150px;" alt=""></td>
-    <td align="center"><a href="https://github.com/jimnyy"><img src="https://github.com/user-attachments/assets/5ff5cb30-f7aa-4ab2-a18d-a31087ab9f80" width="150px;" alt=""></td>
-    <td align="center"><a href="https://github.com/dlrkdms125"><img src="https://github.com/user-attachments/assets/42bed0f6-7d78-4eec-8906-e843495fca4f" width="150px;" alt=""></td>
-  </tr>
-  <tr>
-    <td align="center">🐥<a href="https://github.com/dyun23"><b>김땡땡</b></td>
-    <td align="center">🦊<a href="https://github.com/sue06004"><b>이땡땡</b></td>
-    <td align="center">😼<a href="https://github.com/jimnyy"><b>박땡땡</b></td>
-    <td align="center">🐰<a href="https://github.com/dlrkdms125"><b>최땡땡</b></td>
-  </tr>
-  </table>
+## 😃 팀원 소개
+<figure>
+    <table>
+      <tr>
+        <td align="center"><img src="" width="180px"/></td>
+        <td align="center"><img src="" width="180px"/></td>
+        <td align="center"><img src="" width="180px"/></td>
+	    <td align="center"><img src="" width="180px"/></td>
+      </tr>
+      <tr>
+        <td align="center">팀장: <a href="https://github.com/bdt6246">김혜정</a></td>
+        <td align="center">팀원: <a href="https://github.com/daydeiday">곽효림</a></td>
+        <td align="center">팀원: <a href="https://github.com/s00ya" >정지수</a></td>
+        <td align="center">: <a href="https://github.com/J0a0J">김지원</a></a></td>
+      </tr>
+    </table>
+</figure>
 <br>
 
 
@@ -55,7 +53,6 @@
 <img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=for-the-badge&logo=Spring Boot&logoColor=white" style="border-radius: 5px;">
 <img src="https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=Spring-Security&logoColor=white" style="border-radius: 5px;">
 <img src="https://img.shields.io/badge/Spring data jpa-6DB33F?style=for-the-badge&logo=Spring Boot&logoColor=white" style="border-radius: 5px;">
-<img src="https://img.shields.io/badge/Spring Batch-6DB33F?style=for-the-badge&logo=Spring&logoColor=white" style="border-radius: 5px;">
 <img src="https://img.shields.io/badge/SMTP-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" style="border-radius: 5px;">
 
 
@@ -71,8 +68,7 @@
 <img src="https://img.shields.io/badge/jenkins-D24939?style=for-the-badge&logo=jenkins&logoColor=white" style="border-radius: 5px;">
 
 #### &nbsp;　[ Etc ]
-&nbsp;&nbsp;&nbsp;&nbsp;![Prometheus](https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=Prometheus&logoColor=white)
-![Grafana](https://img.shields.io/badge/grafana-%23F46800.svg?style=for-the-badge&logo=grafana&logoColor=white)
+&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="https://img.shields.io/badge/kafka-231F20?style=for-the-badge&logo=apachekafka&logoColor=white">
 <img src="https://img.shields.io/badge/logstash-f3bd19?style=for-the-badge&logo=logstash&logoColor=white" style="border-radius: 5px;">
 
@@ -84,26 +80,38 @@
 <br><br><br>
 
 
-## 📚 OOO 데모 사이트 바로가기
-### [OOO](https://enadu.o-r.kr)</a>
+## 📚 Grapefield 데모 사이트 바로가기
+### [Grapefield](https://grapefield.kro.kr/)</a>
+아이디 : animal255@example.com    
+비밀번호 : 1234     
+(그 외에도 animal1@example.com ~ animal346@example.com 중에서 자유롭게 사용 가능)
 <br><br>
-## 🎨 OOO 서비스 소개
-<img src= "https://github.com/user-attachments/assets/2a07b47d-e074-4821-b5ac-3b445c6a9f1a">
 
-#### 프로젝트 배경
-전통적인 배포 파이프라인은 코드 변경 사항을 커밋-> 코드 통합 -> 빌드 -> 배포 준비 및 배포 -> 모니터링 방식이었다.
+## 📝 Grapefield 서비스 소개
+### 프로젝트 배경
+//TODO: 사이트 정보를 한 눈에 확인할 수 있는 (커뮤니티 특성이 드러나는) 이미지 추가
 
-이렇듯 전통적인 배포 파이프라인은 수동 작업이 많고, 통합의 어려움, 개발자의 오류 리스크를 증가 시켰다.
+코로나 팬데믹 이후 오프라인 공연 및 전시회에 대한 수요가 급증하면서 관련 행사들이 활발히 개최되고 있다. 특히 기업, 기관의 홍보 담당자들은 브랜드 홍보 및 고객 접점을 확대하기 위한 전략으로 공연이나 박람회와 같은 오프라인 행사를 적극적으로 유치하거나 후원하며, 이를 통해 대면 중심의 마케팅 활동이 활성화되었다.   
+그러나 기존 정보는 개별 사이트나 SNS를 통해 확인해야 하며, 후기를 확인하거나 공유하는 과정이 번거롭다.    
+이러한 불편함을 해소하기 위하여 오프라인 문화 콘텐츠에 대한 `정보 제공`뿐만 아니라, 이용자들이 `실시간으로 소통`하고 `후기를 나눌 수 있는` 커뮤니티 중심의 통합 플랫폼 `GrapeField`를 기획하였다.
 
-현대의 CI/CD는 위와 같은 문제점들을 보완함과 동시에 더 빠르고 안정적인 소프트웨어 배포가 가능하다.
+### 세부 기능
+`Information`
+뮤지컬, 연극, 콘서트, 전시회, 클래식 등 다양한 오프라인 문화 콘텐츠에 대한 예매 정보, 상연 일정, 출연진, 세부 줄거리 등 상세한 정보를 제공한다.
 
-배포 프로세스의 대부분의 과정을 자동화하여 번거로운 배포 과정 간소화가 된다.
+`Calendar`
+예매처별로 나누어진 공연 및 전시 일정을 플랫폼 내에서 통합하여 확인할 수 있으며, 개별 사이트를 방문하지 않고도 손쉽게 일정을 관리할 수 있다. 또한 개인 일정을 등록하여 함께 관리하는 기능도 지원하여 사이트에서 놓친 일정도 문제 없이 관리할 수 있다.
 
-이를 통해 배포에 대한 부담감이 줄어들고, 기존에 수동으로 이루어지던 배포 프로세스를 자동화하여 개발자의 실수로 인한 에러를 방지할 수 있다.
+`Board`
+공연별 커뮤니티 게시판을 통해 이용자 간 자유로운 정보 교류가 가능하다. 공식 채널에서 확인하기 어려운 정보나 생생한 후기를 공유함으로써, 더욱 풍부한 문화 경험을 제공한다.
 
-## 🏗️ 시스템 아키텍처
-<img src="https://github.com/user-attachments/assets/20d4bd81-5a44-453e-9315-6fdfa33e2f4d">
+`Chat`
+공연별 실시간 채팅 기능을 통해 이용자 간 즉각적인 소통이 가능하다. 관람 전 궁금한 사항을 묻거나, 관람 후 소감을 나누는 등 실시간 커뮤니케이션을 통해 현장의 분위기를 함께 느낄 수 있다.
 
+---
+
+## 🎯 시스템 아키텍처
+TODO : 이미지 추가
 
 ## 📚 데브옵스 프로젝트 목표
 - `CI/CD 파이프라인 구축` : 코드 변경 → 자동 빌드 → 테스트 → 배포까지 자동화드 변경 → 자동 빌드 → 테스트 → 배포까지 자동화
@@ -156,13 +164,12 @@ b. Discode봇이 데이터를 받아 지정한 Discode 서버에 실행 결과�
 </details>
 
 
-
 ## 🚀 핵심 로직 상세 설명
-### [📃 프로젝트 Wiki](https://백엔드_레포지토리_주소/wiki) <br>
+### [📃 프로젝트 Wiki](https://github.com/ddarahakit2025/be12-fin-template/wiki/프론트엔드-프로젝트) <br><br>
 
 
 ## 📂 프로젝트 폴더 바로가기
-### [📃 Frontend](https://프론트엔드_레포지토리_주소/) <br>
-### [📃 Backend](https://백엔드_레포지토리_주소/) <br>
-
-
+### [📃 Frontend](https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-FE.git)
+### [📃 Devops(Frontend)](https://github.com/ddarahakit2025/be12-fin-template/tree/main/devops)
+### [📃 Backend](https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-BE.git)
+### [📃 Devops(Backend)](https://github.com/ddarahakit2025/be12-fin-template/tree/main/devops)
