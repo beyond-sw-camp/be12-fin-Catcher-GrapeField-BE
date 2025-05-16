@@ -3,7 +3,7 @@
 </p>
 
 <p align="middle">
-**[한화시스템 BEYOND SW캠프 12기] Final Project** 
+<b>[한화시스템 BEYOND SW캠프 12기] Final Project</b>
 <br>🧑🏻‍🌾 CATCHER 파수꾼 팀 🍇
 </p>
 
