@@ -26,8 +26,16 @@ public interface EventSearchRepository extends ElasticsearchRepository<EventDocu
     // Nori 분석기를 활용한 커스텀 쿼리 추가
 
     // 모든 텍스트 필드에서 검색 (Nori 분석기 활용)
-    @Query("{\"multi_match\": {\"query\": \"?0\", \"fields\": [\"title\", \"postTitle\", \"postContent\", \"review\"], \"analyzer\": \"nori_analyzer\"}}")
+    // 오류 발생 가능성 있는 쿼리 수정
+    @Query("{\"multi_match\": {\"query\": ?0, \"fields\": [\"title\", \"postTitle\", \"postContent\", \"review\"], \"analyzer\": \"nori_analyzer\"}}")
     Page<EventDocument> search(String keyword, Pageable pageable);
+
+    // 카테고리 필터링 + 키워드 검색 수정
+    @Query("{\"bool\": {\"must\": [" +
+            "{\"term\": {\"category\": ?0}}," +
+            "{\"multi_match\": {\"query\": ?1, \"fields\": [\"title\", \"postTitle\", \"postContent\", \"review\"], \"analyzer\": \"nori_analyzer\"}}" +
+            "]}}")
+    Page<EventDocument> searchByKeywordAndCategory(String category, String keyword, Pageable pageable);
 
     // 제목 필드 검색 (Nori 분석기 활용)
     @Query("{\"match\": {\"title\": {\"query\": \"?0\", \"analyzer\": \"nori_analyzer\"}}}")
@@ -46,10 +54,4 @@ public interface EventSearchRepository extends ElasticsearchRepository<EventDocu
     @Query("{\"match\": {\"title.nori_mixed\": {\"query\": \"?0\"}}}")
     List<EventDocument> searchByInitial(String initial);
 
-    // 카테고리 필터링 + 키워드 검색
-    @Query("{\"bool\": {\"must\": [" +
-            "{\"term\": {\"category\": \"?0\"}}," +
-            "{\"multi_match\": {\"query\": \"?1\", \"fields\": [\"title\", \"postTitle\", \"postContent\", \"review\"], \"analyzer\": \"nori_analyzer\"}}" +
-            "]}}")
-    Page<EventDocument> searchByKeywordAndCategory(String category, String keyword, Pageable pageable);
 }
