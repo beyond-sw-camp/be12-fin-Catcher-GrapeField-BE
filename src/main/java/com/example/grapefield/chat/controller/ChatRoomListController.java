@@ -95,14 +95,14 @@ public class ChatRoomListController {
     }
 
     // 전체 채팅방 리스트 인기순 정렬
-    @Operation(summary = "전체 채팅방 리스트 인기순 조회(heart_cnt 내림차순)",
-            description = "이벤트 포스터 이미지, 채팅방 이름, 참여자수, 이벤트 시작일, 종료일을 리스트 형식으로 반환하여 조회")
-    @ApiSuccessResponses
-    @ApiErrorResponses
-    @GetMapping("/popular")
-    public ResponseEntity<Slice<ChatListPageResp>> getPopularRooms(@PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(chatRoomListService.getPopularRooms(pageable));
-    }
+//    @Operation(summary = "전체 채팅방 리스트 인기순 조회(heart_cnt 내림차순)",
+//            description = "이벤트 포스터 이미지, 채팅방 이름, 참여자수, 이벤트 시작일, 종료일을 리스트 형식으로 반환하여 조회")
+//    @ApiSuccessResponses
+//    @ApiErrorResponses
+//    @GetMapping("/popular")
+//    public ResponseEntity<Slice<ChatListPageResp>> getPopularRooms(@PageableDefault(size = 20) Pageable pageable) {
+//        return ResponseEntity.ok(chatRoomListService.getPopularRooms(pageable));
+//    }
 
     // 인기 채팅방 목록
     @Operation(summary = "전체 채팅방 목록 인기순 상위 5개 조회(heart_cnt 내림차순)",

@@ -69,7 +69,14 @@ public class ChatRoomListService {
     public Slice<ChatListPageResp> getAllRooms(Pageable pageable) {
         Slice<ChatRoom> rooms = chatRoomRepository.findAllWithEvents(pageable);
 
-        Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountMap();
+        // 현재 페이지의 채팅방 ID 추출
+        List<Long> roomIdxs = rooms.getContent().stream()
+                .map(ChatRoom::getIdx)
+                .collect(Collectors.toList());
+
+        // 필요한 채팅방만 참여자 수 조회
+        Map<Long, Integer> participantCountMap =
+                chatRoomMemberService.getParticipantCountForRooms(roomIdxs);
 
         return rooms.map(room -> ChatListPageResp.from(
                 room,
@@ -77,11 +84,17 @@ public class ChatRoomListService {
         ));
     }
 
-
     // 이벤트 카테고리 필터링
     public Slice<ChatListPageResp> getRoomsByCategory(EventCategory category, Pageable pageable) {
         Slice<ChatRoom> rooms = chatRoomRepository.findChatRoomsByCategory(category, pageable);
-        Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountMap();
+        // 현재 페이지의 채팅방 ID 추출
+        List<Long> roomIdxs = rooms.getContent().stream()
+                .map(ChatRoom::getIdx)
+                .collect(Collectors.toList());
+
+        // 필요한 채팅방만 참여자 수 조회
+        Map<Long, Integer> participantCountMap =
+                chatRoomMemberService.getParticipantCountForRooms(roomIdxs);
 
         return rooms.map(room -> ChatListPageResp.from(
                 room,
@@ -90,19 +103,22 @@ public class ChatRoomListService {
     }
 
     // 전체 채팅방 인기순서
-    public Slice<ChatListPageResp> getPopularRooms(Pageable pageable) {
-        Slice<ChatRoom> rooms = chatRoomRepository.findAllOrderByHeartCnt(pageable);
-        Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountMap();
-
-        return rooms.map(room -> ChatListPageResp.from(
-                room,
-                participantCountMap.getOrDefault(room.getIdx(), 0)
-        ));
-    }
+//    public Slice<ChatListPageResp> getPopularRooms(Pageable pageable) {
+//        Slice<ChatRoom> rooms = chatRoomRepository.findAllOrderByHeartCnt(pageable);
+//        Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountMap();
+//
+//        return rooms.map(room -> ChatListPageResp.from(
+//                room,
+//                participantCountMap.getOrDefault(room.getIdx(), 0)
+//        ));
+//    }
 
     // 내가 참여한 채팅방 목록 (채팅 전체화면 페이지)
     public Slice<ChatListPageResp> getMyPageRooms(List<ChatRoom> myRooms, Pageable pageable) {
-        Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountMap();
+        List<Long> roomIdxs = myRooms.stream()
+                .map(ChatRoom::getIdx)
+                .collect(Collectors.toList());
+        Map<Long, Integer> participantCountMap = chatRoomMemberService.getParticipantCountForRooms(roomIdxs);
 
         List<ChatListPageResp> result = myRooms.stream()
                 .map(room -> ChatListPageResp.from(
