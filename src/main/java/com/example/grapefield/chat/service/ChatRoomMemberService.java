@@ -21,6 +21,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -66,15 +68,25 @@ public class ChatRoomMemberService {
                         new TransactionSynchronization() {
                             @Override
                             public void afterCommit() {
-                                // 1. Redis 카운트 증가
-                                String key = getRedisKey(roomIdx);
-                                redisTemplate.opsForValue().increment(key);
+                                try {
+                                    // 1. DB에서 정확한 참여자 수 조회
+                                    int dbCount = memberRepository.countByChatRoom_Idx(roomIdx);
 
-                                // 2. 참여자 수 카프카 이벤트 발행
-                                sendParticipantChangeEvent(roomIdx, "JOIN");
+                                    // 2. Redis에 정확한 참여자 수 설정 (increment 대신 직접 set)
+                                    String key = getRedisKey(roomIdx);
+                                    redisTemplate.opsForValue().set(key, String.valueOf(dbCount));
+                                    redisTemplate.expire(key, Duration.ofHours(24));
 
-                                // 3. 사용자 채팅방 리스트 카프카 이벤트 발행
-                                sendUserChatListEvent(userIdx, roomIdx, "JOIN");
+                                    log.info("🔍 입장 후 정확한 참여자 수 설정: roomIdx={}, count={}", roomIdx, dbCount);
+
+                                    // 3. 참여자 수 카프카 이벤트 발행
+                                    sendParticipantChangeEvent(roomIdx, "JOIN");
+
+                                    // 4. 사용자 채팅방 리스트 카프카 이벤트 발행
+                                    sendUserChatListEvent(userIdx, roomIdx, "JOIN");
+                                } catch (Exception e) {
+                                    log.error("❌ Redis 또는 카프카 처리 중 예외 발생: {}", e.getMessage(), e);
+                                }
                             }
                         }
                 );
@@ -106,15 +118,25 @@ public class ChatRoomMemberService {
                 new TransactionSynchronization() {
                     @Override
                     public void afterCommit() {
-                        // 1. Redis 카운트 감소
-                        String key = getRedisKey(roomIdx);
-                        redisTemplate.opsForValue().decrement(key);
+                        try {
+                            // 1. DB에서 정확한 참여자 수 조회 (이미 삭제 후)
+                            int dbCount = memberRepository.countByChatRoom_Idx(roomIdx);
 
-                        // 2. 참여자 수 카프카 이벤트 발행
-                        sendParticipantChangeEvent(roomIdx, "LEAVE");
+                            // 2. Redis에 정확한 참여자 수 설정 (decrement 대신 직접 set)
+                            String key = getRedisKey(roomIdx);
+                            redisTemplate.opsForValue().set(key, String.valueOf(dbCount));
+                            redisTemplate.expire(key, Duration.ofHours(24));
 
-                        // 3. 사용자 채팅방 리스트 카프카 이벤트 발행
-                        sendUserChatListEvent(userIdx, roomIdx, "LEAVE");
+                            log.info("🔍 퇴장 후 정확한 참여자 수 설정: roomIdx={}, count={}", roomIdx, dbCount);
+
+                            // 3. 참여자 수 카프카 이벤트 발행
+                            sendParticipantChangeEvent(roomIdx, "LEAVE");
+
+                            // 4. 사용자 채팅방 리스트 카프카 이벤트 발행
+                            sendUserChatListEvent(userIdx, roomIdx, "LEAVE");
+                        } catch (Exception e) {
+                            log.error("❌ Redis 또는 카프카 처리 중 예외 발생: {}", e.getMessage(), e);
+                        }
                     }
                 }
         );
@@ -180,4 +202,45 @@ public class ChatRoomMemberService {
                 ));
     }
 
+    public Map<Long, Integer> getParticipantCountForRooms(List<Long> roomIdxs) {
+        if (roomIdxs == null || roomIdxs.isEmpty()) {
+            return Map.of();
+        }
+
+        log.info("📊 선택적 참여자 수 조회: {} 개 채팅방", roomIdxs.size());
+        Map<Long, Integer> result = new HashMap<>();
+
+        // Redis에서 먼저 조회
+        for (Long roomIdx : roomIdxs) {
+            String key = getRedisKey(roomIdx);
+            String cached = redisTemplate.opsForValue().get(key);
+
+            if (cached != null) {
+                try {
+                    result.put(roomIdx, Integer.parseInt(cached));
+                } catch (NumberFormatException e) {
+                    log.error("참여자 수 변환 오류: {}", e.getMessage());
+                }
+            }
+        }
+
+        // Redis에 없는 채팅방은 DB에서 개별 조회
+        List<Long> missingRoomIdxs = roomIdxs.stream()
+                .filter(idx -> !result.containsKey(idx))
+                .collect(Collectors.toList());
+
+        if (!missingRoomIdxs.isEmpty()) {
+            for (Long roomIdx : missingRoomIdxs) {
+                int count = memberRepository.countByChatRoom_Idx(roomIdx);
+                result.put(roomIdx, count);
+
+                // Redis에 저장
+                String key = getRedisKey(roomIdx);
+                redisTemplate.opsForValue().set(key, String.valueOf(count));
+                redisTemplate.expire(key, Duration.ofHours(24));
+            }
+        }
+
+        return result;
+    }
 }
