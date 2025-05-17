@@ -21,6 +21,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -198,5 +200,47 @@ public class ChatRoomMemberService {
                         row -> (Long) row[0],
                         row -> ((Long) row[1]).intValue()
                 ));
+    }
+
+    public Map<Long, Integer> getParticipantCountForRooms(List<Long> roomIdxs) {
+        if (roomIdxs == null || roomIdxs.isEmpty()) {
+            return Map.of();
+        }
+
+        log.info("📊 선택적 참여자 수 조회: {} 개 채팅방", roomIdxs.size());
+        Map<Long, Integer> result = new HashMap<>();
+
+        // Redis에서 먼저 조회
+        for (Long roomIdx : roomIdxs) {
+            String key = getRedisKey(roomIdx);
+            String cached = redisTemplate.opsForValue().get(key);
+
+            if (cached != null) {
+                try {
+                    result.put(roomIdx, Integer.parseInt(cached));
+                } catch (NumberFormatException e) {
+                    log.error("참여자 수 변환 오류: {}", e.getMessage());
+                }
+            }
+        }
+
+        // Redis에 없는 채팅방은 DB에서 개별 조회
+        List<Long> missingRoomIdxs = roomIdxs.stream()
+                .filter(idx -> !result.containsKey(idx))
+                .collect(Collectors.toList());
+
+        if (!missingRoomIdxs.isEmpty()) {
+            for (Long roomIdx : missingRoomIdxs) {
+                int count = memberRepository.countByChatRoom_Idx(roomIdx);
+                result.put(roomIdx, count);
+
+                // Redis에 저장
+                String key = getRedisKey(roomIdx);
+                redisTemplate.opsForValue().set(key, String.valueOf(count));
+                redisTemplate.expire(key, Duration.ofHours(24));
+            }
+        }
+
+        return result;
     }
 }
