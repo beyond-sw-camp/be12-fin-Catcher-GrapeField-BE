@@ -19,8 +19,8 @@
       <tr>
         <td align="center">팀장: <a href="https://github.com/bdt6246">김혜정</a></td>
         <td align="center">팀원: <a href="https://github.com/daydeiday">곽효림</a></td>
-        <td align="center">팀원: <a href="https://github.com/s00ya" >김지원</a></td>
-        <td align="center">팀원: <a href="https://github.com/J0a0J">정지수</a></a></td>
+        <td align="center">팀원: <a href="https://github.com/J0a0J">김지원</a></td>
+        <td align="center">팀원: <a href="https://github.com/s00ya">정지수</a></a></td>
       </tr>
     </table>
 </figure>
