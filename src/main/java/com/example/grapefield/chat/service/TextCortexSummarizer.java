@@ -44,7 +44,7 @@ public class TextCortexSummarizer {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.textcortex.com/v1/texts/summarizations"))
                 .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer gAAAAABoJV3SAmhfIrpdMFDHOkNrk1_0lGUP_HoMHqQCncUMUGkO7Hwuw_PPHnQh3IYGeNflboONG0yNMaX9W068gRQGPE1LWzRN_27YjY69pjLkYiaGN_k95hPdV3ScdJwmiK0KV5saF-A9mZwNwJ9zMpzav2xt4CA5Ci1gznQZ4zPD0yKeWDw=")
+                .header("Authorization", "Bearer "+API_KEY)
                 .method("POST", HttpRequest.BodyPublishers.ofString("{\n  \"formality\": \"less\",\n  \"max_tokens\": 10,\n  \"mode\": \"default\",\n  \"model\": \"gemini-2-0-flash\",\n  \"n\": 1,\n  \"source_lang\": \"ko\",\n  \"target_lang\": \"ko\",\n  \"temperature\": null,\n  \"text\": \""+inputText+"\"\n}"))
                 .build();
         HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
