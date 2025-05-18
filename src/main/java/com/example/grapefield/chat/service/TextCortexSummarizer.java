@@ -44,7 +44,7 @@ public class TextCortexSummarizer {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.textcortex.com/v1/texts/summarizations"))
                 .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer gAAAAABoJV3SAmhfIrpdMFDHOkNrk1_0lGUP_HoMHqQCncUMUGkO7Hwuw_PPHnQh3IYGeNflboONG0yNMaX9W068gRQGPE1LWzRN_27YjY69pjLkYiaGN_k95hPdV3ScdJwmiK0KV5saF-A9mZwNwJ9zMpzav2xt4CA5Ci1gznQZ4zPD0yKeWDw=")
+                .header("Authorization", "Bearer "+API_KEY)
                 .method("POST", HttpRequest.BodyPublishers.ofString("{\n  \"formality\": \"less\",\n  \"max_tokens\": 10,\n  \"mode\": \"default\",\n  \"model\": \"gemini-2-0-flash\",\n  \"n\": 1,\n  \"source_lang\": \"ko\",\n  \"target_lang\": \"ko\",\n  \"temperature\": null,\n  \"text\": \""+inputText+"\"\n}"))
                 .build();
         HttpResponse<String> httpResponse = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
@@ -58,13 +58,20 @@ public class TextCortexSummarizer {
         TextCortexResponse responseObj = objectMapper.readValue(respBodyJsonString, TextCortexResponse.class);
 
         String outputKeyword;
+
         if (Objects.equals(responseObj.status, "success")){
             if (responseObj != null && responseObj.data != null && responseObj.data.outputs != null && !responseObj.data.outputs.isEmpty()) {
                 outputKeyword = responseObj.data.outputs.get(0).text;
-            } else { log.info("[키워드 저장 API 오류] 요청에 실패했습니다.");  outputKeyword = "status=\"success\"";}
+            } else if (responseObj.data.remaining_credits <= 0) {
+                log.info("⚠️ [키워드 저장 중...] API 사용량 초과 크레딧 충전 필요");
+                outputKeyword = "요약 불가 status=\"success\"";
+            } else {
+                log.info("⚠️[키워드 저장 중 API 오류] 올바르지 않은 응답 status=\"success\"");
+                outputKeyword = "응답오류 status=\"success\"";
+            }
         } else {
-            log.info("[키워드 저장 API 오류] 요청에 실패했습니다.");
-            outputKeyword = "status=\"failure\"";
+            log.info("⚠️[키워드 저장 중 API 오류] 요청에 실패 status=\"failure\"");
+            outputKeyword = "응답 오류 status=\"failure\"";
         }
 
         return outputKeyword;
