@@ -37,7 +37,7 @@ public class HeartKafkaConsumer {
         // 기존에 없는 경우 추가 되지 않기 때문에 때문에 added에 0을 반환한다.
         Long added = redisTemplate.opsForSet().add("processed:hearts", heartIdx);
         Long newHeartCount;
-        if(added != null || added == 0) {
+        if(added == 0) {
             newHeartCount = chatRoomService.increaseHeart(roomIdx);
             // ⭐ 전체 누적 순위용 ZSet 갱신
             redisTemplate.opsForZSet()
@@ -47,7 +47,7 @@ public class HeartKafkaConsumer {
                     .incrementScore(HOT_SET_KEY, roomIdx.toString(), 1.0);
             // ⭐  TTL 설정: 키 생성 시에만 expire 호출
             Long ttl = redisTemplate.getExpire(HOT_SET_KEY);
-            if (ttl == null || ttl < 0) {
+            if (ttl < 0) {
                 // 키가 없거나 만료 설정이 없으면 WINDOW_SECONDS로 설정
                 redisTemplate.expire(HOT_SET_KEY, Duration.ofSeconds(WINDOW_SECONDS));
             }
