@@ -47,7 +47,7 @@ public class HeartKafkaConsumer {
                     .incrementScore(HOT_SET_KEY, roomIdx.toString(), 1.0);
             // ⭐  TTL 설정: 키 생성 시에만 expire 호출
             Long ttl = redisTemplate.getExpire(HOT_SET_KEY);
-            if (ttl == null || ttl < 0) {
+            if (ttl < 0) {
                 // 키가 없거나 만료 설정이 없으면 WINDOW_SECONDS로 설정
                 redisTemplate.expire(HOT_SET_KEY, Duration.ofSeconds(WINDOW_SECONDS));
             }
