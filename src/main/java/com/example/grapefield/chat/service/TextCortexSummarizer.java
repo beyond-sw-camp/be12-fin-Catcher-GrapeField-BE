@@ -4,6 +4,7 @@ import com.example.grapefield.chat.model.response.TextCortexResponse;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +19,8 @@ import java.util.Objects;
 public class TextCortexSummarizer {
     private final EmojiReplaceService emojiReplaceService;
     private static final String API_URL = "https://api.textcortex.com/v1/texts/summarizations";
-    // 환경변수 처리하기
-    private static final String API_KEY = "${textcortex.api-key}";
+    @Value("${TEXTCORTEX_API_KEY}")
+    private static String API_KEY;
 
 
     public String intoOneLine(List<String> messageList) {
