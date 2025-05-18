@@ -4,6 +4,7 @@ import com.example.grapefield.chat.model.response.TextCortexResponse;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +19,8 @@ import java.util.Objects;
 public class TextCortexSummarizer {
     private final EmojiReplaceService emojiReplaceService;
     private static final String API_URL = "https://api.textcortex.com/v1/texts/summarizations";
-    // 환경변수 처리하기
-    private static final String API_KEY = "${textcortex.api-key}";
+    @Value("${TEXTCORTEX_API_KEY}")
+    private static String API_KEY;
 
 
     public String intoOneLine(List<String> messageList) {
@@ -64,13 +65,18 @@ public class TextCortexSummarizer {
                 outputKeyword = responseObj.data.outputs.get(0).text;
             } else if (responseObj.data.remaining_credits <= 0) {
                 log.info("⚠️ [키워드 저장 중...] API 사용량 초과 크레딧 충전 필요");
+                log.info("🗒️응답내용 status:{}, data.outputs: {}, data.outputs.remaining_credits: {}", responseObj.status, responseObj.data.outputs, responseObj.data.remaining_credits);
+
                 outputKeyword = "요약 불가 status=\"success\"";
             } else {
                 log.info("⚠️[키워드 저장 중 API 오류] 올바르지 않은 응답 status=\"success\"");
+                log.info("🗒️응답내용 status:{}, data.outputs: {}, data.outputs.remaining_credits: {}", responseObj.status, responseObj.data.outputs, responseObj.data.remaining_credits);
                 outputKeyword = "응답오류 status=\"success\"";
             }
         } else {
             log.info("⚠️[키워드 저장 중 API 오류] 요청에 실패 status=\"failure\"");
+            log.info("🗒️ responseObj.toString(): {}",responseObj);
+            log.info("🗒️응답내용 status:{}, data.outputs: {}, data.outputs.remaining_credits: {}", responseObj.status, responseObj.data.outputs, responseObj.data.remaining_credits);
             outputKeyword = "응답 오류 status=\"failure\"";
         }
 
