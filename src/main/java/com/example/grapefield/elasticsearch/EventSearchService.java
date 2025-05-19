@@ -56,28 +56,6 @@ public class EventSearchService {
         try {
             System.out.println("Searching with Nori analyzer for keyword: " + keyword);
 
-            String jsonQuery = "{\n" +
-                    "  \"from\": " + pageable.getOffset() + ",\n" +
-                    "  \"size\": " + pageable.getPageSize() + ",\n" +
-                    "  \"collapse\": {\n" +
-                    "    \"field\": \"idx\"\n" +
-                    "  },\n" +
-                    "  \"query\": {\n" +
-                    "    \"bool\": {\n" +
-                    "      \"should\": [\n" +
-                    "        { \"match_phrase\": { \"title\": \"" + keyword + "\" } },\n" +
-                    "        { \"match_phrase_prefix\": { \"title\": \"" + keyword + "\" } }\n" +
-                    "      ]\n" +
-                    "    }\n" +
-                    "  }\n" +
-                    "}";
-
-            Request request = new Request("POST", "/events/_search");
-            request.setJsonEntity(jsonQuery);
-
-            // 직접 HTTP 요청을 통한 검색 구현
-//            Request request = new Request("POST", "/events/_search");
-
             // 쿼리 JSON 생성
             Map<String, Object> queryJson = new HashMap<>();
             queryJson.put("from", pageable.getOffset());
@@ -113,7 +91,39 @@ public class EventSearchService {
             keywordMatch.put("match", keywordMatchField);
             shouldClauses.add(keywordMatch);
 
-            // 다른 필드 검색
+          // 초성 검색 추가
+          Map<String, Object> chosungMatch = new HashMap<>();
+          Map<String, Object> chosungMatchParams = new HashMap<>();
+          chosungMatchParams.put("query", keyword);
+          chosungMatchParams.put("boost", 5.0);
+          Map<String, Object> chosungMatchField = new HashMap<>();
+          chosungMatchField.put("title.chosung", chosungMatchParams);
+          chosungMatch.put("match", chosungMatchField);
+          shouldClauses.add(chosungMatch);
+
+          // Seunjeon 분석기를 통한 검색 추가
+          Map<String, Object> seunjeonMatch = new HashMap<>();
+          Map<String, Object> seunjeonMatchParams = new HashMap<>();
+          seunjeonMatchParams.put("query", keyword);
+          seunjeonMatchParams.put("boost", 8.0);
+          Map<String, Object> seunjeonMatchField = new HashMap<>();
+          seunjeonMatchField.put("title.seunjeon", seunjeonMatchParams);
+          seunjeonMatch.put("match", seunjeonMatchField);
+          shouldClauses.add(seunjeonMatch);
+
+          // 짧은 단어 정확 매칭을 위한 match_phrase 추가
+          if (keyword.length() <= 3) {
+            Map<String, Object> exactMatch = new HashMap<>();
+            Map<String, Object> exactMatchParams = new HashMap<>();
+            exactMatchParams.put("query", keyword);
+            exactMatchParams.put("boost", 100.0);
+            Map<String, Object> exactMatchField = new HashMap<>();
+            exactMatchField.put("title", exactMatchParams);
+            exactMatch.put("match_phrase", exactMatchField);
+            shouldClauses.add(exactMatch);
+          }
+
+          // 다른 필드 검색
             Map<String, Object> multiMatch = new HashMap<>();
             Map<String, Object> multiMatchParams = new HashMap<>();
             multiMatchParams.put("query", keyword);
@@ -141,10 +151,12 @@ public class EventSearchService {
             queryJson.put("highlight", highlight);
 
             // JSON 쿼리 생성 및 요청 설정
-//            String jsonQuery = objectMapper.writeValueAsString(queryJson);
-//            request.setJsonEntity(jsonQuery);
+          String jsonQuery = objectMapper.writeValueAsString(queryJson);
+          Request request = new Request("POST", "/events/_search");
+          request.setJsonEntity(jsonQuery);
 
-            System.out.println("Using index: [events]");
+          System.out.println("Using index: [events]");
+          System.out.println("Query: " + jsonQuery);
 
             // 요청 실행
             Response response = restHighLevelClient.getLowLevelClient().performRequest(request);

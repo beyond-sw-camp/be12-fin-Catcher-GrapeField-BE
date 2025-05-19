@@ -34,7 +34,7 @@ public class HeartKafkaConsumer {
         Long roomIdx = chatHeartKafkaReq.getRoomIdx();
         String heartIdx = chatHeartKafkaReq.getHeartIdx();
         log.info("✅ KafkaConsumer 좋아요 ♥\uFE0F 하트 수신: roomIdx={}, heartIdx={}", roomIdx, heartIdx);
-        // 기존에 없는 경우 추가 되지 않기 때문에 때문에 added에 0을 반환한다.
+        // 기존에 없는 경우 새로 추가되기 때문에 added에 1을 반환한다.
         Long added = redisTemplate.opsForSet().add("processed:hearts", heartIdx);
         Long newHeartCount;
         if(added == 1) {
