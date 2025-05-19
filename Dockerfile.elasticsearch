@@ -2,6 +2,3 @@ FROM docker.elastic.co/elasticsearch/elasticsearch:7.17.2
 
 # Nori 분석기 설치
 RUN elasticsearch-plugin install --batch analysis-nori
-
-# Seunjeon 플러그인 설치
-RUN elasticsearch-plugin install --batch https://github.com/javacafe-project/elasticsearch-plugin/releases/download/v7.0.0/javacafe-analyzer-7.0.0.zip
