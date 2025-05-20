@@ -124,6 +124,8 @@ GrapeField에서는 실시간 채팅 데이터 처리, 사용자 생성 콘텐�
 
 <details>
 <summary>CI/CD 파이프라인</summary>
+![jenkins](https://github.com/user-attachments/assets/1250d35f-41be-4724-be1f-30f08ca5dfba)
+
 
 1. **코드 푸시**
    - 개발자가 `main` 브랜치에 코드를 **Merge 또는 Push**합니다.
