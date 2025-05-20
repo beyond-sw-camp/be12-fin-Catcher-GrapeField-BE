@@ -183,6 +183,12 @@
 <details>
 <summary>통합 검색</summary>
 
+![고급통합검색](https://github.com/user-attachments/assets/b63f2d57-abf7-4f98-b9e1-2773c1599a2c)
+> 차은우를 생각하고 초성으로 'ㅊㅇㅇ' 를 검색
+
+![고급통합검색_응답](https://github.com/user-attachments/assets/99f41a46-e60f-4e26-bccf-de58171532e9)
+> 초성 검색 시의 응답
+
 > - 상단 헤더의 검색창에 키워드를 입력하면, **Elasticsearch 기반 통합 검색**이 실시간으로 작동한다.  
 > - 예를 들어 "차은우"를 입력하면, **차은우가 포함된 공연/전시/게시물 제목** 등이 자동완성 형태로 추천된다.  
 > - 검색 결과는 제목, 태그, 내용, 날짜, 카테고리 등 복합 조건으로 필터링 가능하며,  
@@ -231,4 +237,4 @@
 ### [📃 Frontend](https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-FE.git)
 ### [📃 Devops(Frontend)]()
 ### [📃 Backend](https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-BE.git)
-### [📃 Devops(Backend)]()
+### [📃 Devops(Backend)](https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-BE/tree/develop/devops)
