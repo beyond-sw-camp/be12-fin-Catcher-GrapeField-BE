@@ -31,9 +31,9 @@
 
 ### 목차
 - [🛠 기술 스택](#-기술-스택)
-- [📚 OOO 데모 사이트 링크](#-enadu-사이트-바로가기)
-- [🎁 OOO 서비스 소개](#-enadu-서비스-소개)
-- [📈 OOO 프로젝트 설계](#-프로젝트-설계)
+- [📚 Grapefield 데모 사이트 링크](https://grapefield.kro.kr/)
+- [🎁 Grapefield 서비스 소개](#-enadu-서비스-소개)
+- [📈 Grapefield 프로젝트 설계](#-프로젝트-설계)
 - [📂 프로젝트 폴더 바로가기](#-프로젝트-폴더-바로가기)
 <br><br>
 
@@ -89,24 +89,15 @@
 
 ## 📝 Grapefield 서비스 소개
 ### 프로젝트 배경
-//TODO: 사이트 정보를 한 눈에 확인할 수 있는 (커뮤니티 특성이 드러나는) 이미지 추가
+![Untitled design](https://github.com/user-attachments/assets/a88cc400-a490-48f2-ac3e-c71d02e95a16)
 
-코로나 팬데믹 이후 오프라인 공연 및 전시회에 대한 수요가 급증하면서 관련 행사들이 활발히 개최되고 있다. 특히 기업, 기관의 홍보 담당자들은 브랜드 홍보 및 고객 접점을 확대하기 위한 전략으로 공연이나 박람회와 같은 오프라인 행사를 적극적으로 유치하거나 후원하며, 이를 통해 대면 중심의 마케팅 활동이 활성화되었다.   
-그러나 기존 정보는 개별 사이트나 SNS를 통해 확인해야 하며, 후기를 확인하거나 공유하는 과정이 번거롭다.    
-이러한 불편함을 해소하기 위하여 오프라인 문화 콘텐츠에 대한 `정보 제공`뿐만 아니라, 이용자들이 `실시간으로 소통`하고 `후기를 나눌 수 있는` 커뮤니티 중심의 통합 플랫폼 `GrapeField`를 기획하였다.
+오프라인 문화 콘텐츠 플랫폼인 GrapeField는 일회성으로 소비되던 채팅과 후기, 질문답변을 영구적으로 아카이빙하여 가치 있는 정보로 재탄생시키는 핵심 컨셉입니다. 특히 실시간 채팅 데이터에서 자동으로 하이라이트 구간을 탐지하고, 사용자 리뷰와 Q&A를 체계적으로 보관하여 미래 사용자들에게 유용한 정보 저장소를 제공합니다.<br>
 
-### 세부 기능
-`Information`
-뮤지컬, 연극, 콘서트, 전시회, 클래식 등 다양한 오프라인 문화 콘텐츠에 대한 예매 정보, 상연 일정, 출연진, 세부 줄거리 등 상세한 정보를 제공한다.
+이러한 서비스를 안정적으로 운영하기 위해서는 효율적인 개발 및 배포 환경이 필수적입니다.<br>
+전통적인 배포 방식은 <br>`코드 변경` → `코드 통합` → `빌드` → `배포 준비 및 배포` → `모니터링`<br>과정에서 수동 작업이 많고, 통합의 어려움, 개발자의 오류 리스크가 컸습니다.<br><br>
 
-`Calendar`
-예매처별로 나누어진 공연 및 전시 일정을 플랫폼 내에서 통합하여 확인할 수 있으며, 개별 사이트를 방문하지 않고도 손쉽게 일정을 관리할 수 있다. 또한 개인 일정을 등록하여 함께 관리하는 기능도 지원하여 사이트에서 놓친 일정도 문제 없이 관리할 수 있다.
-
-`Board`
-공연별 커뮤니티 게시판을 통해 이용자 간 자유로운 정보 교류가 가능하다. 공식 채널에서 확인하기 어려운 정보나 생생한 후기를 공유함으로써, 더욱 풍부한 문화 경험을 제공한다.
-
-`Chat`
-공연별 실시간 채팅 기능을 통해 이용자 간 즉각적인 소통이 가능하다. 관람 전 궁금한 사항을 묻거나, 관람 후 소감을 나누는 등 실시간 커뮤니케이션을 통해 현장의 분위기를 함께 느낄 수 있다.
+GrapeField에서는 실시간 채팅 데이터 처리, 사용자 생성 콘텐츠의 안정적인 저장 및 검색, 그리고 하이라이트 구간 자동 감지와 같은 복잡한 기능들을 지원하기 위해 현대적인 CI/CD 파이프라인이 필수적입니다. <br>이를 통해 배포 프로세스의 대부분을 자동화하여 번거로운 작업을 간소화하고, 개발자의 실수로 인한 에러를 방지하며, 서비스의 지속적인 개선과 확장을 가능하게 합니다.<br><br>
+특히 "Archive" 기능은 대량의 데이터를 효율적으로 저장하고 검색할 수 있는 인프라를 필요로 하며, 실시간 채팅의 "하이라이트 구간" 탐지는 고성능 데이터 처리 시스템을 요구합니다. <br>이러한 기술적 요구사항을 충족시키기 위해 Elasticsearch, Kafka, Kubernetes 등의 최신 기술을 도입하여 안정적이고 확장 가능한 데브옵스 환경을 구축하였습니다.
 
 ---
 
@@ -114,13 +105,12 @@
 ![image](https://github.com/user-attachments/assets/6b47fed2-a38d-470b-98f3-d470ea9d5d0d)
 
 
-
 ## 📚 데브옵스 프로젝트 목표
-- `CI/CD 파이프라인 구축` : 코드 변경 → 자동 빌드 → 테스트 → 배포까지 자동화드 변경 → 자동 빌드 → 테스트 → 배포까지 자동화
-- `모니터링 및 로깅` : 애플리케이션 상태 모니터링 (Prometheus, Grafana 등)
-- `컨테이너화 및 오케스트레이션` : Docker, Kubernetes 등을 통한 배포 및 확장성 확보
-- `인프라 관리` : 앤서블, LB, 오토스케일 등
-- `보안 및 백업 관리` : 서버 보안, SSL 인증서 관리, 정기 백업 자동화
+- `CI/CD 파이프라인 구축` : 코드 변경 → 자동 빌드 → 테스트 → 배포까지 자동화
+- `모니터링 및 로깅` : 애플리케이션 상태 모니터링 및 로그 수집 (Elasticsearch, Logstash)
+- `컨테이너화 및 오케스트레이션` : Docker, Kubernetes를 통한 배포 및 확장성 확보
+- `메시지 큐 시스템` : Kafka를 활용한 실시간 채팅 및 이벤트 처리
+- `보안 및 백업 관리` : 서버 보안, 사용자 인증, 데이터 백업 자동화
 <br>
 
 
@@ -128,46 +118,59 @@
 <details>
 <summary>무중단 배포</summary>
 
-![image](https://private-user-images.githubusercontent.com/64758888/380391055-a84781dd-68e2-409b-bd11-30d2be10c55c.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDcxMDM5NTgsIm5iZiI6MTc0NzEwMzY1OCwicGF0aCI6Ii82NDc1ODg4OC8zODAzOTEwNTUtYTg0NzgxZGQtNjhlMi00MDliLWJkMTEtMzBkMmJlMTBjNTVjLmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MTMlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTEzVDAyMzQxOFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTE1OTgzMGY1ZDAxNWE2NmYxMWQ3ZGM2NDNhYmUwMTIwZTBhMzE3ZGUxZTFiNzJiZWI0ZWMyMjYyYTdkOGYxY2QmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.iO_a7f3UQDM-triRwGcVu9R3tXtEdzWUchz2GZGsGUc)
-> 다운 타임이 없는 무중단 배포 방식 중 Blue/Green 배포 방식을 적용하였다.  블루그린 배포 방식은 지속적 배포 방식 중 하나로 신 버전을 배포가 완료되면 구 버전을 바라보던 서비스가 신 버전으로 일제히 전환하도록 하는 방식이다.
-신속한 업데이트와 동시에 서버 안정성이 좋기 때문에 이 방식을 선택했다.
+> 다운 타임이 없는 무중단 배포 방식 중 Kubernetes의 롤링 업데이트 전략을 적용하였다. 롤링 업데이트는 파드를 점진적으로 교체하여 서비스 중단 없이 애플리케이션을 업데이트하는 방식이다. 이를 통해 서비스 연속성을 유지하면서도 신속한 업데이트가 가능하기 때문에 이 방식을 선택했다.
 </details>
 
 
 <details>
 <summary>CI/CD 파이프라인</summary>
 
-![image](https://private-user-images.githubusercontent.com/64758888/380391946-e486d25f-95e0-47cc-917f-84b03b9ebac0.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDcxMDM5NTgsIm5iZiI6MTc0NzEwMzY1OCwicGF0aCI6Ii82NDc1ODg4OC8zODAzOTE5NDYtZTQ4NmQyNWYtOTVlMC00N2NjLTkxN2YtODRiMDNiOWViYWMwLmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MTMlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTEzVDAyMzQxOFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWNiZmQ4OWE2MWJhNmQ5M2FkMGIzNzhkNDA5YTUwZTA4ZjY2ODFjMTE5YzAyNzE4ZTAxZmMxNTM1NDk4OGEyNDImWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.xyYmi5KDgu1aHk2Hku_4VEiw9dmOZiMsNauT0k4v-1k)
-1. github에 be-dev 최신 버전 프로젝트를 머지
-2. github는 젠킨스에게 webhook을 통해서 젠킨스에게 이벤트 전달
-3. 젠킨스는 파이프라인에 저장된 절차 실행
-a. 젠킨스는 github에서 최신 코드를 clone한다.
-b. backend 혹은 common(repository 관련 모듈) 모듈의 변화를 인식
-c. 단위 테스트 실행 후 전체 테스트 성공 시
-d. 클론된 코드를 기반으로 빌드 작업 수행
-e. 빌드를 통해 도커 이미지 생성 및 도커 허브에 push
-4. 쿠버네티스 마스터에 SSH 접속 후 쉘스크립트 실행
-현재 실행 중인 디플로이먼트가 blue라면 green으로 디플로이먼트 생성
-a. 젠킨스에서 도커 허브에 푸쉬한 이미지로 컨테이너 실행
-rollout명령어를 활용하여 생성한 디플로이먼트내의 프로그램이 정상 작동인지 확인
-정상 작동중이라면 서비스를 신버전 디플로이먼트의 파드들과 연결하도록 수정
-구버전 디플로이먼트 삭제
-5. webhook을 통해 Discode에게 파이프라인 결과 전달
-a. 젠킨스에 설치한 Discode 플러그인을 통해 파이프라인 제목, 결과, 실행 시간이 담긴 Post를 Discode에 보냄
-b. Discode봇이 데이터를 받아 지정한 Discode 서버에 실행 결과를 전송
+1. **코드 푸시**
+   - 개발자가 `main` 브랜치에 코드를 **Merge 또는 Push**합니다.
+
+2. **GitHub → Jenkins**
+   - GitHub는 Webhook을 통해 Jenkins에 이벤트를 전달합니다.
+
+3. **Jenkins 파이프라인 실행**
+   - Jenkins는 사전에 정의된 파이프라인 절차를 실행합니다.
+   - 주요 단계는 다음과 같습니다:
+     - GitHub에서 최신 코드 **Clone**
+     - **Gradle**을 통해 Spring Boot 애플리케이션 **Build**
+     - **Elasticsearch-Nori 플러그인**이 포함된 **커스텀 이미지 Build**
+     - 백엔드 애플리케이션의 **Docker 이미지 Build**
+     - 생성된 이미지를 **Docker Hub에 Push**
+
+4. **Kubernetes 배포**
+   - Jenkins는 Kubernetes 클러스터에 새로운 이미지를 배포합니다:
+     - 배포 YAML 파일의 **이미지 태그 업데이트**
+     - `kubectl apply` 명령어를 사용해 **배포 적용**
+     - `kubectl rollout status` 명령어로 **배포 상태 확인**
+     - **롤링 업데이트** 방식으로 기존 파드를 새 버전으로 점진적 교체
+
 </details>
 
 <details>
-<summary>모니터링 시스템</summary>
+<summary>로깅 및 모니터링 시스템</summary>
 
-![image](https://private-user-images.githubusercontent.com/64758888/350669513-a197a74e-f6e1-4018-9b9c-9f2764d8208e.gif?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDcxMDE2NTEsIm5iZiI6MTc0NzEwMTM1MSwicGF0aCI6Ii82NDc1ODg4OC8zNTA2Njk1MTMtYTE5N2E3NGUtZjZlMS00MDE4LTliOWMtOWYyNzY0ZDgyMDhlLmdpZj9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA1MTMlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNTEzVDAxNTU1MVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTY0MWYzNWMzZDYxZTliZjNhY2NlODFjYjU2Mzg0OTA5NDkwYWRiOTZiMmM0NDY5NjU2YjVhYTA2ZTExY2ZkOTAmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.m6F8hhEXCVS_oFAYpS-vsc8SWeR0Pp7rHx0ICsRNt7M)
-> 이메일, 비밀번호, 닉네임, 프로필 이미지(필수 X)로 회원 가입을 한다.  
-> 이메일, 닉네임은 **중복이 불가능**하다.
+> **Elasticsearch**와 **Logstash**를 활용하여 애플리케이션 로그를 수집하고 분석합니다.  
+> **실시간 채팅 데이터**는 **Kafka**를 통해 처리되며, 특정 시간대의 메시지 빈도를 분석하여 **하이라이트 구간을 자동 탐지**합니다.  
+> 이를 통해 **서비스 상태 모니터링**과 **사용자 행동 패턴 분석**이 가능합니다.
+
+</details>
+
+<details>
+<summary>데이터 처리 및 메시징</summary>
+	
+> **Kafka**를 활용하여 **실시간 채팅 메시지 처리**와 **이벤트 기반 아키텍처**를 구현했습니다.  
+> 채팅 메시지는 **MariaDB**에 영구 저장되며, 동시에 **Elasticsearch**에 인덱싱되어 효율적인 **검색 및 분석**이 가능합니다.  
+> **Amazon S3**는 사용자 업로드 **파일 저장소**로 활용됩니다.
+
 </details>
 
 
+
 ## 🚀 핵심 로직 상세 설명
-### [📃 프로젝트 Wiki](https://github.com/ddarahakit2025/be12-fin-template/wiki/프론트엔드-프로젝트) <br><br>
+### [📃 프로젝트 Wiki]([https://github.com/ddarahakit2025/be12-fin-template/wiki/프론트엔드-프로젝트](https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-BE/wiki)) <br><br>
 
 
 ## 📂 프로젝트 폴더 바로가기
