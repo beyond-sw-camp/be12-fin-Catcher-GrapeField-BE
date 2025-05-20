@@ -29,7 +29,6 @@
 
 ## 목차
 - [🛠 기술 스택](#-기술-스택)
-- [📚 GrapeField 데모 사이트 링크](#-GrapeField-데모-사이트-바로가기)
 - [🎨 GrapeField 서비스 소개](#-GrapeField-서비스-소개)
 - [🏗️ 시스템 아키텍처](#-시스템-아키텍처)
 - [📚 백엔드 프로젝트 목표](#-백엔드-프로젝트-목표)
@@ -39,14 +38,6 @@
 <br><br>
 
 ## 🛠 기술 스택
-
-#### &nbsp;　[ Frontend ]
-&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white" style="border-radius: 5px;"/>
-<img src="https://img.shields.io/badge/css3-1572B6?style=for-the-badge&logo=css3&logoColor=white" style="border-radius: 5px;"/>
-<img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=JavaScript&logoColor=white" style="border-radius: 5px;"/>
-![Vue.js](https://img.shields.io/badge/vuejs-%2335495e.svg?style=for-the-badge&logo=vuedotjs&logoColor=%234FC08D)
-<img src="https://img.shields.io/badge/nginx-009639?style=for-the-badge&logo=nginx&logoColor=white" style="border-radius: 5px;"/>
-<img src="https://img.shields.io/badge/pinia-gold?style=for-the-badge&logo=Pinia&logoColor=white" style="border-radius: 5px;"/>
 
 #### &nbsp;　[ Backend ]
 &nbsp;&nbsp;&nbsp;&nbsp; ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
@@ -82,21 +73,6 @@
 ![Notion](https://img.shields.io/badge/Notion-%23000000.svg?style=for-the-badge&logo=notion&logoColor=white)
 <br><br><br>
 
-
-## 📚 Grapefield 데모 사이트 바로가기
-### 🔗 [Grapefield](https://grapefield.kro.kr/)</a>
-<table>
-	<tr>
-		<td>아이디</td>
-		<td>animal255@example.com</td>
-	</tr>
-	<tr>
-		<td>비밀번호</td>
-		<td>1234</td>
-	</tr>
-</table>
-* 그 외에도 <code>animal1@example.com</code> ~ <code>animal376@example.com</code> 중에서 자유롭게 사용 가능
-<br><br>
 
 ## 📝 Grapefield 서비스 소개
 ### 프로젝트 배경
@@ -134,10 +110,10 @@
 ---
 
 ## 백엔드 프로젝트 목표
-데이터베이스 설계 및 구축 : 정규화 및 무결성을 고려한 효율적인 DB 구조 설계
-RESTful API 개발 : 일관성 있는 URL 설계와 HTTP 메서드를 활용한 API 구현
-보안 강화 : 인증·인가(JWT, OAuth 등), 데이터 암호화 및 보안 정책 적용
-서버 성능 최적화 : 캐싱(Redis 등), 비동기 처리, 트래픽 분산 등 확장성 있는 서버 구조 설계
+데이터베이스 설계 및 구축 : 정규화 및 무결성을 고려한 효율적인 DB 구조 설계</br>
+RESTful API 개발 : 일관성 있는 URL 설계와 HTTP 메서드를 활용한 API 구현</br>
+보안 강화 : 인증·인가(JWT, OAuth 등), 데이터 암호화 및 보안 정책 적용</br>
+서버 성능 최적화 : 캐싱(Redis 등), 비동기 처리, 트래픽 분산 등 확장성 있는 서버 구조 설계</br>
 로그 및 모니터링 시스템 구축, 부하분산 확인 : ELK(Stack), Loucst, Jmeter 등을 활용한 시스템 진단 및 유지보수 용이성 확보
 
 ---
@@ -151,7 +127,13 @@ RESTful API 개발 : 일관성 있는 URL 설계와 HTTP 메서드를 활용한 
 
 <br>
 
-## ⚙️ 주요 기능 시연
+## ⚙️ 주요 기능
+### 1. 통합 검색 기능
+
+---
+### 2. 채팅
+### 3. 일정 관리
+
 ### 📝회원가입
 <p align="middle" style="margin: 0; padding: 0;">
   <img src="https://github.com/user-attachments/assets/01190991-bbf7-4133-b0c4-cbecf42f5265">
