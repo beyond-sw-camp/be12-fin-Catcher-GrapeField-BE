@@ -24,8 +24,8 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long>, ChatR
     @Query("SELECT c FROM ChatRoom c JOIN FETCH c.events WHERE c.events.category IN :categories")
     Slice<ChatRoom> findChatRoomsByCategoryInSlice(@Param("categories") List<EventCategory> categories, Pageable pageable);
 
-    @Query("SELECT c FROM ChatRoom c JOIN FETCH c.events")
-    List<ChatRoom> findAllWithEvents();
+//    @Query("SELECT c FROM ChatRoom c JOIN FETCH c.events")
+//    List<ChatRoom> findAllWithEvents();
 
 
     @Query("SELECT c FROM ChatRoom c JOIN FETCH c.events e LEFT JOIN c.memberList m GROUP BY c ORDER BY c.heartCnt DESC")

@@ -32,7 +32,7 @@ dependencies {
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
 
     //Swagger-ui
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
 
     // 인증, 인가관련 Spring Security, jjwt, validation
     implementation 'org.springframework.boot:spring-boot-starter-security'
