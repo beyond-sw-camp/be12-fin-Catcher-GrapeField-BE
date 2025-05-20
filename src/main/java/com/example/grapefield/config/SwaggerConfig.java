@@ -30,7 +30,7 @@ public class SwaggerConfig {
     public OpenAPI openAPI() {
         return new OpenAPI()
                 // OpenAPI 버전 명시적 설정 추가
-                .openapi("3.0.3")
+                .openapi("3.1.0")
                 .components(new Components().addSecuritySchemes("BearerAuth",
                         new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)
