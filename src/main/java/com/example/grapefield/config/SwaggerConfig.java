@@ -29,6 +29,8 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
+                // OpenAPI 버전 명시적 설정 추가
+                .openapi("3.0.3")
                 .components(new Components().addSecuritySchemes("BearerAuth",
                         new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)
@@ -64,22 +66,18 @@ public class SwaggerConfig {
                     operation.setRequestBody(requestBody);
 
                     // 문서에서 응답 설정
-                    ApiResponses response = new ApiResponses();
-                    response.addApiResponse(String.valueOf(HttpStatus.OK.value()),
-                            new ApiResponse().description(HttpStatus.OK.getReasonPhrase()));
-                    response.addApiResponse(String.valueOf(HttpStatus.BAD_REQUEST.value()),
-                            new ApiResponse().description(HttpStatus.BAD_REQUEST.getReasonPhrase()));
-                    operation.setResponses(new ApiResponses()
-                            .addApiResponse("200", new ApiResponse()
-                                    .description("로그인 성공")
-                                    .content(new Content().addMediaType("application/json",
-                                            new MediaType().example("""
-                                                  {
-                                                  "ATOKEN": "eyJhbGciOiJIUzI1NiIsInR5..."
-                                                  }
-                                                  """))))
-                            .addApiResponse("400", new ApiResponse()
-                                    .description("잘못된 요청입니다")));
+                  ApiResponses responses = new ApiResponses()
+                      .addApiResponse("200", new ApiResponse()
+                          .description("로그인 성공")
+                          .content(new Content().addMediaType("application/json",
+                              new MediaType().example("""
+                              {
+                              "ATOKEN": "eyJhbGciOiJIUzI1NiIsInR5..."
+                              }
+                              """))))
+                      .addApiResponse("400", new ApiResponse()
+                          .description("잘못된 요청입니다"));
+                  operation.setResponses(responses);
 
                     // 직접 만든 필터의 문서를 swagger에 등록
                     operation.addTagsItem("0. 로그인/로그아웃 설정");
