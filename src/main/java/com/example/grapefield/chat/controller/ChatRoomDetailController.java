@@ -26,7 +26,7 @@ public class ChatRoomDetailController {
     private final ChatMessageService chatMessageService;
 
     @GetMapping("/{roomIdx}")
-    @Operation(summary = "특정 채팅방 메시지 조회", description = "채팅방 Idx를 통해 특정 채팅방의 채팅 내용 확인")
+    @Operation(summary = "특정 채팅방 메타데이터 조회", description = "채팅방 Idx를 통해 특정 채팅방의 채팅 내용 확인")
     public ChatRoomDetailResp getChatRoomDetail(@PathVariable("roomIdx") Long roomIdx,
                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
         ChatRoom room = chatRoomService.findByIdx(roomIdx);
