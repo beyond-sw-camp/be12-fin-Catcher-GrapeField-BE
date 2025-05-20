@@ -160,6 +160,52 @@
 
 ## ⚙️ 주요 기능 시연
 <details>
+<summary>회원가입</summary>
+
+![회원가입](https://github.com/user-attachments/assets/1ac421c2-c4e6-449b-8185-94fe5caa040e)
+
+
+> 이메일, 비밀번호, 닉네임, 프로필 이미지(필수 X), 전화번호로 회원 가입을 한다.  
+> 이메일, 닉네임은 **중복이 불가능**하다.
+</details>
+
+<details>
+<summary>로그인</summary>
+
+![로그인](https://github.com/user-attachments/assets/04f00f08-f9cc-416e-8e8b-5847acff5e30)
+
+> 이메일, 비밀번호를 입력하여 로그인 한다. 
+
+</details>
+<details>
+<summary>공연/전시</summary>
+
+![공연전시목록](https://github.com/user-attachments/assets/5abd35ac-cf2a-454b-8621-d1ccdefb34e6)
+
+> 사용자는 공연/전시인 이벤트의 목록을 확인할 수 있다.
+
+
+![공연전시목록_응답](https://github.com/user-attachments/assets/daeee4ed-8170-480d-b16b-18a2365768d7)
+
+> 공연/전시 목록의 응답
+
+![공연전시상세정보](https://github.com/user-attachments/assets/329ca2fe-5e92-4210-bf69-321d4fa65b36)
+> 사용자는 공연/전시인 이벤트의 상세정보를 확인할 수 있다.
+
+![공연전시상세정보_응답](https://github.com/user-attachments/assets/1bdfaa17-7d64-402e-a940-bd545a968801)
+
+> 상세정보 조회 성공 시 응답
+
+
+
+> - 사용자는 **공연**, **전시** 인 콘서트, 뮤지컬, 연극, 전시회, 클래식의 카테고리를 통해 이벤트의 시작일, 예매일, 종료일, 포스터, 상세정보, 출연진을 확인할 수 있다.
+> - 출연진의 정보 조회도 가능하다.
+> - 이벤트 상세정보 페이지에는 게시판, 한줄평을 확인할 수 있다.
+> - 공연/전시 게시판은 **JWT 인증 기반 권한 관리**를 통해 로그인한 사용자만 작성이 가능하다.
+
+</details>
+
+<details>
 <summary>채팅</summary>
 
 ![웹소켓 채팅](https://github.com/user-attachments/assets/8aba6c9d-cb0d-4237-ab90-bfdd1143f982)
@@ -231,55 +277,12 @@
 
 > - 예매 오픈일, 공연일, 전시일 등 일정 정보가 **일정 캘린더**에 통합되어 표시된다.  
 > - 또한 마이페이지의 캘린더에서 공연 일정, 예매 일정, 개인 일정까지 **하나의 UI에서 통합 관리**할 수 있다.  
-> - 관심 일정을 등록하면 자동 알림을 받을 수 있으며,  
+> - 관심 일정을 등록하면 자동 알림을 받을 수 있으며, 마이페이지의 개인 일정도 알림 등록을 하면 자동 알림을 받을 수 있다.
 > - 예매 오픈 알림은 WebSocket 및 이메일, 실시간 알림을 통해 전달된다.
-
-</details>
-<details>
-<summary>공연/전시</summary>
-
-![공연전시목록](https://github.com/user-attachments/assets/5abd35ac-cf2a-454b-8621-d1ccdefb34e6)
-
-> 사용자는 공연/전시인 이벤트의 목록을 확인할 수 있다.
-
-
-![공연전시목록_응답](https://github.com/user-attachments/assets/daeee4ed-8170-480d-b16b-18a2365768d7)
-
-> 공연/전시 목록의 응답
-
-![공연전시상세정보](https://github.com/user-attachments/assets/329ca2fe-5e92-4210-bf69-321d4fa65b36)
-> 사용자는 공연/전시인 이벤트의 상세정보를 확인할 수 있다.
-
-![공연전시상세정보_응답](https://github.com/user-attachments/assets/1bdfaa17-7d64-402e-a940-bd545a968801)
-
-> 상세정보 조회 성공 시 응답
-
-
-
-> - 사용자는 **공연**, **전시** 인 콘서트, 뮤지컬, 연극, 전시회, 클래식의 카테고리를 통해 이벤트의 시작일, 예매일, 종료일, 포스터, 상세정보를 확인할 수 있다.
-> - 이벤트 상세정보 페이지에는 게시판, 한줄평을 확인할 수 있다.
-> - 공연/전시 게시판은 **JWT 인증 기반 권한 관리**를 통해 로그인한 사용자만 작성이 가능하다.
+> - 확인은 메인페이지 헤더의 알림창 부분에서 확인이 가능하다.
 
 </details>
 
-<details>
-<summary>회원가입</summary>
-
-![회원가입](https://github.com/user-attachments/assets/1ac421c2-c4e6-449b-8185-94fe5caa040e)
-
-
-> 이메일, 비밀번호, 닉네임, 프로필 이미지(필수 X)로 회원 가입을 한다.  
-> 이메일, 닉네임은 **중복이 불가능**하다.
-</details>
-
-<details>
-<summary>로그인</summary>
-
-![로그인](https://github.com/user-attachments/assets/04f00f08-f9cc-416e-8e8b-5847acff5e30)
-
-> 이메일, 비밀번호를 입력하여 로그인 한다. 
-
-</details>
 
 ## 🚀 핵심 로직 상세 설명
 ### [📃 프로젝트 Wiki](https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-FE/wiki/백엔드-프로젝트) <br><br>
