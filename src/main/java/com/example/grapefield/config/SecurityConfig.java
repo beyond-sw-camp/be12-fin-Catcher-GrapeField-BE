@@ -42,21 +42,6 @@ public class SecurityConfig {
     return new BCryptPasswordEncoder();
   }
 
-  // CORS 설정 추가
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(Arrays.asList("https://grapefield.kro.kr", "http://grapefield.kro.kr"));
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
-    configuration.setAllowCredentials(true);
-    configuration.setMaxAge(3600L);
-
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
-  }
-
   @Bean
   public SecurityFilterChain configureChain(HttpSecurity http) throws Exception {
     // 기본 HTTP 인증과 폼 로그인 비활성화 (JWT 사용)
