@@ -107,7 +107,6 @@ jwtData:
 springdoc:
   swagger-ui:
     tags-sorter: alpha   # 태그를 알파벳 기준으로 정렬 (숫자 포함 가능)
-    disable-swagger-default-url: true  # 기본 Petstore URL 비활성화
 
 file:
   upload:
