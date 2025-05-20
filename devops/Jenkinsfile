@@ -67,7 +67,7 @@ pipeline {
                     withEnv(['KUBECONFIG=/home/test/.kube/config']) {
                         sh """
                             # 이미지 태그 업데이트
-                            sed -i 's|rekvv/grapefield_back:.*|rekvv/grapefield_backend:${IMAGE_TAG}|g' devops/k8s/backend-deployment.yml
+                            sed -i 's|rekvv/grapefield_backend:.*|rekvv/grapefield_backend:20250520-90|g' devops/k8s/backend-deployment.yml
 
                             # 엘라스틱서치 이미지 업데이트
                             sed -i 's|docker.elastic.co/elasticsearch/elasticsearch:.*|rekvv/elasticsearch-nori:7.17.2|g' devops/k8s/elasticsearch-statefulset.yml
