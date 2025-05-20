@@ -37,14 +37,14 @@ public class HighlightCreationService {
         // String keywords = keywordExtractionService.extractKeywords(detectionResp.getRecentMessages());
 
         String messagesInOneLine = summarizer.intoOneLine(detectionResp.getRecentMessages());
-        String keywords = summarizer.summarize(messagesInOneLine);
+        String keywords = summarizer.summarize(messagesInOneLine, detectionResp);
 
         // 메트릭 정보를 포함한 설명 생성
         String description = keywordExtractionService.createDescription(keywords, detectionResp.getMetrics().getSpikeRatio());
 
         // DB에 저장
         ChatHighlight saved = saveHighlight(roomIdx, kafkaReq,
-                (int) detectionResp.getMetrics().getCurrentMessageRate(), description);
+                (int) detectionResp.getMetrics().getCurrentMessageRate(), keywords);
 
         // WebSocket 브로드캐스트
         broadcastHighlight(roomIdx, saved);

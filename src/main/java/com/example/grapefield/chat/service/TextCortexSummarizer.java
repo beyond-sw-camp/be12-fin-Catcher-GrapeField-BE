@@ -1,5 +1,6 @@
 package com.example.grapefield.chat.service;
 
+import com.example.grapefield.chat.model.response.HighlightDetectionResp;
 import com.example.grapefield.chat.model.response.TextCortexResponse;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +19,7 @@ import java.util.Objects;
 @Service
 public class TextCortexSummarizer {
     private final EmojiReplaceService emojiReplaceService;
+    private final KeywordExtractionService keywordExtractionService;
     private static final String API_URL = "https://api.textcortex.com/v1/texts/summarizations";
     @Value("${TEXTCORTEX_API_KEY}")
     private static String API_KEY;
@@ -32,7 +34,7 @@ public class TextCortexSummarizer {
         return inputText;
     }
 
-    public String summarize(String inputText) throws Exception {
+    public String summarize(String inputText, HighlightDetectionResp detectionResp) throws Exception {
 //        String requestBody = String.format("{\"text\": \"%s\", \"source_lang\": \"ko\", \"target_lang\": \"ko\", \"max_tokens\": 10, \"formality\": \"less\"}",
 //                inputText.replace("\"", "\\\"")); // JSON escape
 //        HttpRequest request = HttpRequest.newBuilder()
@@ -61,29 +63,11 @@ public class TextCortexSummarizer {
         String outputKeyword;
 
         if (Objects.equals(responseObj.status, "success")){
-            if (responseObj != null && responseObj.data != null && responseObj.data.outputs != null && !responseObj.data.outputs.isEmpty()) {
-                outputKeyword = responseObj.data.outputs.get(0).text;
-            } else if (responseObj.data.remaining_credits <= 0) {
-                log.info("⚠️ [키워드 저장 중...] API 사용량 초과 크레딧 충전 필요");
-                log.info("🗒️응답내용 status:{}, data.outputs: {}, data.outputs.remaining_credits: {}", responseObj.status, responseObj.data.outputs, responseObj.data.remaining_credits);
-
-                outputKeyword = "요약 불가 status=\"success\"";
-            } else {
-                log.info("⚠️[키워드 저장 중 API 오류] 올바르지 않은 응답 status=\"success\"");
-                log.info("🗒️응답내용 status:{}, data.outputs: {}, data.outputs.remaining_credits: {}", responseObj.status, responseObj.data.outputs, responseObj.data.remaining_credits);
-                outputKeyword = "응답오류 status=\"success\"";
-            }
+            outputKeyword = responseObj.data.outputs.get(0).text;
         } else {
             log.info("⚠️[키워드 저장 중 API 오류] 요청에 실패 status=\"failure\"");
-            log.info("🗒️ responseObj.toString(): {}",responseObj);
-            log.info("🗒️응답내용 status:{}, data.outputs: {}, data.outputs.remaining_credits: {}", responseObj.status, responseObj.data.outputs, responseObj.data.remaining_credits);
-            outputKeyword = "응답 오류 status=\"failure\"";
+            outputKeyword = keywordExtractionService.createDescription(keywordExtractionService.extractKeywords(detectionResp.getRecentMessages()), detectionResp.getMetrics().getSpikeRatio());
         }
-
         return outputKeyword;
-
-
-
-
     }
 }
