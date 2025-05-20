@@ -21,9 +21,8 @@ public class TextCortexSummarizer {
     private final EmojiReplaceService emojiReplaceService;
     private final KeywordExtractionService keywordExtractionService;
     private static final String API_URL = "https://api.textcortex.com/v1/texts/summarizations";
-    @Value("${TEXTCORTEX_API_KEY}")
-    private static String API_KEY;
-
+    @Value("${textcortex.key}")
+    private String API_KEY; // = "gAAAAABoKGvz49-wgOE5XWuoy8Q2lPq0P7UCz50e92XbpwxyUF_ChtodpcnG6Zk18YcQ-D7lBnASli5AucBBK0oYy0arzqyeRykGv6LQVE5V9TkXEW5fP_-1ylDIH1TfnZHHUo4p16tffIU7_Poi5p2X-eofgTncwUou-Hlb6kmsKdl71HQSYwg=";
 
     public String intoOneLine(List<String> messageList) {
         String inputText = "";
@@ -43,9 +42,8 @@ public class TextCortexSummarizer {
 //                .header("Content-Type", "application/json")
 //                .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8))
 //                .build();
-
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.textcortex.com/v1/texts/summarizations"))
+                .uri(URI.create(API_URL))
                 .header("Content-Type", "application/json")
                 .header("Authorization", "Bearer "+API_KEY)
                 .method("POST", HttpRequest.BodyPublishers.ofString("{\n  \"formality\": \"less\",\n  \"max_tokens\": 10,\n  \"mode\": \"default\",\n  \"model\": \"gemini-2-0-flash\",\n  \"n\": 1,\n  \"source_lang\": \"ko\",\n  \"target_lang\": \"ko\",\n  \"temperature\": null,\n  \"text\": \""+inputText+"\"\n}"))

@@ -145,3 +145,5 @@ logging:
     com.example.grapefield.elasticsearch: DEBUG
 #    org.hibernate.SQL: DEBUG
 #    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+textcortex:
+  key: "${TEXTCORTEX_API_KEY}"
