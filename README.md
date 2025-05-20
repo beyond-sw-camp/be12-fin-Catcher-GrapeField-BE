@@ -157,6 +157,20 @@
 <details>
 <summary>채팅</summary>
 
+![웹소켓 채팅](https://github.com/user-attachments/assets/8aba6c9d-cb0d-4237-ab90-bfdd1143f982)
+
+> 사용자는 채팅방에 입장해 메시지를 입력하고 전송합니다.
+- 응답
+![웹소켓 채팅_응답](https://github.com/user-attachments/assets/a677390a-314a-4f9f-a58d-0a5f48e8f9d0)
+> 채팅이 성공적으로 전송되었을 때 반환되는 응답
+
+![채팅방](https://github.com/user-attachments/assets/5f384093-40d7-4488-8e97-4d7caaba2480)
+> 사용자는 채팅방에 입장해 특정 채팅방의 채팅방 내용을 확인합니다
+- 응답
+![채팅방_응답](https://github.com/user-attachments/assets/eb3cb043-5dbc-4102-af81-07a3a1a55010)
+> 채팅방 데이터가 성공적으로 불러와질 때 반환되는 응답
+
+
 > - 사용자는 **공연/전시 상세 페이지 또는 전체 채팅방 목록에서 실시간 채팅**을 통해 관람자들과 자유롭게 소통할 수 있다.  
 > - 채팅 중에는 **하트(❤️) 전송**이 가능하며, 사용자 반응을 기반으로 실시간 분위기를 형성할 수 있다.
 > - 특정 채팅방에서 **하트 수가 일정 기준 이상을 넘으면**, 해당 채팅방은 **인기 채팅방**으로 선정되어 **메인 화면 상단에 노출**된다.
