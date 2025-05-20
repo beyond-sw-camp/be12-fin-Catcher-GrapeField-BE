@@ -64,10 +64,10 @@ pipeline {
                     withEnv(['KUBECONFIG=/home/test/.kube/config']) {
                         sh """
                             # 이미지 태그 업데이트
-                            sed -i 's|rekvv/grapefield_back:.*|rekvv/grapefield_backend:${IMAGE_TAG}|g' k8s/backend-deployment.yml
+                            sed -i 's|rekvv/grapefield_back:.*|rekvv/grapefield_backend:${IMAGE_TAG}|g' devops/k8s/backend-deployment.yml
 
                             # 엘라스틱서치 이미지 업데이트
-                            sed -i 's|docker.elastic.co/elasticsearch/elasticsearch:.*|rekvv/elasticsearch-nori:7.17.2|g' k8s/elasticsearch-statefulset.yml
+                            sed -i 's|docker.elastic.co/elasticsearch/elasticsearch:.*|rekvv/elasticsearch-nori:7.17.2|g' devops/k8s/elasticsearch-statefulset.yml
 
                             # 배포 전 YAML 확인
                             echo "=== 배포할 YAML 파일 내용 ==="
