@@ -231,27 +231,49 @@
 
 </details>
 <details>
-<summary>게시판</summary>
+<summary>공연/전시</summary>
 
-> - 사용자는 **자유 게시판**, **후기 게시판** 등을 통해 콘텐츠에 대한 후기를 공유하거나 질문을 남길 수 있다.  
-> - 게시물에는 댓글을 달 수 있고, 인기순/최신순 정렬 및 키워드 기반 검색도 가능하다.  
-> - 게시판은 **JWT 인증 기반 권한 관리**를 통해 로그인한 사용자만 작성이 가능하다.
+![공연전시목록](https://github.com/user-attachments/assets/5abd35ac-cf2a-454b-8621-d1ccdefb34e6)
+
+> 사용자는 공연/전시인 이벤트의 목록을 확인할 수 있다.
+
+
+![공연전시목록_응답](https://github.com/user-attachments/assets/daeee4ed-8170-480d-b16b-18a2365768d7)
+
+> 공연/전시 목록의 응답
+
+![공연전시상세정보](https://github.com/user-attachments/assets/329ca2fe-5e92-4210-bf69-321d4fa65b36)
+> 사용자는 공연/전시인 이벤트의 상세정보를 확인할 수 있다.
+
+![공연전시상세정보_응답](https://github.com/user-attachments/assets/1bdfaa17-7d64-402e-a940-bd545a968801)
+
+> 상세정보 조회 성공 시 응답
+
+
+
+> - 사용자는 **공연**, **전시** 인 콘서트, 뮤지컬, 연극, 전시회, 클래식의 카테고리를 통해 이벤트의 시작일, 예매일, 종료일, 포스터, 상세정보를 확인할 수 있다.
+> - 이벤트 상세정보 페이지에는 게시판, 한줄평을 확인할 수 있다.
+> - 공연/전시 게시판은 **JWT 인증 기반 권한 관리**를 통해 로그인한 사용자만 작성이 가능하다.
 
 </details>
 
-<details>
-<summary>한줄평</summary>
-
-> - 각 공연/전시 상세 페이지에서 **한 줄 평**을 남길 수 있다.  
-> - 짧고 간결하게 관람 소감을 표현할 수 있으며, 다른 이용자들의 한줄평도 함께 볼 수 있다.  
-> - 정렬 및 좋아요 순으로 표시되어 커뮤니티 의견을 쉽게 확인할 수 있다.
-
-</details>
 <details>
 <summary>회원가입</summary>
 
+![회원가입](https://github.com/user-attachments/assets/1ac421c2-c4e6-449b-8185-94fe5caa040e)
+
+
 > 이메일, 비밀번호, 닉네임, 프로필 이미지(필수 X)로 회원 가입을 한다.  
 > 이메일, 닉네임은 **중복이 불가능**하다.
+</details>
+
+<details>
+<summary>로그인</summary>
+
+![로그인](https://github.com/user-attachments/assets/04f00f08-f9cc-416e-8e8b-5847acff5e30)
+
+> 이메일, 비밀번호를 입력하여 로그인 한다. 
+
 </details>
 
 ## 🚀 핵심 로직 상세 설명
