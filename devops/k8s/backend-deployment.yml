@@ -22,19 +22,18 @@ spec:
       containers:
         - name: backend
           # Jenkins 파이프라인에서 sed 명령어로 실제 버전으로 대체됨
-          image: rekvv/grapefield_back:latest
+          image: rekvv/grapefield_backend:latest
           ports:
             - containerPort: 8080
           envFrom:
             - configMapRef:
                 name: backend-config
-          # [start] 5월 7일에 새롭게 추가된 코드
+          # 추가 환경 변수
           env:
             - name: POD_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-          # [end] 5월 7일에 새롭게 추가된 코드
           volumeMounts:
             - name: backend-tls
               mountPath: /app/ssl

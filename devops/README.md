@@ -22,7 +22,7 @@
         <td align="center">팀장: <a href="https://github.com/bdt6246">김혜정</a></td>
         <td align="center">팀원: <a href="https://github.com/daydeiday">곽효림</a></td>
         <td align="center">팀원: <a href="https://github.com/J0a0J">김지원</a></td>
-        <td align="center">팀원: <a href="https://github.com/s00ya">정지수</a></a></td>
+        <td align="center">팀원: <a href="https://github.com/s00ya">정지수</a></td>
       </tr>
     </table>
 </figure>
@@ -170,11 +170,11 @@ GrapeField에서는 실시간 채팅 데이터 처리, 사용자 생성 콘텐�
 
 
 ## 🚀 핵심 로직 상세 설명
-### [📃 프로젝트 Wiki]([https://github.com/ddarahakit2025/be12-fin-template/wiki/프론트엔드-프로젝트](https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-BE/wiki)) <br><br>
+### [📃 프로젝트 Wiki](https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-BE/wiki) <br><br>
 
 
 ## 📂 프로젝트 폴더 바로가기
 ### [📃 Frontend](https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-FE.git)
-### [📃 Devops(Frontend)](https://github.com/ddarahakit2025/be12-fin-template/tree/main/devops)
+### [📃 Devops(Frontend)](https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-FE/tree/main/devops)
 ### [📃 Backend](https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-BE.git)
-### [📃 Devops(Backend)](https://github.com/ddarahakit2025/be12-fin-template/tree/main/devops)
+### [📃 Devops(Backend)](https://github.com/beyond-sw-camp/be12-fin-Catcher-GrapeField-BE/tree/main/devops)

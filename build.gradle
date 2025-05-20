@@ -82,6 +82,7 @@ dependencies {
     implementation 'org.elasticsearch:elasticsearch:7.17.9'
     implementation 'org.springframework.boot:spring-boot-starter-data-rest'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'jakarta.json:jakarta.json-api:2.0.1'
 }
 
 tasks.named('test') {
