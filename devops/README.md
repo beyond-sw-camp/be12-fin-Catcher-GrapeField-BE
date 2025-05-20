@@ -13,16 +13,16 @@
 <figure>
     <table>
       <tr>
-        <td align="center"><img src="" width="180px"/></td>
-        <td align="center"><img src="" width="180px"/></td>
-        <td align="center"><img src="" width="180px"/></td>
-	    <td align="center"><img src="" width="180px"/></td>
+        <td align="center"><img src="https://github.com/user-attachments/assets/fc09670f-0100-4deb-a070-a975200e5b44" width="180px"/></td>
+        <td align="center"><img src="https://github.com/user-attachments/assets/e1378ccf-4afa-48cd-877d-e64b2ac69c19" width="180px"/></td>
+        <td align="center"><img src="https://github.com/user-attachments/assets/e2dc5942-a318-4082-98e9-79a3919b0a07" width="180px"/></td>
+	    <td align="center"><img src="https://github.com/user-attachments/assets/05128582-7e08-4fb5-a911-cf095af55af3" width="180px"/></td>
       </tr>
       <tr>
         <td align="center">팀장: <a href="https://github.com/bdt6246">김혜정</a></td>
         <td align="center">팀원: <a href="https://github.com/daydeiday">곽효림</a></td>
-        <td align="center">팀원: <a href="https://github.com/s00ya" >정지수</a></td>
-        <td align="center">: <a href="https://github.com/J0a0J">김지원</a></a></td>
+        <td align="center">팀원: <a href="https://github.com/J0a0J">김지원</a></td>
+        <td align="center">팀원: <a href="https://github.com/s00ya">정지수</a></a></td>
       </tr>
     </table>
 </figure>
@@ -50,9 +50,9 @@
 
 #### &nbsp;　[ Backend ]
 &nbsp;&nbsp;&nbsp;&nbsp; ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
-<img src="https://img.shields.io/badge/Spring Boot-6DB33F?style=for-the-badge&logo=Spring Boot&logoColor=white" style="border-radius: 5px;">
+<img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=Spring-Boot&logoColor=white" style="border-radius: 5px;">
 <img src="https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=Spring-Security&logoColor=white" style="border-radius: 5px;">
-<img src="https://img.shields.io/badge/Spring data jpa-6DB33F?style=for-the-badge&logo=Spring Boot&logoColor=white" style="border-radius: 5px;">
+<img src="https://img.shields.io/badge/Spring_Data_JPA-6DB33F?style=for-the-badge&logo=Spring-Boot&logoColor=white" style="border-radius: 5px;">
 <img src="https://img.shields.io/badge/SMTP-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" style="border-radius: 5px;">
 
 
@@ -111,7 +111,9 @@
 ---
 
 ## 🎯 시스템 아키텍처
-TODO : 이미지 추가
+![image](https://github.com/user-attachments/assets/6b47fed2-a38d-470b-98f3-d470ea9d5d0d)
+
+
 
 ## 📚 데브옵스 프로젝트 목표
 - `CI/CD 파이프라인 구축` : 코드 변경 → 자동 빌드 → 테스트 → 배포까지 자동화드 변경 → 자동 빌드 → 테스트 → 배포까지 자동화
