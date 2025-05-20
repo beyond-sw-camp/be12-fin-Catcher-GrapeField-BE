@@ -32,8 +32,9 @@ public class JwtFilter extends OncePerRequestFilter {
   protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
     String path = request.getServletPath();
 
-
-    return path.contains("swagger") || path.startsWith("/v3/api-docs");
+    return path.startsWith("/swagger-ui") ||
+        path.startsWith("/api-docs") ||
+        path.startsWith("/v3/api-docs");
   }
 
   @Override
