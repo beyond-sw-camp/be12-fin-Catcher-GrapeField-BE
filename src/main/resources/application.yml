@@ -45,6 +45,8 @@ spring:
     uris: http://${ELASTIC_HOST}:${ELASTIC_PORT}
     username: ${ELASTIC_USER}
     password: ${ELASTIC_PASSWORD}
+    connection-timeout: 60000  # 30초로 설정
+    socket-timeout: 60000      # 소켓 타임아웃도 함께 설정
 
   application:
     name: grapefield
@@ -94,8 +96,6 @@ spring:
     elasticsearch:
       repositories:
         enabled: true
-#      cluster-name: docker-cluster
-#      cluster-nodes: ${spring.elasticsearch.host}:${spring.elasticsearch.port}
       # Spring Boot 3.4.x 설정
       auto-index-creation: false  # 인덱스 자동 생성 비활성화
 
