@@ -24,4 +24,6 @@ public class UserInfoDetailResp {
   private String profileImg;
   @Schema(description = "가입일", example = "2025-04-01T14:30:00")
   private LocalDateTime createdAt;
+  @Schema(description = "회원 분류", example = "일반 회원")
+  private String role;
 }

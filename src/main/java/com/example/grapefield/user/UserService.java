@@ -110,7 +110,8 @@ public class UserService implements UserDetailsService {
                 "********", // 비밀번호는 마스킹 처리
                 user.getPhone(),
                 user.getProfileImg(),
-                user.getCreatedAt()
+                user.getCreatedAt(),
+                user.getRole().getKoreanRole()
         );
     }
 

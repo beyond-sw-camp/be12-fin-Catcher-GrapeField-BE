@@ -76,7 +76,7 @@ public class ChatRoomDetailController {
     public ChatMessagePageResp getMessagesInPages(
             @PathVariable("roomIdx") Long roomIdx,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "30") int size) {
+            @RequestParam(defaultValue = "100") int size) {
 
         Page<ChatMessageCurrent> messagePage = chatRoomService.getPaginatedMessages(roomIdx, page, size);
         List<ChatMessageResp> dtoList = messagePage.getContent().stream()
