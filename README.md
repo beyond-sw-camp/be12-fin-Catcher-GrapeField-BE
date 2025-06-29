@@ -85,7 +85,7 @@
 
 
 ## 📚 Grapefield 데모 사이트 바로가기
-### 🔗 [Grapefield](https://grape-field.kro.kr/)</a>
+### 🔗 [Grapefield](https://www.grapefield-demo.kro.kr/)</a>
 
 ## 📝 Grapefield 서비스 소개
 <p align="middle" style="margin: 0; padding: 0;">
