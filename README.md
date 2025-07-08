@@ -87,6 +87,19 @@
 ## 📚 Grapefield 데모 사이트 바로가기
 ### 🔗 [Grapefield](https://www.grapefield-demo.kro.kr/)</a>
 
+<table>
+	<tr>
+		<td>아이디</td>
+		<td>animal255@example.com</td>
+	</tr>
+	<tr>
+		<td>비밀번호</td>
+		<td>1234</td>
+	</tr>
+</table>
+* 그 외에도 <code>animal1@example.com</code> ~ <code>animal376@example.com</code> 중에서 숫자를 바꾸어 아이디로 사용 가능
+<br><br>
+
 ## 📝 Grapefield 서비스 소개
 <p align="middle" style="margin: 0; padding: 0;">
 <img width="90%" src="https://github.com/user-attachments/assets/d93c8050-f470-429f-af57-3d8387fc6be6">
