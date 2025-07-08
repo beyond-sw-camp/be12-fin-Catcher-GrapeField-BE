@@ -43,6 +43,7 @@ public class SecurityConfig {
     http.httpBasic(AbstractHttpConfigurer::disable);
     http.formLogin(AbstractHttpConfigurer::disable);
     http.csrf(AbstractHttpConfigurer::disable);
+    http.cors(AbstractHttpConfigurer::disable);
 
     // 로그아웃 설정
     http.logout(logout -> logout

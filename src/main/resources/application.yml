@@ -1,10 +1,23 @@
+server:
+  servlet:
+    session:
+      cookie:
+        same-site: None    # cross-site 쿠키 허용
+        secure: true       # HTTPS에서만 전송
+
 spring:
+  # cors 관련설정
+  security:
+    csrf:
+      cookie:
+        same-site: None
+        secure: true #cors 관련설정
   kafka:
     # bootstrap-servers: ${KAFKA}:9092
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     topic:
-      partitions: 3  #${KAFKA_TOPIC_PARTITIONS:3}
-      replication-factor: 2 # ${KAFKA_TOPIC_REPLICATION_FACTOR:2}
+      partitions: 1  #${KAFKA_TOPIC_PARTITIONS:3}
+      replication-factor: 1 # ${KAFKA_TOPIC_REPLICATION_FACTOR:2}
     admin:
       auto-create: false # 토픽 자동생성은 비활성화 (운영중 불필요한 토픽 생성을 막음)
     producer:
@@ -71,7 +84,7 @@ spring:
         access-key: ${AWS_ACCESS_KEY}
         secret-key: ${AWS_SECRET_KEY}
       s3:
-        bucket: grapefield-image
+        bucket: ${AWS_S3_BUCKET}
       region:
         static: ${SEOUL}
   data:

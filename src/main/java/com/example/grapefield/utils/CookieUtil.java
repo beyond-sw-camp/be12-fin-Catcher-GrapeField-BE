@@ -8,9 +8,9 @@ public class CookieUtil {
   public static ResponseCookie createAccessTokenCookie(String token) {
     return ResponseCookie.from("ATOKEN", token)
         .path("/")
-        .httpOnly(false) // 개발 환경 설정
-        .secure(false)
-        .sameSite("Lax")
+        .httpOnly(true) // 개발 환경 설정 false
+        .secure(true) // 개발 환경 설정 false
+        .sameSite("False")  //Lax 에서 수정
         .maxAge(3600)    // 1시간
         .build();
   }
@@ -19,9 +19,9 @@ public class CookieUtil {
   public static ResponseCookie createRefreshTokenCookie(String token) {
     return ResponseCookie.from("RTOKEN", token)
         .path("/")
-        .httpOnly(false)
-        .secure(false)
-        .sameSite("Lax")
+        .httpOnly(true) // 개발 환경 설정 false
+        .secure(true) // 개발 환경 설정 false
+        .sameSite("False") //Lax 에서 수정
         .maxAge(14 * 24 * 3600) // 2주
         .build();
   }
